@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: win.c,v 1.4 2001/03/08 14:49:09 schoenw Exp $
+ * @(#) $Id: win.c 1107 2001-03-08 14:49:09Z schoenw $
  */
 
 #include <stdio.h>

@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.23 2002/08/08 11:46:06 strauss Exp $
+# @(#) $Id: Makefile.am 1438 2002-08-08 11:46:06Z strauss $
 #
 
 TESTMIBTOPDIR		= ../../mibs

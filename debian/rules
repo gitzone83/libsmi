@@ -15,6 +15,8 @@ version_major=$(shell expr `pwd` : '.*-\([0-9]*\).[0-9.]*')
 #export DH_VERBOSE=1
 
 build: build-stamp
+
+build: build-stamp
 build-stamp:
 	dh_testdir
 
@@ -40,6 +42,7 @@ build-stamp:
 #	          CFLAGS="-O2 -pipe" LDFLAGS="-s" progs
 
 	touch build-stamp
+
 
 clean:
 	dh_testdir
@@ -71,10 +74,89 @@ install-stamp: build-stamp
 	dh_movefiles
 	touch install-stamp
 
-binary-arch: build install
+binary: build install
 #	dh_testversion
 	dh_testdir -a
 	dh_testroot -a
+
+	# hack to put proper symlinks in place
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiInit.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiExit.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiSetErrorLevel.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiGetFlags.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiSetFlags.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiLoadModule.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiGetPath.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiSetPath.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_config.3.gz smiReadConfig.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_macro.3.gz smiGetMacro.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_macro.3.gz smiGetFirstMacro.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_macro.3.gz smiGetNextMacro.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_macro.3.gz smiGetMacroModule.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetModule.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetFirstModule.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetNextModule.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetModuleIdentityNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetFirstImport.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetNextImport.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiIsImported.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetFirstRevision.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_module.3.gz smiGetNextRevision.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNodeByOID.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetFirstNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNextNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetParentNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetRelatedNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetFirstChildNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNextChildNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNodeModule.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNodeType.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNodeLine.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetFirstElement.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNextElement.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetElementNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetFirstOption.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNextOption.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetOptionNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetFirstRefinement.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetNextRefinement.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetRefinementModule.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetRefinementNode.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetRefinementType.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_node.3.gz smiGetRefinementWriteType.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetType.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetFirstType.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetNextType.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetParentType.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetTypeLine.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetFirstRange.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetNextRange.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetFirstNamedNumber.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetNextNamedNumber.3.gz)
+	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetTypeModule.3.gz)
+
+	# move files from libsmi2 to libsmi2-common dir
+	mv -f debian/tmp/usr/share/mibs/* debian/libsmi2-common/usr/share/mibs
+	mv -f debian/tmp/usr/share/pibs/* debian/libsmi2-common/usr/share/pibs
+	rmdir debian/tmp/usr/share/mibs 
+	rmdir debian/tmp/usr/share/pibs
+
+	# now make arch all package
+	dh_installdebconf -i
+	dh_installdocs -i
+	dh_installexamples -i
+	dh_installchangelogs ChangeLog -i
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_perl -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+
 	dh_installdocs -a
 	dh_installexamples -a
 #	dh_installmenu -a
@@ -84,62 +166,6 @@ binary-arch: build install
 #	dh_installmanpages -a
 	dh_undocumented
 
-	# hack to put proper symlinks in place
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiInit.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiExit.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiSetErrorLevel.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiGetFlags.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiSetFlags.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiLoadModule.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiGetPath.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiSetPath.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_config.3.gz smiReadConfig.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_macro.3.gz smiGetMacro.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_macro.3.gz smiGetFirstMacro.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_macro.3.gz smiGetNextMacro.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_macro.3.gz smiGetMacroModule.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetModule.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetFirstModule.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetNextModule.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetModuleIdentityNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetFirstImport.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetNextImport.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiIsImported.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetFirstRevision.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_module.3.gz smiGetNextRevision.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNodeByOID.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetFirstNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNextNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetParentNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetRelatedNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetFirstChildNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNextChildNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNodeModule.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNodeType.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNodeLine.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetFirstElement.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNextElement.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetElementNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetFirstOption.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNextOption.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetOptionNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetFirstRefinement.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetNextRefinement.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetRefinementModule.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetRefinementNode.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetRefinementType.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_node.3.gz smiGetRefinementWriteType.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetType.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetFirstType.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetNextType.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetParentType.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetTypeLine.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetFirstRange.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetNextRange.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetFirstNamedNumber.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetNextNamedNumber.3.gz)
-	(cd debian/libsmi2-dev/usr/share/man/man3; ln -s smi_type.3.gz smiGetTypeModule.3.gz)
 
 	dh_installchangelogs -a ChangeLog
 	dh_link -a
@@ -159,5 +185,7 @@ binary-arch: build install
 source diff:                                                                  
 	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
 
-binary: binary-arch
-.PHONY: build clean binary-indep binary-arch binary
+
+binary-arch: binary
+
+.PHONY: build clean binary-arch binary install

@@ -1,3 +1,80 @@
+2004-08-18  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* libsmi-0.4.3.tar.gz: released version 0.4.3. Time for a new
+	release to get it out with the next stable Debian release (3.1).
+	The are numerous bug fixes, improvements to smidump drivers,
+	MIB updates, added MIBs, and new smilint checks.
+
+2004-07-27  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* lib/check.c, lib/error.c: Added checks for object groups
+	containing notifications and vice versa. Thanks to Mike.
+
+2004-07-22  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* lib/parser-smi.y, lib/error.c, lib/data.c: Added checks for
+	revision clauses that reveal revisions after LAST-UPDATED,
+	revisions that are not in reverse chronological order and
+	missing revisions for the LAST-UPDATED timestamp. Besides that,
+	revisions are now implcitly sorted in reverse chronological
+	order.
+
+2004-06-22  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/{MPLS-TE-STD-MIB,MPLS-LSR-STD-MIB,MPLS-FTN-STD-MIB,
+	MPLS-LDP-STD-MIB,MPLS-LDP-ATM-STD-MIB,MPLS-LDP-FRAME-RELAY-STD-MIB,
+	MPLS-LDP-GENERIC-STD-MIB}: added (RFCs 3812,3813,3814,3815).
+
+2004-06-17  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/{Printer-MIB,Finisher-MIB,MPLS-TC-STD-MIB},
+	mibs/iana/{IANA-PRINTER-MIB,IANA-FINISHER-MIB,IANA-CHARSET-MIB}:
+	updated and added (RFCs 3805,3806,3808,3811).
+
+2004-06-10  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/{ROHC-MIB,ROHC-RTP-MIB,ROHC-UNCOMPRESSED-MIB}:
+	added (RFC 3816).
+
+2004-06-02  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* tools/dump-netsnmp.c: Cleanup session in case of errors,
+	Thanks to Michael Hocke.
+
+2004-04-14  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/DIFFSERV-CONFIG-MIB: added (RFC 3747).
+
+2004-03-03  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/APM-MIB: added (RFC 3729).
+
+2004-02-27  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/VDSL-LINE-MIB: added (RFC 3728).
+
+2004-02-11  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/HC-PerfHist-TC-MIB: added (RFC 3705).
+
+2004-01-12  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* tools/smidiff.c: Fixed potential segfault in
+	checkTypeCompatibility(). Thanks to Mike.
+
+2003-12-25  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/POWER-ETHERNET-MIB: added (RFC 3621).
+
+2003-12-12  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* tools/dump-python.c, tools/dump-xml.c: Fixed segfaults upon
+	unresolvable parent type names.
+
+	* tools/dump-cm.c: Added an explicit float-cast in one place
+	to ensure execatly equal values on different platforms so that
+	the test suite is happy again.
+
 2003-12-05  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
 
 	* libsmi-0.4.2.tar.gz: released version 0.4.2. Time for a new

@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-xml.c,v 1.25 2002/11/29 14:47:19 schoenw Exp $
+ * @(#) $Id: dump-xml.c 1665 2004-07-29 23:10:21Z schoenw $
  */
 
 /*
@@ -121,13 +121,15 @@ static char *getStringBasetype(SmiBasetype basetype)
 
 static char *getTimeString(time_t t)
 {
-    static char   s[27];
+    static char   *s = NULL;
     struct tm	  *tm;
 
+    if (s) xfree(s);
+    
     tm = gmtime(&t);
-    sprintf(s, "%04d-%02d-%02d %02d:%02d",
-	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min);
+    smiAsprintf(&s, "%04d-%02d-%02d %02d:%02d",
+		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+		tm->tm_hour, tm->tm_min);
     return s;
 }
 
@@ -601,7 +603,8 @@ static void fprintTypedef(FILE *f, int indent, SmiType *smiType)
     
     parentType = smiGetParentType(smiType);
     parentModule = smiGetTypeModule(parentType);
-    if (parentType && parentModule && strlen(parentModule->name)) {
+    if (parentType && parentType->name &&
+	parentModule && strlen(parentModule->name)) {
 	fprintSegment(f, indent + INDENT, "<parent ", 0);
 	fprintf(f, "module=\"%s\" name=\"%s\"/>\n",
 		parentModule->name, parentType->name);

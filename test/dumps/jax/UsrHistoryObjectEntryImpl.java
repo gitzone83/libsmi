@@ -3,7 +3,7 @@
  * is intended to be edited by the application programmer and
  * to be used within a Java AgentX sub-agent environment.
  *
- * $Id: UsrHistoryObjectEntryImpl.java,v 1.11 2003/12/01 12:24:33 strauss Exp $
+ * $Id: UsrHistoryObjectEntryImpl.java 1606 2003-12-01 12:24:15Z strauss $
  */
 
 /**

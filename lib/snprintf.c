@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-/* $Id: snprintf.c,v 1.2 2002/07/23 23:12:20 strauss Exp $ */
+/* $Id: snprintf.c 1429 2002-07-23 23:12:20Z strauss $ */
 
 #include <config.h>
 

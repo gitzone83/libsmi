@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: parser-sming.y,v 1.73 2003/08/14 11:28:09 schoenw Exp $
+ * @(#) $Id: parser-sming.y 1631 2004-03-13 22:21:32Z schoenw $
  */
 
 %{
@@ -3174,6 +3174,7 @@ qlcIdentifier:		ucIdentifier COLON_COLON lcIdentifier
 
 text:			textSegment optsep_textSegment_0n
 			{
+			    int len;
 			    if ($2) {
 				$$ = smiMalloc(strlen($1) + strlen($2) + 1);
 				strcpy($$, $1);
@@ -3182,6 +3183,10 @@ text:			textSegment optsep_textSegment_0n
 				free($2);
 			    } else {
 				$$ = smiStrdup($1);
+			    }
+			    len = strlen($$);
+			    while (len > 0 && $$[len-1] == '\n') {
+				$$[--len] = 0;
 			    }
 			}
         ;

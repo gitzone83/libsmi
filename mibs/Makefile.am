@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.5 2003/12/01 12:24:17 strauss Exp $
+# @(#) $Id: Makefile.am 1606 2003-12-01 12:24:15Z strauss $
 #
 
 MIBDIRS			= iana ietf irtf tubs site

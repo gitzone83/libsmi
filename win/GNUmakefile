@@ -10,7 +10,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: GNUmakefile,v 1.2 2000/12/15 14:28:30 strauss Exp $
+# @(#) $Id: GNUmakefile 1065 2000-12-15 14:28:30Z strauss $
 
 ##
 ## Project directories -- these may need to be customized for your site

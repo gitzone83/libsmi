@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-types.c,v 1.33 2002/10/30 09:17:37 schoenw Exp $
+ * @(#) $Id: dump-types.c 1455 2002-10-30 09:17:37Z schoenw $
  */
 
 /*

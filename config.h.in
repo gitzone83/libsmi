@@ -15,7 +15,7 @@
 /* The default search path to lookup SMI module files. */
 #undef DEFAULT_SMIPATH
 
-/* The basename of the per-user configuration file searched in HOME. */
+/* The basename of the per-user configuration file searched in $HOME. */
 #undef DEFAULT_USERCONFIG
 
 /* The default path separator character. */

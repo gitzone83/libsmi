@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: parser-smi.h,v 1.6 2000/12/11 09:11:08 strauss Exp $
+ * @(#) $Id: parser-smi.h 1061 2000-12-11 09:11:00Z strauss $
  */
 
 #ifndef _PARSER_SMI_H

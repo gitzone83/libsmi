@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: parser-smi.y,v 1.198 2003/11/18 12:56:04 schoenw Exp $
+ * @(#) $Id: parser-smi.y 1663 2004-07-27 12:23:25Z strauss $
  */
 
 %{
@@ -139,6 +139,53 @@ checkNameLen(Parser *parser, char *name, int error_32, int error_64)
 
  
 static void
+checkModuleName(Parser *parserPtr, Module *modulePtr)
+{
+     static char *mib_ignore[] = {
+	 "SNMPv2-SMI", "SNMPv2-TC", "SNMPv2-CONF", NULL
+     };
+     
+     static char *pib_ignore[] = {
+	 "COPS-PR-SPPI", "COPS-PR-SPPI-TC",
+	 "SNMPv2-SMI", "SNMPv2-TC", "SNMPv2-CONF", NULL
+     };
+
+     const char *name = thisModulePtr->export.name;
+     const int len = strlen(name);
+     int i;
+
+     switch (modulePtr->export.language) {
+     case SMI_LANGUAGE_SMIV1:
+     case SMI_LANGUAGE_SMIV2:
+     case SMI_LANGUAGE_SMING:
+	 for (i = 0; mib_ignore[i]; i++) {
+	     if (strcmp(mib_ignore[i], name) == 0) {
+		 return;
+	     }
+	 }
+	 if (len > 3 && (strcmp(name + len - 4, "-MIB") != 0)) {
+	     smiPrintError(parserPtr, ERR_MIB_MODULENAME_SUFFIX, name);
+	     return;
+	 }
+	 break;
+     case SMI_LANGUAGE_SPPI:
+	 for (i = 0; pib_ignore[i]; i++) {
+	     if (strcmp(pib_ignore[i], name) == 0) {
+		 return;
+	     }
+	 }
+	 if (len > 3 && (strcmp(name + len - 4, "-PIB") != 0)) {
+	     smiPrintError(parserPtr, ERR_PIB_MODULENAME_SUFFIX, name);
+	 }
+	 break;
+     case SMI_LANGUAGE_UNKNOWN:
+	 break;
+     }
+}
+
+
+
+static void
 checkModuleIdentity(Parser *parserPtr, Module *modulePtr)
 {
     if ((modulePtr->export.language == SMI_LANGUAGE_SMIV2)
@@ -149,31 +196,6 @@ checkModuleIdentity(Parser *parserPtr, Module *modulePtr)
         && strcmp(modulePtr->export.name, "COPS-PR-SPPI")) {
 	smiPrintError(parserPtr, ERR_NO_MODULE_IDENTITY);
     }
-}
-
-
-
-static void
-checkModuleName(Parser *parserPtr, const char *name)
-{
-     static char *ignore[] = {
-	  "SNMPv2-SMI", "SNMPv2-TC", "SNMPv2-CONF", NULL
-     };
-
-     int i, len;
-
-     for (i = 0; ignore[i]; i++) {
-	  if (strcmp(ignore[i], name) == 0) {
-	       return;
-	  }
-     }
-
-     len = strlen(name);
-     if (len > 3 && (strcmp(name + len - 4, "-MIB") == 0)) {
-	  return;
-     }
-     
-     smiPrintError(parserPtr, ERR_MODULENAME_SUFFIX, name);
 }
 
 
@@ -1071,10 +1093,7 @@ adjustDefval(Parser *parserPtr, SmiValue *valuePtr, Type *typePtr, int line)
 static void
 checkDefvals(Parser *parserPtr, Module *modulePtr)
 {
-    Object *objectPtr, *object2Ptr;
-    List *bitsListPtr, *valueListPtr, *p, *pp, *nextPtr, *listPtr;
-    Import *importPtr;
-    int nBits, bit;
+    Object *objectPtr;
     
     /*
      * Check unknown identifiers in OID DEFVALs.
@@ -1473,7 +1492,8 @@ checkDate(Parser *parserPtr, char *date)
 %type  <err>RevisionPart
 %type  <err>Revisions
 %type  <err>Revision
-%type  <listPtr>ObjectsPart
+%type  <listPtr>NotificationObjectsPart
+%type  <listPtr>ObjectGroupObjectsPart
 %type  <listPtr>Objects
 %type  <objectPtr>Object
 %type  <listPtr>NotificationsPart
@@ -1595,8 +1615,6 @@ module:			moduleName
 				    thisModulePtr->export.language =
 					SMI_LANGUAGE_SMIV2;
 				}
-				checkModuleName(thisParserPtr,
-						thisModulePtr->export.name);
 			    } else {
 			        smiPrintError(thisParserPtr,
 					      ERR_MODULE_ALREADY_LOADED,
@@ -1618,6 +1636,7 @@ module:			moduleName
 			{
 			    if (thisModulePtr->export.language == SMI_LANGUAGE_UNKNOWN)
 				thisModulePtr->export.language = SMI_LANGUAGE_SMIV1;
+			    checkModuleName(thisParserPtr, thisModulePtr);
 			    checkModuleIdentity(thisParserPtr, thisModulePtr);
 			    checkObjects(thisParserPtr, thisModulePtr);
 			    checkTypes(thisParserPtr, thisModulePtr);
@@ -3253,12 +3272,12 @@ MaxOrPIBAccessPart:     MaxAccessPart
                                 smiPrintError(thisParserPtr, ERR_NOT_ACCESSIBLE_IN_PIB_ACCESS);
                             $$ = $1;
                         }
+        |               /* empty */
+                        { $$ = 0;  }
         ;
 
 PibAccessPart:          PibAccess Access
                         { $$ = $2; }
-        |               /* empty */
-                        { $$ = 0;  }
         ;
 
 PibAccess:              POLICY_ACCESS
@@ -3437,7 +3456,7 @@ notificationTypeClause:	LOWERCASE_IDENTIFIER
 					      "SNMPv2-SMI");
 			    }
 			}
-			ObjectsPart
+			NotificationObjectsPart
 			STATUS Status
 			DESCRIPTION Text
 			{
@@ -3512,38 +3531,50 @@ moduleIdentityClause:	LOWERCASE_IDENTIFIER
                         {
                           /* do nothing at the moment */
                         }
-			LAST_UPDATED ExtUTCTime      /* old 5-7, new $7-9 */
+			LAST_UPDATED ExtUTCTime
 			{
 			    setModuleLastUpdated(thisParserPtr->modulePtr, $8);
 			}
-			ORGANIZATION Text            /* old 8-10, new $10-12 */
+			ORGANIZATION Text
 			{
 			    if ($11 && !strlen($11)) {
 				smiPrintError(thisParserPtr,
 					      ERR_EMPTY_ORGANIZATION);
 			    }
 			}
-			CONTACT_INFO Text             /* old 11-13, new 13-15 */
+			CONTACT_INFO Text
 			{
 			    if ($14 && !strlen($14)) {
 				smiPrintError(thisParserPtr,
 					      ERR_EMPTY_CONTACT);
 			    }
 			}
-			DESCRIPTION Text              /* old 14-16, new 16-18 */
+			DESCRIPTION Text
 			{
 			    if ($17 && !strlen($17)) {
 				smiPrintError(thisParserPtr,
 					      ERR_EMPTY_DESCRIPTION);
 			    }
 			}
-			RevisionPart                  /* old 17, new 19 */
+			RevisionPart
+                        {
+			    if ((!thisModulePtr->firstRevisionPtr) ||
+				(thisModulePtr->firstRevisionPtr->export.date !=
+				 thisModulePtr->lastUpdated)) {
+				smiPrintError(thisParserPtr,
+					      ERR_REVISION_MISSING);
+				addRevision(thisModulePtr->lastUpdated,
+					    smiStrdup(
+						"[Revision added by libsmi due to a LAST-UPDATED clause.]"),
+					    thisParserPtr);
+			    }
+			}
 			COLON_COLON_EQUAL
-			'{' objectIdentifier '}'      /* old 19-21, new 21-23 */
+			'{' objectIdentifier '}'
 			{
 			    Object *objectPtr;
 			    
-			    objectPtr = $22;
+			    objectPtr = $23;
 			    smiCheckObjectReuse(thisParserPtr, $1, &objectPtr);
 
 			    thisParserPtr->modulePtr->numModuleIdentities++;
@@ -5745,15 +5776,7 @@ ReferPart:		REFERENCE Text
 RevisionPart:		Revisions
 			{ $$ = 0; }
 	|		/* empty */
-			{
-			    if (!thisModulePtr->firstRevisionPtr) {
-				addRevision(thisModulePtr->lastUpdated,
-					    smiStrdup(
-	           "[Revision added by libsmi due to a LAST-UPDATED clause.]"),
-					    thisParserPtr);
-			    }
-			    $$ = 0;
-			}
+			{ $$ = 0; }
 	;
 
 Revisions:		Revision
@@ -5765,23 +5788,21 @@ Revisions:		Revision
 Revision:		REVISION ExtUTCTime
 			{
 			    firstRevisionLine = thisParserPtr->line;
+
+			    if (thisParserPtr->modulePtr->lastRevisionPtr &&
+				($2 >= thisParserPtr->modulePtr->lastRevisionPtr->export.date)) {
+				smiPrintError(thisParserPtr,
+					      ERR_REVISION_NOT_DESCENDING);
+			    }
+
+			    if ($2 > thisParserPtr->modulePtr->lastUpdated) {
+				smiPrintError(thisParserPtr,
+					      ERR_REVISION_AFTER_LAST_UPDATE);
+			    }
 			}
 			DESCRIPTION Text
 			{
 			    Revision *revisionPtr;
-
-			    /*
-			     * If the first REVISION (which is the newest)
-			     * has another date than the LAST-UPDATED clause,
-			     * we add an implicit Revision structure.
-			     */
-			    if ((!thisModulePtr->firstRevisionPtr) &&
-				($2 != thisModulePtr->lastUpdated)) {
-				addRevision(thisModulePtr->lastUpdated,
-					    smiStrdup(
-	           "[Revision added by libsmi due to a LAST-UPDATED clause.]"),
-					    thisParserPtr);
-			    }
 
 			    if ($5 && !strlen($5)) {
 				smiPrintError(thisParserPtr,
@@ -5798,16 +5819,19 @@ Revision:		REVISION ExtUTCTime
 			}
 	;
 
-ObjectsPart:		OBJECTS '{' Objects '}'
+NotificationObjectsPart: OBJECTS '{' Objects '}'
 			{
 			    $$ = $3;
 			}
 	|		/* empty */
 			{
-                            /* must be present for PIBs */
-                            if (thisParserPtr->modulePtr->export.language == SMI_LANGUAGE_SPPI)
-                                smiPrintError(thisParserPtr, ERR_OBJECTS_MISSING_IN_OBJECT_GROUP);
 			    $$ = NULL;
+			}
+	;
+
+ObjectGroupObjectsPart:	OBJECTS '{' Objects '}'
+			{
+			    $$ = $3;
 			}
 	;
 
@@ -5880,7 +5904,12 @@ Notification:		NotificationName
 
 Text:			QUOTED_STRING
 			{
+			    int len;
 			    $$ = smiStrdup($1);
+			    len = strlen($$);
+			    while (len > 0 && $$[len-1] == '\n') {
+				$$[--len] = 0;
+			    }
 			}
 	;
 
@@ -6248,7 +6277,7 @@ objectGroupClause:	LOWERCASE_IDENTIFIER
 					      "OBJECT-GROUP", "SNMPv2-CONF");
 			    }
 			}
-			ObjectsPart
+			ObjectGroupObjectsPart
 			STATUS Status
 			DESCRIPTION Text
 			{

@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-jax.c,v 1.40 2002/10/30 09:17:37 schoenw Exp $
+ * @(#) $Id: dump-jax.c 1455 2002-10-30 09:17:37Z schoenw $
  */
 
 #include <config.h>

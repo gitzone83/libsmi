@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: util.c,v 1.33 2002/11/13 13:15:03 strauss Exp $
+ * @(#) $Id: util.c 1470 2002-11-13 13:15:03Z strauss $
  */
 
 #include <config.h>

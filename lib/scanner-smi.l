@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: scanner-smi.l,v 1.38 2003/05/16 11:22:50 strauss Exp $
+ * @(#) $Id: scanner-smi.l 1561 2003-05-16 11:22:50Z strauss $
  */
 
 %option noyywrap

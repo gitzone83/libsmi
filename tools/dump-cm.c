@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-cm.c,v 1.37 2002/10/30 09:17:37 schoenw Exp $
+ * @(#) $Id: dump-cm.c 1621 2003-12-12 10:36:38Z strauss $
  */
 
 
@@ -38,7 +38,7 @@
 
 
 
-#define ABS(a) ((a > 0.0) ? (a) : (-(a)))
+#define ABS(a) ((float)((a > 0.0) ? (a) : (-(a))))
 
 
 
@@ -2196,22 +2196,22 @@ static void diaPrintXMLGroup(int group, float x, float y)
 
 static float getRectSX(GraphNode *tNode)
 {
-    return (float) tNode->dia.w / 2 + tNode->dia.x - RECTCORRECTION;
+    return (float) tNode->dia.w / 2.0 + tNode->dia.x - RECTCORRECTION;
 }
 
 static float getRectEX(GraphNode *tNode)
 {
-    return (float) tNode->dia.w / 2 + tNode->dia.x + RECTCORRECTION;
+    return (float) tNode->dia.w / 2.0 + tNode->dia.x + RECTCORRECTION;
 }
 
 static float getRectSY(GraphNode *tNode)
 {
-    return (float) tNode->dia.y - 2 - RECTCORRECTION;
+    return (float) tNode->dia.y - 2.0 - RECTCORRECTION;
 }
 
 static float getRectEY(GraphNode *tNode)
 {
-    return (float) tNode->dia.y - 2 + RECTCORRECTION;
+    return (float) tNode->dia.y - 2.0 + RECTCORRECTION;
 }
 
 
@@ -2244,7 +2244,7 @@ static float getObjX(GraphNode *node, int con)
 	return node->dia.x;
 	break;
     case 1 :
-	return node->dia.w / 2 + node->dia.x;
+	return node->dia.w / 2.0 + node->dia.x;
 	break;
     case 2 :
 	return node->dia.x + node->dia.w;
@@ -2259,13 +2259,13 @@ static float getObjX(GraphNode *node, int con)
 	return node->dia.x;
 	break;	
     case 6 :
-	return node->dia.w / 2 + node->dia.x;
+	return node->dia.w / 2.0 + node->dia.x;
 	break;
     case 7 :
 	return node->dia.x + node->dia.w;
 	break;
     }
-    return 0;
+    return 0.0;
 }
 
 static float getObjY(GraphNode *node, int con)
@@ -2281,10 +2281,10 @@ static float getObjY(GraphNode *node, int con)
 	return node->dia.y;
 	break;
     case 3 :
-	return node->dia.y + TABLEHEIGHT / 2;
+	return node->dia.y + TABLEHEIGHT / 2.0;
 	break;	
     case 4 :
-	return node->dia.y + TABLEHEIGHT / 2;
+	return node->dia.y + TABLEHEIGHT / 2.0;
 	break;
     case 5 :
 	return node->dia.y + node->dia.h;
@@ -2296,7 +2296,7 @@ static float getObjY(GraphNode *node, int con)
 	return node->dia.y + node->dia.h;
 	break;
     }
-    return 0;
+    return 0.0;
 }
 
 static float getObjYRel(GraphEdge *edge, int con)
@@ -2307,9 +2307,9 @@ static float getObjYRel(GraphEdge *edge, int con)
     node = edge->startNode;
     node2 = edge->endNode;
     if (node->dia.y < node2->dia.y) {
-	dist = ABS(((node->dia.y + node->dia.h) - node2->dia.y ) / 2);
+	dist = ABS(((node->dia.y + node->dia.h) - node2->dia.y ) / 2.0);
     } else {
-	dist = ABS((node->dia.y - (node2->dia.y + node2->dia.h)) / 2);
+	dist = ABS((node->dia.y - (node2->dia.y + node2->dia.h)) / 2.0);
     }
     
     switch (con) {
@@ -2323,10 +2323,10 @@ static float getObjYRel(GraphEdge *edge, int con)
 	return node->dia.y - dist;
 	break;
     case 3 :
-	return node->dia.y + TABLEHEIGHT / 2;
+	return node->dia.y + TABLEHEIGHT / 2.0;
 	break;	
     case 4 :
-	return node->dia.y + TABLEHEIGHT / 2;
+	return node->dia.y + TABLEHEIGHT / 2.0;
 	break;
     case 5 :
 	return node->dia.y + node->dia.h + dist;
@@ -2338,7 +2338,7 @@ static float getObjYRel(GraphEdge *edge, int con)
 	return node->dia.y + node->dia.h + dist;
 	break;
     }
-    return 0;
+    return 0.0;
 }
 
 /*
@@ -2639,7 +2639,7 @@ static void diaPrintXMLInfoNote(int modc, SmiModule **modv)
     }
     strcat(note, s2);
 
-    width = strlen(note) * (float)0.76;	/* don't ask */
+    width = (float)strlen(note) * (float)0.76;	/* don't ask */
 
     printf("<object type=\"UML - Note\" version=\"0\" id=\"O0\">\n");
     printf("  <attribute name=\"obj_pos\">\n");
@@ -2846,8 +2846,8 @@ static void diaPrintXML(int modc, SmiModule **modv)
 	 group <= algGetNumberOfGroups();
 	 group++) {
 	diaPrintXMLGroup(group,x,y);
-	x += 2;
-	y += 2;
+	x += 2.0;
+	y += 2.0;
     }
     
     diaPrintXMLClose();

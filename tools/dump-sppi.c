@@ -114,13 +114,15 @@ static int isSmiOnlyType(char *type)
 
 static char *getTimeString(time_t t)
 {
-    static char   s[27];
+    static char   *s = NULL;
     struct tm	  *tm;
 
+    if (s) xfree(s);
+
     tm = gmtime(&t);
-    sprintf(s, "%04d%02d%02d%02d%02dZ",
-	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	    tm->tm_hour, tm->tm_min);
+    smiAsprintf(&s, "%04d%02d%02d%02d%02dZ",
+		tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+		tm->tm_hour, tm->tm_min);
     return s;
 }
 
@@ -600,6 +602,9 @@ static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
 	}
 	sprintf(&s[strlen(s)], "}");
 	break;
+    case SMI_BASETYPE_FLOAT32:
+    case SMI_BASETYPE_FLOAT64:
+    case SMI_BASETYPE_FLOAT128:
     case SMI_BASETYPE_UNKNOWN:
 	break;
     case SMI_BASETYPE_OBJECTIDENTIFIER:
@@ -737,6 +742,12 @@ static void fprintIndex(FILE *f, SmiNode *indexNode, const int comment)
                         fprintSegment(f, INDENT, "EXTENDS", INDENTVALUE,
                                       comment);
                         break;
+		    case SMI_INDEX_UNKNOWN:
+		    case SMI_INDEX_REORDER:
+		    case SMI_INDEX_EXPAND:
+                        fprintSegment(f, INDENT, "-- unsupported indexing --",
+				      INDENTVALUE, comment);
+			break;
                 }
                 fprint(f, "{ ");
             } else if (j == 1) {
@@ -1190,6 +1201,8 @@ static void fprintObjects(FILE *f, SmiModule *smiModule)
 	    fprint(f, "{ %s }\n", relatedNode->name);
 	    break;
 	case SMI_INDEX_UNKNOWN:
+	case SMI_INDEX_REORDER:
+	case SMI_INDEX_EXPAND:
 	    break;
 	}
 	

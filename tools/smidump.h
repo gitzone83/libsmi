@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smidump.h,v 1.28 2003/09/17 12:45:28 schoenw Exp $
+ * @(#) $Id: smidump.h 1589 2003-09-17 12:45:28Z schoenw $
  */
 
 #ifndef _SMIDUMP_H
