@@ -1,0 +1,185 @@
+libsmi (0.4.2-1) unstable; urgency=low
+
+  * New upstream release
+  * libsmi2-dev: changed section from devel to libdevel
+
+ -- Remco van de Meent <remco@debian.org>  Sun,  7 Dec 2003 12:56:18 +0100
+
+libsmi (0.4.1.cvs20031010-2) unstable; urgency=low
+
+  * Permission problem? (see buildd reports) -> chmod +x on ./configure
+
+ -- Remco van de Meent <remco@debian.org>  Sun, 12 Oct 2003 19:20:44 +0200
+
+libsmi (0.4.1.cvs20031010-1) unstable; urgency=low
+
+  * Upstream CVS snapshot (also closes: #212151)
+  * Add few words to -dev package description (closes: #209806)
+
+ -- Remco van de Meent <remco@debian.org>  Fri, 10 Oct 2003 10:47:21 +0200
+
+libsmi (0.4.1-3) unstable; urgency=low
+
+  * Updated build-depends. Upgraded standards-version.
+
+ -- Remco van de Meent <remco@debian.org>  Mon,  3 Mar 2003 15:28:49 +0100
+
+libsmi (0.4.1-2) unstable; urgency=low
+
+  * Updated build-depends
+
+ -- Remco van de Meent <remco@debian.org>  Sun,  2 Feb 2003 22:19:43 +0100
+
+libsmi (0.4.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Mon, 18 Nov 2002 11:53:43 +0000
+
+libsmi (0.4.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Fri, 21 Jun 2002 19:13:06 +0000
+
+libsmi (0.3.1-2.cvs20020318) unstable; urgency=low
+
+  * Fixed typos in manual page (closes: #140939)
+  * Added missing symlinks for manual pages (closes: #99608)
+  * Updated long description with explanations on MIB and SMI (closes:
+    #109353)
+
+ -- Remco van de Meent <remco@debian.org>  Sun, 21 Apr 2002 18:46:10 +0200
+
+libsmi (0.3.1-1.cvs20020318) unstable; urgency=low
+
+  * CVS version as of today (fixes some segmentation faults)
+
+ -- Remco van de Meent <remco@debian.org>  Mon, 18 Mar 2002 23:26:22 +0100
+
+libsmi (0.3.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Wed,  6 Mar 2002 14:18:45 +0100
+
+libsmi (0.3.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Fixed postinst warning about ldconfig
+  * Upgraded to standards version 3.5.6
+
+ -- Remco van de Meent <remco@debian.org>  Thu, 29 Nov 2001 19:18:48 +0100
+
+libsmi (0.2.17-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Thu, 30 Aug 2001 14:35:50 +0200
+
+libsmi (0.2.16-4) unstable; urgency=low
+
+  * Added build depends on libtool (closes: #100645)
+
+ -- Remco van de Meent <remco@debian.org>  Wed, 13 Jun 2001 01:41:19 +0200
+
+libsmi (0.2.16-3) unstable; urgency=low
+
+  * Added and fixed location of smi.conf file and incorporate these changes
+    in debian/rules (closes: #100561)
+  * Added Section for source files
+
+ -- Remco van de Meent <remco@debian.org>  Tue, 12 Jun 2001 12:06:24 +0200
+
+libsmi (0.2.16-2) unstable; urgency=low
+
+  * Updated config.{guess,sub} using upstream CVS (closes: #95079)
+
+ -- Remco van de Meent <remco@debian.org>  Tue, 24 Apr 2001 11:33:28 +0200
+
+libsmi (0.2.16-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Mon, 16 Apr 2001 21:38:38 +0200
+
+libsmi (0.2.14-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Tue,  6 Mar 2001 16:10:33 +0100
+
+libsmi (0.2.13-2) unstable; urgency=low
+
+  * Fixes section (libs/devel)
+
+ -- Remco van de Meent <remco@debian.org>  Wed,  7 Feb 2001 21:47:13 +0100
+
+libsmi (0.2.13-1) unstable; urgency=low
+
+  * New upstream release
+  * Closing old bug that has been fixed earlier (closes: #82022)
+
+ -- Remco van de Meent <remco@debian.org>  Wed,  7 Feb 2001 14:30:23 +0100
+
+libsmi (0.2.12-2) unstable; urgency=low
+
+  * Reupload including .orig.tar.gz file to fix corruption in that file on
+    ftp-master.debian.org (closes: #82022).
+
+ -- Remco van de Meent <remco@debian.org>  Tue, 16 Jan 2001 15:36:13 +0100
+
+libsmi (0.2.12-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Wed,  6 Dec 2000 18:36:00 +0100
+
+libsmi (0.2.11-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Mon,  4 Dec 2000 10:51:49 +0100
+
+libsmi (0.2.8-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Remco van de Meent <remco@debian.org>  Mon, 20 Nov 2000 11:31:34 +0100
+
+libsmi (0.2.7-1) unstable; urgency=low
+
+  * New upstream release
+  * Changed smipath to contain everything in /usr/share/mibs
+
+ -- Remco van de Meent <remco@debian.org>  Sun, 12 Nov 2000 23:31:26 +0100
+
+libsmi (0.2.6-1) unstable; urgency=low
+
+  * New upstream release
+  * New maintainer, closes: Bug#75417
+
+ -- Remco van de Meent <remco@debian.org>  Mon, 23 Oct 2000 23:43:52 +0200
+
+libsmi (0.2.3-1) unstable; urgency=low
+
+  * New upstream version
+  * Upgrade packaging standard and added Builds-Depends
+
+ -- Craig Small <csmall@debian.org>  Mon, 19 Jun 2000 19:10:40 +1000
+
+libsmi (0.1.7-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Craig Small <csmall@debian.org>  Thu, 21 Oct 1999 11:48:22 +1000
+
+libsmi (0.1.6-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Craig Small <csmall@debian.org>  Mon, 23 Aug 1999 13:16:29 +1000
+
+Local variables:
+mode: debian-changelog
+End:

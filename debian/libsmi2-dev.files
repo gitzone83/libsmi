@@ -1,0 +1,10 @@
+usr/lib/libsmi.a
+usr/lib/libsmi.la
+usr/lib/libsmi.so
+usr/share/man/man3/smi_config.3
+usr/share/man/man3/smi_macro.3
+usr/share/man/man3/smi_module.3
+usr/share/man/man3/smi_node.3
+usr/share/man/man3/smi_type.3
+usr/share/man/man3/libsmi.3
+usr/include/smi.h

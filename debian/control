@@ -1,0 +1,46 @@
+Source: libsmi
+Priority: optional
+Maintainer: Remco van de Meent <remco@debian.org>
+Build-Depends: flex, bison, debhelper, libtool, automake, m4, autoconf
+Section: libs
+Standards-Version: 3.5.8
+
+Package: libsmi2
+Architecture: any
+Depends: ${shlibs:Depends}
+Conflicts: libsmi0, libsmi1
+Replaces: libsmi0, libsmi1
+Section: libs
+Description: A library to access SMI MIB information 
+ The purpose of libsmi is to 
+   * give network management applications a concise programmer-friendly
+     interface to access MIB module information, 
+   * separate the knowledge on SMI from the main parts of management 
+     applications, 
+   * allow to add new kinds of MIB repositories without the need to adapt 
+     applications that make use of libsmi. 
+ .
+ In this context, MIB is "Management Information Base" and SMI stands for
+ "Structure and identification of Management Information". See RFC1902 and
+ others for details.
+
+Package: libsmi2-dev
+Architecture: any
+Depends: libsmi2 (= ${Source-Version}), libc6-dev
+Provides: libsmi-dev
+Conflicts: libsmi-dev
+Section: libdevel
+Description: A library to access SMI MIB information (development files)
+ These are the files needed to compile programs using libsmi.
+ .
+ The purpose of libsmi is to 
+   * give network management applications a concise programmer-friendly
+     interface to access MIB module information, 
+   * separate the knowledge on SMI from the main parts of management 
+     applications, 
+   * allow to add new kinds of MIB repositories without the need to adapt 
+     applications that make use of libsmi. 
+ .
+ In this context, MIB is "Management Information Base" and SMI stands for
+ "Structure and identification of Management Information". See RFC1902 and
+ others for details.
