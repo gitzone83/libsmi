@@ -2,7 +2,7 @@
 LIBSMI NOTES FOR NATIVE WIN32 SUPPORT
 =====================================
 
-@(#) $Id: README.win,v 1.8 2002/11/13 19:22:15 schoenw Exp $
+@(#) $Id: README.win 1471 2002-11-13 19:22:15Z schoenw $
 
 This directory contains some help to compile the libsmi and associated
 tools on a Win32 platform (Windows 95, 98, 2000, NT) with the native

@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: check.h,v 1.13 2003/11/18 12:56:04 schoenw Exp $
+ * @(#) $Id: check.h 1611 2003-12-09 14:53:04Z strauss $
  */
 
 #ifndef _CHECK_H
@@ -32,6 +32,9 @@ extern void smiCheckTypeRanges(Parser *parser, Type *type);
 extern void smiCheckTypeFormat(Parser *parser, Type *type);
 
 extern void smiCheckTypeUsage(Parser *parserPtr, Module *modulePtr);
+
+extern void smiCheckValueType(Parser *parser, SmiValue *value, Type *type,
+			      int line);
 
 extern void smiCheckDefault(Parser *parser, Object *object);
 

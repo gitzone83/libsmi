@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-netsnmp.c,v 1.14 2002/10/30 09:17:37 schoenw Exp $
+ * @(#) $Id: dump-netsnmp.c 1642 2004-06-02 13:00:34Z strauss $
  */
 
 /*
@@ -1154,6 +1154,8 @@ static void printMgrGetMethod(FILE *f, SmiModule *smiModule,
 	    "\n"
 	    "    status = snmp_synch_response(peer, request, &response);\n"
 	    "    if (status != STAT_SUCCESS) {\n"
+	    "        if (response) snmp_free_pdu(response);\n"
+	    "        snmp_close(peer);\n"
 	    "        return -2;\n"
 	    "    }\n"
 	    "\n");
@@ -1163,6 +1165,8 @@ static void printMgrGetMethod(FILE *f, SmiModule *smiModule,
     fprintf(f,
 	    "    *%s = (%s_t *) malloc(sizeof(%s_t));\n"
 	    "    if (! *%s) {\n"
+	    "        if (response) snmp_free_pdu(response);\n"
+	    "        snmp_close(peer);\n"
 	    "        return -4;\n"
 	    "    }\n"
 	    "\n",

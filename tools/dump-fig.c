@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-fig.c,v 1.11 2000/11/29 16:35:26 strauss Exp $
+ * @(#) $Id: dump-fig.c 1050 2000-11-29 16:34:45Z strauss $
  */
 
 #include <config.h>

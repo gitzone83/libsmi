@@ -4,7 +4,7 @@
  *
  * This header is derived from the SNMPv2-MIB module.
  *
- * $Id: snmpv2-mib.h,v 1.9 2001/08/24 10:11:18 strauss Exp $
+ * $Id: snmpv2-mib.h 1154 2001-08-24 10:09:18Z strauss $
  */
 
 #ifndef _SNMPV2_MIB_H_

@@ -1,4 +1,4 @@
-/* $Id: shhopt.h,v 1.1 2000/11/29 16:35:56 strauss Exp $ */
+/* $Id: shhopt.h 1050 2000-11-29 16:34:45Z strauss $ */
 #ifndef SHHOPT_H
 #define SHHOPT_H
 

@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.29 2003/11/06 10:15:26 strauss Exp $
+# @(#) $Id: Makefile.am 1670 2004-08-09 14:06:04Z strauss $
 #
 
 
@@ -142,8 +142,8 @@ DATA =  $(m4data_DATA) $(pkgconfig_DATA)
 
 DIST_COMMON =  README ./stamp-h.in COPYING ChangeLog Makefile.am \
 Makefile.in THANKS TODO aclocal.m4 config.guess config.h.in config.sub \
-configure configure.in install-sh libsmi.pc.in ltconfig ltmain.sh \
-missing mkinstalldirs
+configure configure.in install-sh libsmi.pc.in ltmain.sh missing \
+mkinstalldirs
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -464,14 +464,6 @@ $(pkgconfig_DATA):	config.status
 
 anoncvs:
 	RSYNC_RSH=ssh rsync -rlt --delete $(HOME)/.cvs-repository/libsmi anoncvs@anoncvs:/var/lib/cvs
-#	ssh agitator chgrp -R anoncvs /var/lib/cvs/libsmi
-#	ssh agitator chmod -R ug+rw /var/lib/cvs/libsmi
-#
-#	mkdir /tmp/libsmi-diff
-#	tar xzCf /tmp/libsmi-diff /ftp/local/libsmi/libsmi-current.tar.gz
-#	cd /tmp/libsmi-diff ; cvs -Q co libsmi
-#	-cd /tmp/libsmi-diff ; diff -r -u -N libsmi-* libsmi > /ftp/local/libsmi/libsmi-current-cvs.diff
-#	rm -rf /tmp/libsmi-diff
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -4,7 +4,7 @@
  *
  * This header is derived from the MAU-MIB module.
  *
- * $Id: mau-mib.h,v 1.10 2003/12/01 12:24:35 strauss Exp $
+ * $Id: mau-mib.h 1606 2003-12-01 12:24:15Z strauss $
  */
 
 #ifndef _MAU_MIB_H_

@@ -1,3 +1,30 @@
+libsmi (0.4.3-1) unstable; urgency=medium
+
+  * New upstream release (medium urgency because there are quite some bugs
+    fixed upstream)
+
+ -- Remco van de Meent <remco@debian.org>  Wed, 18 Aug 2004 16:24:22 +0200
+
+libsmi (0.4.2-4) unstable; urgency=medium
+
+  * Fix build problems (closes: #266016)
+
+ -- Remco van de Meent <remco@debian.org>  Mon, 16 Aug 2004 15:42:03 +0200
+
+libsmi (0.4.2-3) unstable; urgency=low
+
+  * Split MIB module files off from libsmi2 package, into libsmi2-common
+    (closes: #233404). 
+
+ -- Remco van de Meent <remco@debian.org>  Wed,  4 Aug 2004 16:42:51 +0200
+
+libsmi (0.4.2-2) unstable; urgency=low
+
+  * Upgrade to standards-version 3.6.1
+  * Updated config.{guess,sub} files
+
+ -- Remco van de Meent <remco@debian.org>  Wed,  4 Aug 2004 12:07:01 +0200
+
 libsmi (0.4.2-1) unstable; urgency=low
 
   * New upstream release

@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-sming.c,v 1.93 2002/11/19 12:45:44 strauss Exp $
+ * @(#) $Id: dump-sming.c 1477 2002-11-19 12:45:41Z strauss $
  */
 
 #include <config.h>

@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.34 2003/09/17 12:37:58 schoenw Exp $
+# @(#) $Id: Makefile.am 1588 2003-09-17 12:37:58Z schoenw $
 #
 
 
@@ -415,6 +415,35 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
+dump-cm.o: dump-cm.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-corba.o: dump-corba.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-identifiers.o: dump-identifiers.c ../config.h ../lib/smi.h \
+	smidump.h shhopt.h
+dump-imports.o: dump-imports.c ../config.h ../lib/smi.h smidump.h \
+	shhopt.h
+dump-jax.o: dump-jax.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-metrics.o: dump-metrics.c ../config.h ../lib/smi.h smidump.h \
+	shhopt.h
+dump-mosy.o: dump-mosy.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-netsnmp.o: dump-netsnmp.c ../config.h ../lib/smi.h smidump.h \
+	shhopt.h
+dump-perl.o: dump-perl.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-python.o: dump-python.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-scli.o: dump-scli.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-sizes.o: dump-sizes.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-smi.o: dump-smi.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-sming.o: dump-sming.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-sppi.o: dump-sppi.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-tree.o: dump-tree.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-types.o: dump-types.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-xml.o: dump-xml.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-xsd.o: dump-xsd.c ../config.h ../lib/smi.h smidump.h shhopt.h
+shhopt.o: shhopt.c shhopt.h
+smidiff.o: smidiff.c ../config.h ../lib/smi.h shhopt.h
+smidump.o: smidump.c ../config.h ../lib/smi.h shhopt.h smidump.h
+smilint.o: smilint.c ../config.h ../lib/smi.h shhopt.h
+smiquery.o: smiquery.c ../config.h ../lib/smi.h shhopt.h
+
 info-am:
 info: info-am
 dvi-am:

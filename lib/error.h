@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: error.h,v 1.20 2001/08/22 17:51:42 strauss Exp $
+ * @(#) $Id: error.h 1151 2001-08-22 17:51:42Z strauss $
  */
 
 #ifndef _ERROR_H

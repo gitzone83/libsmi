@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.5 2002/11/20 14:00:37 schoenw Exp $
+# @(#) $Id: Makefile.am 1482 2002-11-20 14:00:37Z schoenw $
 #
 
 EXTRA_DIST		= LIBSMI-TEST-MIB \

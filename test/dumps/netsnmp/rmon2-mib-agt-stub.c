@@ -4,7 +4,7 @@
  *
  * This C file is derived from the RMON2-MIB module.
  *
- * $Id: rmon2-mib-agt-stub.c,v 1.5 2003/12/01 12:24:35 strauss Exp $
+ * $Id: rmon2-mib-agt-stub.c 1606 2003-12-01 12:24:15Z strauss $
  */
 
 #include <stdio.h>

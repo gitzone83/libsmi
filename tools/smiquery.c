@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smiquery.c,v 1.72 2002/12/06 15:37:46 strauss Exp $
+ * @(#) $Id: smiquery.c 1490 2002-12-06 15:37:46Z strauss $
  */
 
 #include <config.h>

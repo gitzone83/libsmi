@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.2 2003/12/01 12:24:19 strauss Exp $
+# @(#) $Id: Makefile.am 1788 2004-08-18 13:16:30Z strauss $
 #
 
 
@@ -126,6 +126,7 @@ ianadir = $(mibdir)/iana
 MIBS = $(shell ls -1 $(srcdir) | egrep -v 'CVS|Makefile')
 EXTRA_DIST = $(MIBS)
 iana_DATA = $(MIBS)
+MIBURLS = http://www.iana.org/assignments/ianaaddressfamilynumbers-mib http://www.iana.org/assignments/ianacharset-mib http://www.iana.org/assignments/ianafinisher-mib http://www.iana.org/assignments/ianaiftype-mib http://www.iana.org/assignments/ianaiprouteprotocol-mib http://www.iana.org/assignments/ianalanguage-mib http://www.iana.org/assignments/ianamalloc-mib http://www.iana.org/assignments/ianaprinter-mib http://www.iana.org/assignments/ianatn3270etc-mib
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -247,6 +248,9 @@ uninstall-am uninstall all-redirect all-am all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+
+download:
+	mkdir tmp ; cd tmp ; for m in $(MIBURLS) ; do curl -s -O $$m ; b=`basename $$m` ; f=`head -5 $$b | grep DEFINITIONS | awk '{print $$1}'` ; cmp -s $$b ../$$f || cp -v $$b ../$$f ; done ; cd .. ; rm -rf tmp
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
