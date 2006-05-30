@@ -1,9 +1,9 @@
 Source: libsmi
 Priority: optional
 Maintainer: Remco van de Meent <remco@debian.org>
-Build-Depends: flex, bison, debhelper, libtool, automake, m4, autoconf
+Build-Depends: flex, bison, debhelper, libtool, automake1.9, m4, autoconf
 Section: libs
-Standards-Version: 3.6.1
+Standards-Version: 3.7.2
 
 Package: libsmi2
 Architecture: any

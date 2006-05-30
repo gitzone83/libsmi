@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: data.h 1553 2003-04-30 14:29:31Z strauss $
+ * @(#) $Id: data.h 2011 2004-11-29 10:54:16Z strauss $
  */
 
 #ifndef _DATA_H
@@ -247,6 +247,14 @@ typedef struct Parser {
     ParserFlags	   flags;
     List	   *firstIndexlabelPtr; /* only for the SMIng parser */
     char	   *identityObjectName; /* only for the SMIng parser */
+    Module         *complianceModulePtr;
+    Module         *capabilitiesModulePtr;
+    Node	   *parentNodePtr;
+    int            currentDecl;
+    int            firstStatementLine;
+    int            firstNestedStatementLine;
+    int	           firstRevisionLine;
+    Node     	    *pendingNodePtr;
 } Parser;
 
 
@@ -260,7 +268,6 @@ typedef struct Handle {
     Module   	    *firstModulePtr;
     Module   	    *lastModulePtr;
     Node     	    *rootNodePtr;
-    Node     	    *pendingNodePtr;
     Type     	    *typeOctetStringPtr;
     Type     	    *typeObjectIdentifierPtr;
     Type     	    *typeInteger32Ptr;
@@ -278,6 +285,7 @@ typedef struct Handle {
     char     	    *cacheProg;
     int      	    errorLevel;
     SmiErrorHandler *errorHandler;
+    Parser          *parserPtr;
 } Handle;
 
 
@@ -386,7 +394,7 @@ extern Node *getParentNode(Node *nodePtr);
  *   objectPtr = setObjectName(objectPtr, name);
  */
 extern Object *setObjectName(Object *objectPtr,
-			     char *name);
+			     char *name, Parser *parserPtr);
 
 extern void setObjectType(Object *objectPtr,
 			  Type *typePtr);

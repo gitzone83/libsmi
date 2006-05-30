@@ -9,13 +9,14 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: win.h 1615 2003-12-11 13:10:51Z schoenw $
+ * @(#) $Id: win.h 1867 2004-10-06 13:45:31Z strauss $
  */
 
 #ifndef _WIN_H
 #define _WIN_H
 
 #include <ctype.h>
+#include <limits.h>
 #include <io.h>
 
 /*

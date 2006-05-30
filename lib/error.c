@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: error.c 1677 2004-08-10 11:10:27Z strauss $
+ * @(#) $Id: error.c 4200 2006-05-15 13:50:39Z strauss $
  */
 
 #include <config.h>
@@ -197,8 +197,10 @@ static Error errors[] = {
       "%s: unable to determine SMI version", NULL},
     { 1, ERR_UNKNOWN_OIDLABEL, "object-identifier-unknown", 
       "unknown object identifier label `%s'", NULL},
-    { 2, ERR_SUBIDENTIFIER_VS_OIDLABEL, "object-identifier-not-matching", 
-      "subidentifier `%s' does not match object identifier label `%s'", NULL},
+    { 5, ERR_OIDLABEL_CHANGED, "object-identifier-label-not-matching", 
+      "label `%s' does not match previous label `%s' for same object identifier", NULL},
+    { 5, ERR_IDENTIFIER_OID_CHANGED, "object-identifier-oid-not-matching", 
+      "object identifier for label `%s' does not match previous label usage", NULL},
     { 2, ERR_EXISTENT_OBJECT, "object-identifier-redefined", 
       "an object named `%s' already exists", NULL},
     { 2, ERR_IDENTIFIER_NOT_IN_MODULE, "import-failed", 
@@ -207,8 +209,10 @@ static Error errors[] = {
       "MACRO definitions are only allowed in SMI base modules", NULL},
     { 1, ERR_CHOICE, "choice-not-allowed", 
       "CHOICE type definitions are only allowed in SMI base modules", NULL},
-    { 1, ERR_TYPE_SMI, "type-not-allowed", 
+    { 1, ERR_TYPE_SMI_OR_SPPI, "type-not-allowed", 
       "type `%s' may only be defined in SMI/SPPI base modules", NULL},
+    { 1, ERR_TYPE_SPPI, "type-not-allowed-sppi", 
+      "type `%s' may only be defined in SPPI base modules", NULL},
     { 1, ERR_TYPE_TAG, "tagged-type-not-allowed", 
       "tagged or IMPLICIT types may only be defined in SMI base modules", NULL},
     { 1, ERR_EXPORTS, "export-not-allowed", 
@@ -255,12 +259,14 @@ static Error errors[] = {
       "named bit `%s' must not include a hyphen in SMIv2", NULL},
     { 2, ERR_REDEFINITION, "identifier-redefined", 
       "redefinition of identifier `%s'", NULL},
-    { 5, ERR_EXT_REDEFINITION, "identifier-external-redifined", 
+    { 5, ERR_EXT_REDEFINITION, "identifier-external-redefined", 
       "redefinition of identifier `%s::%s'", NULL},
     { 5, ERR_CASE_REDEFINITION, "identifier-case-match", 
       "identifier `%s' differs from `%s' only in case", NULL},
     { 5, ERR_EXT_CASE_REDEFINITION, "identifier-external-case-match", 
       "identifier `%s' differs from `%s::%s' only in case", NULL},
+    { 5, ERR_BASETYPE_REDEFINITION, "identifier-basetype-redefined", 
+      "definition of identifier `%s' which is already a SMI or SPPI basetype", NULL},
     { 6, ERR_PREVIOUS_DEFINITION, "previous-definition",
       "previous definition of `%s'", NULL},
     { 2, ERR_INVALID_FORMAT, "invalid-format", 
@@ -515,7 +521,7 @@ static Error errors[] = {
     { 5, ERR_INDEX_ACCESSIBLE, "index-element-accessible",
       "index element `%s' of row `%s' should be not-accessible in SMIv2 MIB", NULL},
     { 5, ERR_INDEX_NON_ACCESSIBLE, "index-element-not-accessible",
-      "exactly one index element of row `%s' must be accessible in SMIv2 MIB", NULL},
+      "exactly one index element of row `%s' must be accessible", NULL},
     { 3, ERR_REFINEMENT_NOT_LISTED, "refinement-not-listed",
       "refined object `%s' not listed in a mandatory or optional group", NULL},
     { 5, ERR_NOTIFICATION_NOT_REVERSIBLE, "notification-not-reversible",
@@ -641,6 +647,11 @@ static Error errors[] = {
       "notification group `%s' includes object `%s'", NULL},
     { 2, ERR_NOTIFICATION_IN_OBJECT_GROUP, "group-objects-notification",
       "object group `%s' includes notification `%s'", NULL},
+    { 4, ERR_MODULE_IDENTITY_REGISTRATION, "module-identity-registration",
+      "uncontrolled MODULE-IDENTITY registration",
+      "The identities of IETF MIB modules should be registered below\n"
+      "mib-2, transmission, or snmpModules so that the registration\n"
+      "space can be controlled by IANA."},
     { 0, 0, NULL, NULL, NULL }
 };
 

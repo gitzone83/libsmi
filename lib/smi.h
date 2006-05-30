@@ -1,14 +1,14 @@
 /*
  * smi.h --
  *
- *      Interface Definition of libsmi (version 2:23:0).
+ *      Interface Definition of libsmi (version 2:25:0).
  *
  * Copyright (c) 1999,2000 Frank Strauss, Technical University of Braunschweig.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smi.h.in 1564 2003-05-19 13:42:35Z strauss $
+ * @(#) $Id: smi.h.in 2013 2004-11-29 15:45:59Z strauss $
  */
 
 #ifndef _SMI_H
@@ -24,13 +24,13 @@ extern "C" {
 #endif
 
 
-#define SMI_LIBRARY_VERSION "2:23:0"
+#define SMI_LIBRARY_VERSION "2:25:0"
 extern const char *smi_library_version;
 
 #define SMI_VERSION_MAJOR 0
 #define SMI_VERSION_MINOR 4
-#define SMI_VERSION_PATCHLEVEL 3
-#define SMI_VERSION_STRING "0.4.3"
+#define SMI_VERSION_PATCHLEVEL 5
+#define SMI_VERSION_STRING "0.4.5"
 extern const char *smi_version_string;
 
 
@@ -146,6 +146,7 @@ typedef enum SmiDecl {
     SMI_DECL_MACRO	        = 16,
     SMI_DECL_COMPL_GROUP        = 17,
     SMI_DECL_COMPL_OBJECT       = 18,
+    SMI_DECL_IMPL_OBJECT        = 19,	/* object label in sth like "iso(1)" */
     /* SMIng statements */
     SMI_DECL_MODULE             = 33,
     SMI_DECL_EXTENSION          = 34,

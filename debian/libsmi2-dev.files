@@ -8,3 +8,5 @@ usr/share/man/man3/smi_node.3
 usr/share/man/man3/smi_type.3
 usr/share/man/man3/libsmi.3
 usr/include/smi.h
+usr/share/aclocal/libsmi.m4
+usr/lib/pkgconfig/libsmi.pc

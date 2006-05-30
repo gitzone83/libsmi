@@ -1,5 +1,5 @@
 .\"
-.\" $Id: libsmi.3.in 1666 2004-08-09 13:40:13Z strauss $
+.\" $Id: libsmi.3.in 4432 2006-05-29 16:21:11Z strauss $
 .\"
 .TH libsmi 3  "August 16, 2001" "IBR" "SMI Management Information Library"
 .SH NAME
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 .fi
 .SH "FILES"
 .nf
-@prefix@/include/smi.h    SMI library header file
+@includedir@/smi.h    SMI library header file
 .fi
 .SH "SEE ALSO"
 .BR "RFCs 2578-2580"
