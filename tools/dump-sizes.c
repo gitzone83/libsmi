@@ -8,18 +8,51 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-sizes.c 1636 2004-03-13 22:44:41Z schoenw $
+ * @(#) $Id: dump-sizes.c 2003 2004-11-15 12:29:58Z schoenw $
  */
 
 #include <config.h>
 
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_WIN_H
+#include "win.h"
+#endif
 
 #include "smi.h"
 #include "smidump.h"
 
 static int silent = 0;
+static int detail = 0;
+
+/*
+ * help functions
+ */
+#define m_abs(a)	((a) < 0 ? -(a) : (a))
+
+typedef struct WellKnowType {
+    char *module;
+    char *name;
+    int max;
+    int mean;
+    int min;
+} WellKnowType;
+
+static WellKnowType specialTypes[] = {
+    { "SNMPv2-TC", "PhysAddress", 65535, 6, 0 },
+    { "INET-ADDRESS-MIB", "InetAddress", 255, 4, 0 },
+    { "IANATn3270eTC-MIB", "IANATn3270eAddress", 255, 4, 0 },
+    { NULL, NULL, 0, 0, 0 }
+};
+
+
+
+typedef enum len_type {
+    len_min,
+    len_mean,
+    len_max
+} len_type;
+
 
 
 static SmiInteger32
@@ -155,7 +188,7 @@ getAbsMinInteger64(SmiType *smiType)
 {
      SmiType *parent;
      SmiRange *range;
-     SmiInteger64 min = 9223372036854775808ULL;
+     SmiInteger64 min = LIBSMI_INT64_MAX;
 
      range = smiGetFirstRange(smiType);
      if (! range) {
@@ -164,8 +197,8 @@ getAbsMinInteger64(SmiType *smiType)
      }
 
      for (; range; range = smiGetNextRange(range)) {
-	  if (abs(range->minValue.value.integer64) < min) {
-	       min = abs(range->minValue.value.integer64);
+	  if (m_abs(range->minValue.value.integer64) < min) {
+	       min = m_abs(range->minValue.value.integer64);
 	  }
      }
      return min;
@@ -187,8 +220,8 @@ getAbsMaxInteger64(SmiType *smiType)
      }
 
      for (; range; range = smiGetNextRange(range)) {
-	  if (abs(range->maxValue.value.integer64) > max) {
-	       max = abs(range->maxValue.value.integer64);
+	  if (m_abs(range->maxValue.value.integer64) > max) {
+	       max = m_abs(range->maxValue.value.integer64);
 	  }
      }
      return max;
@@ -484,80 +517,239 @@ ber_len_uint64(const SmiUnsigned64 value)
 
 
 static int
-ber_len_val(SmiType *smiType, int flags)
+ber_len_val_oid(SmiType *smiType, len_type flags)
+{
+    SmiSubid      oid[128];
+    unsigned int  oidlen = sizeof(oid)/sizeof(oid[0]);
+    int i;
+    
+    switch (flags) {
+    case len_max: 
+	oid[0] = 2;
+	for (i = 1; i < 128; i++) {
+	    oid[i] = 4294967295UL;
+	}
+	break;
+    case len_mean:
+	/* see Aiko's measurements */
+	for (oidlen = 0; oidlen < 15; oidlen++) {
+	    oid[oidlen] = 1;
+	}
+	break;
+    case len_min:
+	oid[0] = oid[1] = 0, oidlen = 2;
+	break;
+    }
+    return ber_len_oid(oid, oidlen);
+}
+
+
+
+static int
+ber_len_val_octs(SmiType *smiType, len_type flags)
+{
+    int len = 0;
+
+    SmiModule *smiModule;
+
+    smiModule = smiGetTypeModule(smiType);
+    if (smiModule && smiModule->name && smiType->name) {
+	int i;
+	for (i = 0; specialTypes[i].module; i++) {
+	    if (strcmp(specialTypes[i].module, smiModule->name) == 0
+		&& (strcmp(specialTypes[i].name, smiType->name) == 0)) {
+		break;
+	    }
+	}
+	if (specialTypes[i].module) {
+	    switch (flags) {
+	    case len_max:
+		return specialTypes[i].max;
+		break;
+	    case len_mean:
+		return specialTypes[i].mean;
+		break;
+	    case len_min:
+		return specialTypes[i].min;
+		break;
+	    }
+	}
+    }
+
+    switch (flags) {
+    case len_max:
+	len = getMaxSize(smiType);
+	break;
+    case len_mean:
+	len = (getMaxSize(smiType) + getMinSize(smiType)) / 2;
+	break;
+    case len_min:
+	len = getMinSize(smiType);
+	break;
+    }
+    return len;
+}
+
+
+
+static int
+ber_len_val_bits(SmiType *smiType, len_type flags)
+{
+    int len = 0;
+
+    switch (flags) {
+    case len_max:
+	len = getMaxSize(smiType);
+	break;
+    case len_mean:
+	len = (getMaxSize(smiType) + getMinSize(smiType)) / 2;
+	break;
+    case len_min:
+	len = getMinSize(smiType);
+	break;
+    }
+    return len;
+}
+
+
+
+static int
+ber_len_val_enum(SmiType *smiType, len_type flags)
+{
+     SmiInteger32 val = 0;
+
+     switch (flags) {
+     case len_max:
+	 val = getAbsMaxEnum(smiType);
+	 break;
+     case len_mean:
+	 val = (getAbsMaxEnum(smiType) + getAbsMinEnum(smiType)) / 2;
+	 break;
+     case len_min:
+	 val = getAbsMinEnum(smiType);
+	 break;
+     }
+     return ber_len_int32(val);
+}
+
+
+
+static int
+ber_len_val_int32(SmiType *smiType, len_type flags)
+{
+    SmiInteger32 val = 0;
+    
+    switch (flags) {
+    case len_max:
+	val = getAbsMaxInteger32(smiType);
+	break;
+    case len_mean:
+	val = (getAbsMaxInteger32(smiType) + getAbsMinInteger32(smiType)) / 2;
+	break;
+    case len_min:
+	val = getAbsMinInteger32(smiType);
+	break;	     
+    }
+    return ber_len_int32(val);
+}
+
+
+
+static int
+ber_len_val_uint32(SmiType *smiType, len_type flags)
+{
+    SmiUnsigned32 val = 0;
+    
+    switch (flags) {
+    case len_max:
+	val = getMaxUnsigned32(smiType);
+	break;
+    case len_mean:
+	val = (getMaxUnsigned32(smiType) + getMinUnsigned32(smiType)) / 2;
+	break;
+    case len_min:
+	val = getMinUnsigned32(smiType);
+	break;
+    }
+    return ber_len_uint32(val);
+}
+
+
+
+static int
+ber_len_val_int64(SmiType *smiType, len_type flags)
+{
+    SmiInteger64 val = 0;
+
+    switch (flags) {
+    case len_max:
+	val = getAbsMaxInteger64(smiType);
+	break;
+    case len_mean:
+	val = (getAbsMaxInteger64(smiType) + getAbsMinInteger64(smiType)) / 2;
+	break;
+    case len_min:
+	val = getAbsMinInteger64(smiType);
+	break;
+    }
+    return ber_len_int64(val);
+}
+
+
+
+static int
+ber_len_val_uint64(SmiType *smiType, len_type flags)
+{
+    SmiUnsigned64 val = 0;
+
+    switch (flags) {
+    case len_max:
+	val = getMaxUnsigned64(smiType);
+	break;
+    case len_mean:
+	val = (getMaxUnsigned64(smiType) + getMinUnsigned64(smiType)) / 2;
+	break;
+    case len_min:
+	val = getMinUnsigned64(smiType);
+	break;
+    }
+    return ber_len_uint64(val);
+}
+
+
+
+static int
+ber_len_val(SmiType *smiType, len_type flags)
 {
      int len = 0;
-     SmiInteger32  int32;
-     SmiUnsigned32 uint32;
-     SmiInteger64  int64;
-     SmiUnsigned64 uint64;
-     SmiSubid      oid[128];
-     unsigned int  oidlen = sizeof(oid)/sizeof(oid[0]);
      
      switch (smiType->basetype) {
      case SMI_BASETYPE_OBJECTIDENTIFIER:
-	  if (flags) {
-	       int i;
-
-	       oid[0] = 2;
-	       for (i = 1; i < 128; i++) {
-		    oid[i] = 4294967295UL;
-	       }
-	  } else {
-	       oid[0] = oid[1] = 0, oidlen = 2;
-	  }
-	  len = ber_len_oid(oid, oidlen);
-	  break;
+	 len = ber_len_val_oid(smiType, flags);
+	 break;
      case SMI_BASETYPE_OCTETSTRING:
+	 len = ber_len_val_octs(smiType, flags);
+	 break;
      case SMI_BASETYPE_BITS:
-	  if (flags) {
-	       len = getMaxSize(smiType);
-	  } else {
-	       len = getMinSize(smiType);
-	  }
-	  break;
+	 len = ber_len_val_bits(smiType, flags);
+	 break;
      case SMI_BASETYPE_ENUM:
-	  if (flags) {
-	       int32 = getAbsMaxEnum(smiType);
-	  } else {
-	       int32 = getAbsMinEnum(smiType);
-	  }
-	  len = ber_len_int32(int32);
-	  break;
+	 len = ber_len_val_enum(smiType, flags);
+	 break;
      case SMI_BASETYPE_INTEGER32:
-	  if (flags) {
-	       int32 = getAbsMaxInteger32(smiType);
-	  } else {
-	       int32 = getAbsMinInteger32(smiType);
-	  }
-	  len = ber_len_int32(int32);
-	  break;
+	 len = ber_len_val_int32(smiType, flags);
+	 break;
      case SMI_BASETYPE_UNSIGNED32:
-	  if (flags) {
-	       uint32 = getMaxUnsigned32(smiType);
-	  } else {
-	       uint32 = getMinUnsigned32(smiType);
-	  }
-	  len = ber_len_uint32(uint32);
-	  break;
+	 len = ber_len_val_uint32(smiType, flags);
+	 break;
      case SMI_BASETYPE_INTEGER64:
-	  if (flags) {
-	       int64 = getAbsMaxInteger64(smiType);
-	  } else {
-	       int64 = getAbsMinInteger64(smiType);
-	  }
-	  len = ber_len_int64(int64);
-	  break;
+	 len = ber_len_val_int64(smiType, flags);
+	 break;
      case SMI_BASETYPE_UNSIGNED64:
-	  if (flags) {
-	       uint64 = getMaxUnsigned64(smiType);
-	  } else {
-	       uint64 = getMinUnsigned64(smiType);
-	  }
-	  len = ber_len_uint64(uint64);
-	  break;
+	 len = ber_len_val_uint64(smiType, flags);
+	 break;
      default:
-	  break;
+	 break;
      }
 
      return len;
@@ -567,72 +759,165 @@ ber_len_val(SmiType *smiType, int flags)
 
 static void
 append_index(SmiSubid *oid, unsigned int *oidlen,
-	     SmiNode *indexNode, int flags)
+	     SmiNode *indexNode, len_type flags)
 {
-     SmiInteger32  int32;
-     SmiUnsigned32 uint32;
+     SmiInteger32  int32 = 0;
+     SmiUnsigned32 uint32 = 0;
      SmiType *indexType;
-     int i, len;
+     SmiModule *indexModule;
+     int i, len = 0;
 
      if (! indexNode) return;
 
      indexType = smiGetNodeType(indexNode);
      if (! indexType) return;
 
+     indexModule = smiGetTypeModule(indexType);
+
      switch (indexType->basetype) {
      case SMI_BASETYPE_OBJECTIDENTIFIER:
-	 fprintf(stderr, "*** xxx object identifiers in the index are not yet supported ***\n");
-#if 0
-	 if (flags) {
-	     int i;
-	     
-	     oid[0] = 2;
-	     for (i = 1; i < 128; i++) {
-		 oid[i] = 4294967295UL;
-	     }
-	 } else {
-	     oid[0] = oid[1] = 0, oidlen = 2;
+
+	 switch (flags) {
+	 case len_max:
+	     len = 128 - *oidlen;
+	     if (indexNode->implied) len--;
+	     break;
+	 case len_mean:
+	     len = 16;
+	     break;
+	 case len_min:
+	     len = 2;
+	     break;
 	 }
-	 len = ber_len_oid(oid, oidlen);
-#endif
-	 break;
-     case SMI_BASETYPE_OCTETSTRING:
-     case SMI_BASETYPE_BITS:
-	 if (flags) {
-	     len = getMaxSize(indexType);
-	 } else {
-	     len = getMinSize(indexType);
-	 }
-	 if (! indexNode->implied) {
+	 
+	 if (! indexNode->implied && *oidlen < 128) {
 	     oid[(*oidlen)++] = len;
 	 }
 	 for (i = 0; i < len && *oidlen < 128; i++) {
-	     oid[(*oidlen)++] = flags ? 255 : 0;
+	     switch (flags) {
+	     case len_max:
+		 if (i == 0) {
+		     oid[(*oidlen)++] = 2;
+		 } else {
+		     oid[(*oidlen)++] = 4294967295UL;
+		 }
+		 break;
+	     case len_mean:
+		 oid[(*oidlen)++] = i + 1;
+		 break;
+	     case len_min:
+		 oid[(*oidlen)++] = 0;
+		 break;
+	     }
+	 }
+	 break;
+     case SMI_BASETYPE_OCTETSTRING:
+     case SMI_BASETYPE_BITS:
+	 switch (flags) {
+	 case len_max:
+	     len = getMaxSize(indexType);
+	     break;
+	 case len_mean:
+	     len = (getMaxSize(indexType) + getMinSize(indexType) / 2);
+	     break;
+	 case len_min:
+	     len = getMinSize(indexType);
+	     break;
+	 }
+
+	 if (indexModule && indexModule->name && indexType->name) {
+	     int i;
+	     for (i = 0; specialTypes[i].module; i++) {
+		 if (strcmp(specialTypes[i].module, indexModule->name) == 0
+		     && (strcmp(specialTypes[i].name, indexType->name) == 0)) {
+		     break;
+		 }
+	     }
+	     if (specialTypes[i].module) {
+		 switch (flags) {
+		 case len_max:
+		     len = specialTypes[i].max;
+		     break;
+		 case len_mean:
+		     len = specialTypes[i].mean;
+		     break;
+		 case len_min:
+		     len = specialTypes[i].min;
+		     break;
+		 }
+	     }
+	 }
+	 
+	 if (! indexNode->implied && *oidlen < 128) {
+	     oid[(*oidlen)++] = len;
+	 }
+	 for (i = 0; i < len && *oidlen < 128; i++) {
+	     switch (flags) {
+	     case len_max:
+		 oid[(*oidlen)++] = 255;
+		 break;
+	     case len_mean:
+		 if (i == 0) {
+		     oid[(*oidlen)++] = 1;
+		 } else {
+		     oid[(*oidlen)++] = (i%2) ? 85 : 170;
+		 }
+		 break;
+	     case len_min:
+		 oid[(*oidlen)++] = 0;
+		 break;
+	     }
 	  }
 	 break;
      case SMI_BASETYPE_ENUM:
-	 if (flags) {
+	 switch (flags) {
+	 case len_max:
 	     int32 = getAbsMaxEnum(indexType);
-	 } else {
+	     break;
+	 case len_mean:
+	     int32 = (getAbsMaxEnum(indexType) - getAbsMinEnum(indexType)) / 2;
+	     break;
+	 case len_min:
 	     int32 = getAbsMinEnum(indexType);
+	     break;
 	 }
-	 oid[(*oidlen)++] = int32;
+	 if (*oidlen < 128) {
+	     oid[(*oidlen)++] = int32;
+	 }
 	 break;
      case SMI_BASETYPE_INTEGER32:
-	 if (flags) {
+	 switch (flags) {
+	 case len_max:
 	     int32 = getAbsMaxInteger32(indexType);
-	 } else {
+	     break;
+	 case len_mean:
+	     int32 = (getAbsMaxInteger32(indexType)
+		      + getAbsMinInteger32(indexType)) / 2;
+	     break;
+	 case len_min:
 	     int32 = getAbsMinInteger32(indexType);
+	     break;
 	 }
-	 oid[(*oidlen)++] = int32;
+	 if (*oidlen < 128) {
+	     oid[(*oidlen)++] = int32;
+	 }
 	 break;
      case SMI_BASETYPE_UNSIGNED32:
-	 if (flags) {
+	 switch (flags) {
+	 case len_max:
 	     uint32 = getMaxUnsigned32(indexType);
-	 } else {
+	     break;
+	 case len_mean:
+	     uint32 = (getMaxUnsigned32(indexType)
+		       + getMinUnsigned32(indexType)) / 2;
+	     break;
+	 case len_min:
 	     uint32 = getMinUnsigned32(indexType);
+	     break;
 	 }
-	 oid[(*oidlen)++] = uint32;
+	 if (*oidlen < 128) {
+	     oid[(*oidlen)++] = uint32;
+	 }
 	 break;
      case SMI_BASETYPE_UNKNOWN:
      case SMI_BASETYPE_INTEGER64:
@@ -648,7 +933,7 @@ append_index(SmiSubid *oid, unsigned int *oidlen,
 #undef DUMP_OID
 
 static int
-ber_len_varbind(SmiNode *smiNode, int flags)
+ber_len_varbind(SmiNode *smiNode, len_type flags)
 {
      SmiNode *row;
      SmiSubid oid[128];
@@ -710,7 +995,6 @@ ber_len_varbind(SmiNode *smiNode, int flags)
      fprintf(stderr, "\n");
 #endif
 
-
      len += ber_len_oid(oid, oidlen);
      len += ber_len_val(smiGetNodeType(smiNode), flags);
      len += ber_len_length(len) + 1;
@@ -732,7 +1016,8 @@ isGroup(SmiNode *smiNode)
     for (childNode = smiGetFirstChildNode(smiNode);
 	 childNode;
 	 childNode = smiGetNextChildNode(childNode)) {
-	if (childNode->nodekind == SMI_NODEKIND_SCALAR) {
+	if (childNode->nodekind == SMI_NODEKIND_SCALAR
+		&& childNode->access > SMI_ACCESS_NOTIFY) {
 	    return 1;
 	}
     }
@@ -743,14 +1028,13 @@ isGroup(SmiNode *smiNode)
 
 
 static void
-dumpSizeOfPDU(FILE *f, SmiNode *smiNode)
+dumpSizeOfPDU(FILE *f, SmiModule *smiModule, SmiNode *smiNode)
 {
      SmiNode *child;
      int worst = 0;
      int best = 0;
-     int b, w, n = 0;
-     
-     fprintf(f, "%s {\n", smiNode->name);
+     int avg = 0;
+     int b, w, a, n = 0;
      
      for (child = smiGetFirstChildNode(smiNode);
 	  child;
@@ -758,42 +1042,65 @@ dumpSizeOfPDU(FILE *f, SmiNode *smiNode)
 	  if (child->access == SMI_ACCESS_READ_WRITE
 	      || child->access == SMI_ACCESS_READ_ONLY) {
 
-	       b = ber_len_varbind(child, 0);
-	       w = ber_len_varbind(child, 1);
-
-	       fprintf(f, "  %-32s\t[%d..%d]\n", child->name, b, w);
+	       b = ber_len_varbind(child, len_min);
+	       a = ber_len_varbind(child, len_mean);
+	       w = ber_len_varbind(child, len_max);
 	       
-	       best += b, worst += w, n++;
+	       best += b, worst += w, avg += a, n++;
 	  }
      }
 
      /* varbind list sequence length and tag */
      best  += ber_len_length(best)  + 1;
+     avg   += ber_len_length(avg)   + 1;
      worst += ber_len_length(worst) + 1;
 
      /* request-id as defined in RFC 3416 */
      best += ber_len_int32(0);
+     avg += ber_len_int32(1073741824);
      worst += ber_len_int32(-214783648);
      
      /* error-status as defined in RFC 3416 */
      best += ber_len_int32(0);
+     avg += ber_len_int32(0);
      worst += ber_len_int32(18);
      
      /* error-index as defined in RFC 3416 */
      best += ber_len_int32(0);
+     avg += ber_len_int32(0);
      worst += ber_len_int32(n-1);
 
      /* PDU sequence length and tag */
      best  += ber_len_length(best)  + 1;
+     avg += ber_len_length(avg) + 1;
      worst += ber_len_length(worst) + 1;
      
-     fprintf(f, "} [%d..%d]\n\n", best, worst);
+     fprintf(f, "%-23s %-23s \t%d\t[%d..%d]\n", smiModule->name, smiNode->name,
+	     avg, best, worst);
+
+     if (detail) {
+	 for (child = smiGetFirstChildNode(smiNode);
+	      child;
+	      child = smiGetNextChildNode(child)) {
+	     if (child->access == SMI_ACCESS_READ_WRITE
+		 || child->access == SMI_ACCESS_READ_ONLY) {
+		 
+		 b = ber_len_varbind(child, len_min);
+		 a = ber_len_varbind(child, len_mean);
+		 w = ber_len_varbind(child, len_max);
+		 
+		 fprintf(f, "%-23s %-23s \t%d\t[%d..%d]\n",
+			 "", child->name, a, b, w);
+	     }
+	 }
+     }
 }
 
 
 
 static void
-dumpSizeOfCreatePDU(FILE *f, SmiNode *smiNode, int ignoreDefaultColumns)
+dumpSizeOfCreatePDU(FILE *f, SmiModule *smiModule, SmiNode *smiNode,
+		    int ignoreDefaultColumns)
 {
      SmiNode *child;
      SmiType *childType;
@@ -801,10 +1108,9 @@ dumpSizeOfCreatePDU(FILE *f, SmiNode *smiNode, int ignoreDefaultColumns)
      
      int worst = 0;
      int best = 0;
-     int b, w, n = 0;
+     int avg = 0;
+     int b, w, a, n = 0;
      int isRowStatus;
-     
-     fprintf(f, "%s {\n", smiNode->name);
      
      for (child = smiGetFirstChildNode(smiNode);
 	  child;
@@ -828,71 +1134,77 @@ dumpSizeOfCreatePDU(FILE *f, SmiNode *smiNode, int ignoreDefaultColumns)
 	       /* xxx at least one PDU must be present xxx */
 
 	       if (ignoreDefaultColumns
-		   && child->value.basetype == SMI_BASETYPE_UNKNOWN
+		   && child->value.basetype != SMI_BASETYPE_UNKNOWN
 		   && !isRowStatus) {
 		    continue;
 	       }
 
-	       b = ber_len_varbind(child, 0);
-	       w = ber_len_varbind(child, 1);
+	       b = ber_len_varbind(child, len_min);
+	       a = ber_len_varbind(child, len_mean);
+	       w = ber_len_varbind(child, len_max);
 
-	       fprintf(f, "  %-32s\t[%d..%d]\n", child->name, b, w);
+#if 0
+	       fprintf(f, "  %-32s\t[%d..%d] | %d\n", child->name, b, w, a);
+#endif
 	       
-	       best += b, worst += w, n++;
+	       best += b, worst += w, avg += a, n++;
 	  }
      }
 
      /* varbind list sequence length and tag */
      best  += ber_len_length(best)  + 1;
+     avg   += ber_len_length(avg)   + 1;
      worst += ber_len_length(worst) + 1;
 
      /* request-id as defined in RFC 3416 */
      best += ber_len_int32(0);
+     avg += ber_len_int32(1073741824);
      worst += ber_len_int32(-214783648);
      
      /* error-status as defined in RFC 3416 */
      best += ber_len_int32(0);
+     avg += ber_len_int32(0);
      worst += ber_len_int32(18);
      
      /* error-index as defined in RFC 3416 */
      best += ber_len_int32(0);
+     avg += ber_len_int32(0);
      worst += ber_len_int32(n-1);
 
      /* PDU sequence length and tag */
      best  += ber_len_length(best)  + 1;
+     avg += ber_len_length(avg) + 1;
      worst += ber_len_length(worst) + 1;
      
-     fprintf(f, "} [%d..%d]\n\n", best, worst);
+     fprintf(f, "%-23s %-23s \t%d\t[%d..%d]\n", smiModule->name, smiNode->name,
+	     avg, best, worst);
 }
 
 
 
 static void
-dumpSizeOfNotificationPDU(FILE *f, SmiNode *smiNode)
+dumpSizeOfNotificationPDU(FILE *f, SmiModule *smiModule, SmiNode *smiNode)
 {
      SmiElement *smiElement;
      SmiNode *varNode;
      int worst = 0;
      int best = 0;
-     int w, b;
+     int avg = 0;
+     int w, b, a;
      int len = 0;
      static const SmiSubid snmpTrapOid0[]
 	  = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
      static const int snmpTrapOid0Len
 	  = sizeof(snmpTrapOid0) / sizeof(SmiSubid);
      
-     fprintf(f, "%s {\n", smiNode->name);
-
-     b = 15, w = 19;
-     fprintf(f, "  %-32s\t[%d..%d]\n", "sysUpTime", b, w);
-     best += b, worst += w;
+     b = 15, w = 19, a = 18;
+     best += b, worst += w, avg += a;
      
      len += ber_len_oid(smiNode->oid, smiNode->oidlen);
      len += ber_len_oid(snmpTrapOid0, snmpTrapOid0Len);
      len += ber_len_length(len) + 1;
-     b = len, w = len;
-     fprintf(f, "  %-32s\t[%d..%d]\n", "snmpTrapOID", b, w);
-     best += b, worst += w;
+     b = len, w = len, a = len;
+     best += b, worst += w, avg += a;
      
      for (smiElement = smiGetFirstElement(smiNode);
 	  smiElement;
@@ -900,70 +1212,130 @@ dumpSizeOfNotificationPDU(FILE *f, SmiNode *smiNode)
 	  varNode = smiGetElementNode(smiElement);
 	  if (! varNode) continue;
 
-	  b = ber_len_varbind(varNode, 0);
-	  w = ber_len_varbind(varNode, 1);
-
-	  fprintf(f, "  %-32s\t[%d..%d]\n", varNode->name, b, w);
+	  b = ber_len_varbind(varNode, len_min);
+	  a = ber_len_varbind(varNode, len_mean);
+	  w = ber_len_varbind(varNode, len_max);
 	  
-	  best += b, worst += w;
+	  best += b, worst += w, avg += a;
      }
 
+     /* varbind list sequence length and tag */
      best  += ber_len_length(best)  + 1;
+     avg   += ber_len_length(avg)   + 1;
      worst += ber_len_length(worst) + 1;
      
-     fprintf(f, "} [%d..%d]\n\n", best, worst);
+     /* request-id as defined in RFC 3416 */
+     best += ber_len_int32(0);
+     avg += ber_len_int32(1073741824);
+     worst += ber_len_int32(-214783648);
+     
+     /* error-status as defined in RFC 3416 */
+     best += ber_len_int32(0);
+     avg += ber_len_int32(0);
+     worst += ber_len_int32(18);
+     
+     /* error-index as defined in RFC 3416 */
+     best += ber_len_int32(0);
+     avg += ber_len_int32(0);
+     worst += ber_len_int32(0);
+
+     /* PDU sequence length and tag */
+     best  += ber_len_length(best)  + 1;
+     avg += ber_len_length(avg) + 1;
+     worst += ber_len_length(worst) + 1;
+     
+     fprintf(f, "%-23s %-23s \t%d\t[%d..%d]\n", smiModule->name, smiNode->name,
+	     avg, best, worst);
+
+     if (detail) {
+	 b = 15, w = 19, a = 18;
+	 fprintf(f, "%-23s %-23s \t%d\t[%d..%d]\n",
+		 "", "sysUpTime", a, b, w);
+	 
+	 len = 0;
+	 len += ber_len_oid(smiNode->oid, smiNode->oidlen);
+	 len += ber_len_oid(snmpTrapOid0, snmpTrapOid0Len);
+	 len += ber_len_length(len) + 1;
+	 b = len, w = len, a = len;
+	 fprintf(f, "%-23s %-23s \t%d\t[%d..%d]\n",
+		 "", "snmpTrapOID", a, b, w);
+	 
+	 for (smiElement = smiGetFirstElement(smiNode);
+	      smiElement;
+	      smiElement = smiGetNextElement(smiElement)) {
+	     varNode = smiGetElementNode(smiElement);
+	     if (! varNode) continue;
+	     
+	     b = ber_len_varbind(varNode, len_min);
+	     a = ber_len_varbind(varNode, len_mean);
+	     w = ber_len_varbind(varNode, len_max);
+	     
+	     fprintf(f, "%-23s %-23s \t%d\t[%d..%d]\n",
+		     "", varNode->name, a, b, w);
+	 }
+     }
 }
 
 
 
 static void
-gaga(FILE *f, SmiModule *smiModule)
+dumpGroupPduSizes(FILE *f, SmiModule *smiModule)
 {
-     SmiNode *smiNode;
-     int c;
+    SmiNode *smiNode;
 
-     /* objects */
+    for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_ANY);
+	 smiNode;
+	 smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ANY)) {
+	if (isGroup(smiNode)) {
+	    dumpSizeOfPDU(f, smiModule, smiNode);
+	}
+    }
+}
+
+
+
+static void
+dumpFullRowCreatePduSizes(FILE *f, SmiModule *smiModule)
+{
+    SmiNode *smiNode;
+    
+    for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_ROW);
+	 smiNode;
+	 smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ROW)) {
+	if (smiNode->create) {
+	    dumpSizeOfCreatePDU(f, smiModule, smiNode, 0);
+	}
+    }
+}
+
      
-     for (c = 0, smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_ANY);
-	  smiNode;
-	  smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ANY), c++) {
-	  if (isGroup(smiNode)) {
-	       dumpSizeOfPDU(f, smiNode);
-	  }
-     }
 
-     for (c = 0, smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_ROW);
-	  smiNode;
-	  smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ROW)) {
-	  if (smiNode->create) {
-	       if (c == 0) {
-		    fprintf(f, "# size of full one-shot row creation PDUs:\n\n");
-	       }
-	       dumpSizeOfCreatePDU(f, smiNode, 0);
-	       c++;
-	  }
-     }
+static void
+dumpSmallRowCreatePduSizes(FILE *f, SmiModule *smiModule)
+{
+    SmiNode *smiNode;
+    
+    for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_ROW);
+	 smiNode;
+	 smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ROW)) {
+	if (smiNode->create) {
+	    dumpSizeOfCreatePDU(f, smiModule, smiNode, 1);
+	}
+    }
+}
 
-     for (c = 0, smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_ROW);
-	  smiNode;
-	  smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ROW)) {
-	  if (smiNode->create) {
-	       if (c == 0) {
-		    fprintf(f, "# size of one-shot row creation PDUs excluding columns with default values:\n\n");
-	       }
-	       dumpSizeOfCreatePDU(f, smiNode, 1);
-	       c++;
-	  }
-     }
 
-     for (c = 0,smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_NOTIFICATION);
-	  smiNode;
-	  smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_NOTIFICATION), c++) {
-          if (c == 0) {
-	       fprintf(f, "# size of notification PDUs:\n\n");
-	  }
-	  dumpSizeOfNotificationPDU(f, smiNode);
-     }
+
+static void
+dumpNotificationPduSizes(FILE *f, SmiModule *smiModule)
+{
+    SmiNode *smiNode;
+    
+    for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_NOTIFICATION);
+	 smiNode;
+	 smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_NOTIFICATION)) {
+	dumpSizeOfNotificationPDU(f, smiModule, smiNode);
+    }
 }
 
 
@@ -1001,8 +1373,21 @@ dumpSizes(int modc, SmiModule **modv, int flags, char *output)
 	       }
 	       fprintf(f, "%s\n", (pos == 8) ? "" : "\n");
 	  }
+	  fprintf(f, "\n# size of PDUs for groups and rows:\n\n");
 	  for (i = 0; i < modc; i++) {
-	       gaga(f, modv[i]);
+	      dumpGroupPduSizes(f, modv[i]);
+	  }
+	  fprintf(f, "\n# size of one-shot row creation PDUs including columns with default values:\n\n");
+	  for (i = 0; i < modc; i++) {
+	      dumpFullRowCreatePduSizes(f, modv[i]);
+	  }
+	  fprintf(f, "\n# size of one-shot row creation PDUs excluding columns with default values:\n\n");
+	  for (i = 0; i < modc; i++) {
+	      dumpSmallRowCreatePduSizes(f, modv[i]);
+	  }
+	  fprintf(f, "\n# size of notification PDUs:\n\n");
+	  for (i = 0; i < modc; i++) {
+	      dumpNotificationPduSizes(f, modv[i]);
 	  }
      } else {
 	  for (i = 0; i < modc; i++) {
@@ -1010,7 +1395,14 @@ dumpSizes(int modc, SmiModule **modv, int flags, char *output)
 		    fprintf(f, "# %s module PDU sizes (generated by smidump "
 			    SMI_VERSION_STRING ")\n\n", modv[i]->name);
 	       }
-	       gaga(f, modv[i]);
+	       fprintf(f, "\n# size of PDUs for groups and rows:\n\n");
+	       dumpGroupPduSizes(f, modv[i]);
+	       fprintf(f, "\n# size of one-shot row creation PDUs including columns with default values:\n\n");
+	       dumpFullRowCreatePduSizes(f, modv[i]);
+	       fprintf(f, "\n# size of one-shot row creation PDUs excluding columns with default values:\n\n");
+	       dumpSmallRowCreatePduSizes(f, modv[i]);
+	       fprintf(f, "\n# size of notification PDUs:\n\n");
+	       dumpNotificationPduSizes(f, modv[i]);
 	  }
      }
      
@@ -1027,16 +1419,21 @@ dumpSizes(int modc, SmiModule **modv, int flags, char *output)
 void
 initSizes()
 {
-     
-     static SmidumpDriver driver = {
-	  "sizes",
-	  dumpSizes,
-	  0,
-	  SMIDUMP_DRIVER_CANT_UNITE,
-	  "SNMPv3 PDU sizes (RFC 3416)",
-	  NULL,
-	  NULL
-     };
-     
-     smidumpRegisterDriver(&driver);
+    static SmidumpDriverOption opt[] = {
+	{ "variables", OPT_FLAG, &detail, 0,
+	  "show detailed information the sizes of variables"},
+        { 0, OPT_END, 0, 0 }
+    };
+    
+    static SmidumpDriver driver = {
+	"sizes",
+	dumpSizes,
+	SMI_FLAG_NODESCR,
+	0,
+	"SNMP PDU sizes (RFC 3416)",
+	opt,
+	NULL
+    };
+    
+    smidumpRegisterDriver(&driver);
 }

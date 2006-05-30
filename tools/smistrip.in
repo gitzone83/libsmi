@@ -9,7 +9,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# $Id: smistrip.in 1575 2003-07-24 09:42:29Z strauss $
+# $Id: smistrip.in 3434 2006-04-07 07:02:51Z strauss $
 #
 # NOTE, that this script relies on awk (tested with GNU awk) and getopts
 # (shell builtin like in bash or standalone).
@@ -56,11 +56,12 @@ do_strip () {
     fi
 
     $CMD "$FILE" | \
-    grep -i -v '^[ ]*Internet Draft' | \
+    tr -d '\015' | \
+    grep -i -v '^[ ]*Internet[ \-]Draft' | \
     $AWK -vtest="$test" -vdir="$dir" -vsingle="$single" '
 
     # start of module
-    /^[ \t]*[A-Za-z0-9-]* *(PIB-)?DEFINITIONS */ {
+    /^[ \t]*[A-Za-z0-9-]* *(PIB-)?DEFINITIONS *(::=)? *(BEGIN)? *$/ {
 	module = $1
 	skip = 9
 	skipped = -1

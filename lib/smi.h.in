@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smi.h.in 1564 2003-05-19 13:42:35Z strauss $
+ * @(#) $Id: smi.h.in 2013 2004-11-29 15:45:59Z strauss $
  */
 
 #ifndef _SMI_H
@@ -146,6 +146,7 @@ typedef enum SmiDecl {
     SMI_DECL_MACRO	        = 16,
     SMI_DECL_COMPL_GROUP        = 17,
     SMI_DECL_COMPL_OBJECT       = 18,
+    SMI_DECL_IMPL_OBJECT        = 19,	/* object label in sth like "iso(1)" */
     /* SMIng statements */
     SMI_DECL_MODULE             = 33,
     SMI_DECL_EXTENSION          = 34,

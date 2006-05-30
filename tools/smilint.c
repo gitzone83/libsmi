@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smilint.c 1679 2004-08-10 11:34:56Z strauss $
+ * @(#) $Id: smilint.c 1867 2004-10-06 13:45:31Z strauss $
  */
 
 #include <config.h>
@@ -109,7 +109,7 @@ static Error* errors_new()
 	fprintf(stderr, "smilint: malloc failed - running out of memory\n");
 	exit(1);
     }
-    memset(errors, 0, cnt * sizeof(Error));
+    memset(errors, 0, (cnt + 1) * sizeof(Error));
 
     for (i = 0; i < cnt; i++) {
 	errors[i].id = i;

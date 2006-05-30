@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smiquery.c 1490 2002-12-06 15:37:46Z strauss $
+ * @(#) $Id: smiquery.c 2445 2005-06-13 10:44:30Z schoenw $
  */
 
 #include <config.h>
@@ -89,6 +89,7 @@ static char *smiStringDecl(SmiDecl macro)
         (macro == SMI_DECL_NOTIFICATION)      ? "notification" :
         (macro == SMI_DECL_GROUP)	      ? "group" :
         (macro == SMI_DECL_COMPLIANCE)	      ? "compliance" :
+        (macro == SMI_DECL_IMPL_OBJECT)	      ? "<implicit object>" :
                                                 "<UNDEFINED>";
 }
 

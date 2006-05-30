@@ -13,6 +13,7 @@ version_major=$(shell expr `pwd` : '.*-\([0-9]*\).[0-9.]*')
 
 # Uncomment this to turn on verbose mode. 
 #export DH_VERBOSE=1
+export DH_COMPAT=4
 
 build: build-stamp
 
@@ -22,7 +23,8 @@ build-stamp:
 
 	chmod 755 configure
 	./configure --prefix=/usr --mandir=\$${prefix}/share/man \
-		--with-mibdir=/usr/share/mibs
+		--with-mibdir=/usr/share/mibs --sysconfdir=/etc \
+		--libexecdir=/usr/lib
 
 #	-mkdir shared static
 	$(MAKE)
@@ -69,7 +71,7 @@ install-stamp: build-stamp
 
 	# Add here commands to install the package into debian/tmp.
 	$(MAKE) install DESTDIR=`pwd`/debian/tmp
-	install -m 644 debian/smi.conf `pwd`/debian/tmp/etc/smi.conf
+	install -m 644 -D debian/smi.conf `pwd`/debian/tmp/etc/smi.conf
 
 	dh_movefiles
 	touch install-stamp
@@ -186,6 +188,7 @@ source diff:
 	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
 
 
+binary-indep: binary
 binary-arch: binary
 
 .PHONY: build clean binary-arch binary install

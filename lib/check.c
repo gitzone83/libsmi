@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: check.c 1663 2004-07-27 12:23:25Z strauss $
+ * @(#) $Id: check.c 4200 2006-05-15 13:50:39Z strauss $
  */
 
 #include <config.h>
@@ -145,44 +145,61 @@ redefinition(Parser *parser, int line1, char *name1, Module *module,
     char *tmp = parser->path;
     int equal = (strcmp(name1, name2) == 0);
 
-    if (! module) {
-	if (equal) {
-	    if (line1) {
-		smiPrintErrorAtLine(parser, ERR_REDEFINITION, line1, name1);
-	    } else {
-		smiPrintError(parser, ERR_REDEFINITION, name1);
-	    }
+    if (!strcmp(name1, "IpAddress") ||
+	!strcmp(name1, "TimeTicks") ||
+	!strcmp(name1, "Opaque") ||
+	!strcmp(name1, "Integer32") ||
+	!strcmp(name1, "Unsigned32") ||
+	!strcmp(name1, "Counter32") ||
+	!strcmp(name1, "Gauge32") ||
+	!strcmp(name1, "Counter64") ||
+	!strcmp(name1, "Integer64") ||
+	!strcmp(name1, "Unsigned64")) {
+	if (line1) {
+	    smiPrintErrorAtLine(parser, ERR_BASETYPE_REDEFINITION, line1, name1);
 	} else {
-	    if (line1) {
-		smiPrintErrorAtLine(parser, ERR_CASE_REDEFINITION,
-						line1, name1, name2);
-	    } else {
-		smiPrintError(parser, ERR_CASE_REDEFINITION, name1, name2);
-	    }
+	    smiPrintError(parser, ERR_BASETYPE_REDEFINITION, name1);
 	}
     } else {
-	if (equal) {
-	    if (line1) {
-		smiPrintErrorAtLine(parser, ERR_EXT_REDEFINITION, line1,
-			      module->export.name, name1);
+	if (! module) {
+	    if (equal) {
+		if (line1) {
+		    smiPrintErrorAtLine(parser, ERR_REDEFINITION, line1, name1);
+		} else {
+		    smiPrintError(parser, ERR_REDEFINITION, name1);
+		}
 	    } else {
-		smiPrintError(parser, ERR_EXT_REDEFINITION,
-			      module->export.name, name1);
+		if (line1) {
+		    smiPrintErrorAtLine(parser, ERR_CASE_REDEFINITION,
+					line1, name1, name2);
+		} else {
+		    smiPrintError(parser, ERR_CASE_REDEFINITION, name1, name2);
+		}
 	    }
 	} else {
-	    if (line1) {
-		smiPrintErrorAtLine(parser, ERR_EXT_CASE_REDEFINITION, line1,
-			      name1, module->export.name, name2);
+	    if (equal) {
+		if (line1) {
+		    smiPrintErrorAtLine(parser, ERR_EXT_REDEFINITION, line1,
+					module->export.name, name1);
+		} else {
+		    smiPrintError(parser, ERR_EXT_REDEFINITION,
+				  module->export.name, name1);
+		}
 	    } else {
-		smiPrintError(parser, ERR_EXT_CASE_REDEFINITION,
-			      name1, module->export.name, name2);
+		if (line1) {
+		    smiPrintErrorAtLine(parser, ERR_EXT_CASE_REDEFINITION, line1,
+					name1, module->export.name, name2);
+		} else {
+		    smiPrintError(parser, ERR_EXT_CASE_REDEFINITION,
+				  name1, module->export.name, name2);
+		}
 	    }
+	    parser->path = module->export.path;
 	}
-	parser->path = module->export.path;
-    }
-    smiPrintErrorAtLine(parser, ERR_PREVIOUS_DEFINITION, line2, name2);
-    if (module) {
-	parser->path = tmp;
+	smiPrintErrorAtLine(parser, ERR_PREVIOUS_DEFINITION, line2, name2);
+	if (module) {
+	    parser->path = tmp;
+	}
     }
 }
 
@@ -1363,7 +1380,7 @@ checkInetAddressType(Parser *parserPtr, Module *modulePtr, Object *objectPtr)
     Type *inetAddressTypePtr = NULL;		/* RFC 3291 */
     Type *inetAddressPtr = NULL;		/* RFC 3291 */
     Node *nodePtr;
-    List *listPtr;
+    List *listPtr = NULL;
     int i;
 
     const char *protected[] = {
@@ -1461,7 +1478,7 @@ checkTransportAddressType(Parser *parserPtr, Module *modulePtr, Object *objectPt
     Type *transportAddressPtr = NULL;		/* RFC 3419 */
     Type *transportDomainPtr = NULL;		/* RFC 3419 */
     Node *nodePtr;
-    List *listPtr;
+    List *listPtr = NULL;
     int i;
 
     const char *protected[] = {
@@ -2100,6 +2117,58 @@ void smiCheckUniqueness(Parser *parser, Object *object)
                                     object->line, uniq->export.name);
         }
     }
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * smiCheckModuleIdentityRegistration --
+ *
+ *      Check whether the module identity is registered in a well
+ *	known (IANA) controlled location. In particular, warn if
+ *	the OID is below iso(1).org(3).dod(6).mgmt(1) and not
+ *	below well known registration locations such as mib-2,
+ *	transmission, or snmpModules.
+ *
+ * Results:
+ *      None.
+ *
+ * Side effects:
+ *      None.
+ *
+ *----------------------------------------------------------------------
+ */
+
+void
+smiCheckModuleIdentityRegistration(Parser *parser, Object *object)
+{
+    static const SmiSubid mgmt[] = { 1, 3, 6, 1, 2 };
+    static const SmiSubid mib2[] = { 1, 3, 6, 1, 2, 1 };
+    static const SmiSubid transmission[] = { 1, 3, 6, 1, 2, 1, 10 };
+    static const SmiSubid snmpModules[] = { 1, 3, 6, 1, 6, 3 };
+
+    if (object->export.oidlen < sizeof(mgmt)/sizeof(SmiSubid)
+	|| memcmp(object->export.oid, mgmt, sizeof(mgmt)) != 0) {
+	return;
+    }
+
+    if (object->export.oidlen == sizeof(mib2)/sizeof(SmiSubid) + 1
+	&& memcmp(object->export.oid, mib2, sizeof(mib2)) == 0) {
+	return;
+    }
+
+    if (object->export.oidlen == sizeof(transmission)/sizeof(SmiSubid) + 1
+	&& memcmp(object->export.oid, transmission, sizeof(transmission)) == 0) {
+	return;
+    }
+
+    if (object->export.oidlen == sizeof(snmpModules)/sizeof(SmiSubid) + 1
+	&& memcmp(object->export.oid, snmpModules, sizeof(snmpModules)) == 0) {
+	return;
+    }
+
+    smiPrintErrorAtLine(parser, ERR_MODULE_IDENTITY_REGISTRATION,
+			object->line);
 }
 
 /*

@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-mosy.c 1544 2003-04-02 07:59:13Z schoenw $
+ * @(#) $Id: dump-mosy.c 2444 2005-06-13 10:34:35Z schoenw $
  */
 
 #include <config.h>
@@ -106,11 +106,12 @@ static char *getOidString(SmiNode *smiNode, int importedParent)
 	}
 	
 	/* found an imported or a local parent node? */
-	if ((parentNode->name && strlen(parentNode->name)) &&
-	    (smiIsImported(smiModule, NULL, parentNode->name) ||
-	     (!importedParent &&
-	      (smiGetNodeModule(parentNode) == smiModule)) ||
-	     (parentNode->oidlen == 1))) {
+	if ((parentNode->decl != SMI_DECL_IMPL_OBJECT) 
+	    && ((parentNode->name && strlen(parentNode->name)) 
+		&& (smiIsImported(smiModule, NULL, parentNode->name) 
+		    || (!importedParent 
+			&& (smiGetNodeModule(parentNode) == smiModule)) 
+		    || (parentNode->oidlen == 1)))) {
 	    sprintf(s, "%s%s", parentNode->name, append);
 	    return s;
 	}
@@ -196,12 +197,12 @@ static void printAssignements(FILE *f, SmiModule *smiModule)
 {
     int		 cnt = 0;
     SmiNode	 *smiNode;
-    
+
     for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_NODE);
 	 smiNode; smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_NODE)) {
 
 	cnt++;
-	
+
 	if (smiNode->status == SMI_STATUS_UNKNOWN &&
 	    smiNode != smiGetModuleIdentityNode(smiModule)) {
 	    fprintf(f, "%-20s %s\n", smiNode->name, getOidString(smiNode, 0));
@@ -496,7 +497,8 @@ static void dumpMosy(int modc, SmiModule **modv, int flags, char *output)
 	
 	smiNode = smiGetModuleIdentityNode(modv[i]);
 	if (smiNode) {
-	    fprintf(f, "%-20s %s\n", smiNode->name, getOidString(smiNode, 0));
+	    SmiNode *parent = smiGetParentNode(smiNode);
+	    fprintf(f, "%-20s %s\n", smiNode->name, getOidString(smiNode, !parent || parent->nodekind == SMI_NODEKIND_UNKNOWN ));
 	    fprintf(f, "%%n0 %-16s module-identity\n", smiNode->name);
 	    fprintf(f, "\n");
 	}

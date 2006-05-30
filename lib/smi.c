@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smi.c 1557 2003-05-12 17:31:19Z tklie $
+ * @(#) $Id: smi.c 2128 2005-04-25 22:36:46Z schoenw $
  */
 
 #include <config.h>
@@ -994,9 +994,9 @@ SmiNode *smiGetFirstNode(SmiModule *smiModulePtr, SmiNodekind nodekind)
 	    nodePtr = nodePtr->nextPtr;
 	} else {
 	    for (nodePtr = nodePtr->parentPtr;
-		 (nodePtr->parentPtr) && (!nodePtr->nextPtr);
+		 nodePtr && (nodePtr->parentPtr) && (!nodePtr->nextPtr);
 		 nodePtr = nodePtr->parentPtr);
-	    nodePtr = nodePtr->nextPtr;
+	    if (nodePtr) nodePtr = nodePtr->nextPtr;
 	}
     } while (nodePtr);
 
@@ -1040,7 +1040,7 @@ SmiNode *smiGetNextNode(SmiNode *smiNodePtr, SmiNodekind nodekind)
 	    nodePtr = nodePtr->nextPtr;
 	    /* did we move outside the common oid prefix of this module? */
 	    for (i = 0; i < modulePtr->prefixNodePtr->oidlen; i++)
-		if ((!nodePtr) ||
+		if ((!nodePtr) || (!nodePtr->oid) ||
 		    (nodePtr->oid[i] != modulePtr->prefixNodePtr->oid[i]))
 		    return NULL;
 	}
@@ -1081,6 +1081,9 @@ SmiNode *smiGetParentNode(SmiNode *smiNodePtr)
     }
 
     nodePtr = nodePtr->parentPtr;
+    if (! nodePtr) {
+        return NULL;
+    }
 
     /*
      * First, try to find a definition in the same module.
@@ -1763,12 +1766,12 @@ char *smiRenderValue(SmiValue *smiValuePtr, SmiType *smiTypePtr, int flags)
 		    /* XXX UTF-8 not implemented, fall through to ASCII (a) */
 		case 'a':
 		    n = (pfx < (smiValuePtr->len - i)) ?
-			       pfx : smiValuePtr->len - i;
+			pfx : smiValuePtr->len - i;
 		    for (k = 0; k < n; k++) {
 			if (! isascii((int) smiValuePtr->value.ptr[i+k])) {
 			    smiFree(s);
 			    if (flags & SMI_RENDER_UNKNOWN) {
-				smiAsprintf(&s, SMI_LANGUAGE_UNKNOWN);
+				smiAsprintf(&s, SMI_UNKNOWN_LABEL);
 			    } else {
 				s = NULL;
 			    }
@@ -1832,7 +1835,7 @@ char *smiRenderValue(SmiValue *smiValuePtr, SmiType *smiTypePtr, int flags)
 		default:
 		    smiFree(s);
 		    if (flags & SMI_RENDER_UNKNOWN) {
-			smiAsprintf(&s, SMI_LANGUAGE_UNKNOWN);
+			smiAsprintf(&s, SMI_UNKNOWN_LABEL);
 		    } else {
 			s = NULL;
 		    }
@@ -1913,7 +1916,7 @@ char *smiRenderValue(SmiValue *smiValuePtr, SmiType *smiTypePtr, int flags)
     case SMI_BASETYPE_UNKNOWN:
     default:
 	if (flags & SMI_RENDER_UNKNOWN) {
-	    smiAsprintf(&s, SMI_LANGUAGE_UNKNOWN);
+	    smiAsprintf(&s, SMI_UNKNOWN_LABEL);
 	} else {
 	    s = NULL;
 	}

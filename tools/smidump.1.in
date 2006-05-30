@@ -1,5 +1,5 @@
 .\"
-.\" $Id: smidump.1.in 1676 2004-08-10 10:58:12Z strauss $
+.\" $Id: smidump.1.in 3012 2005-11-14 16:23:17Z schoenw $
 .\"
 .TH smidump 1  "August 10, 2004" "IBR" "SMI Tools"
 .SH NAME
@@ -116,6 +116,9 @@ Metrics derived from a module (experimental).
 identifiers
 List of identifiers defined in a module.
 .TP
+compliances
+Compliance definitions with all included objects and notifications.
+.TP
 corba
 CORBA IDL and OID definitions following the JIDM specification translation
 rules.
@@ -128,6 +131,9 @@ ANSI C manager stubs for usage within the scli package (experimental).
 .TP
 cm
 Reverse engineered conceptual model in DIA XML file format (experimental).
+.TP
+svg
+SVG diagram of a module (experimental). Use with \fB-u\fP when dumping multiple \fImodules\fP.
 .TP
 jax
 Java AgentX sub-agent classes in separate files (experimental).

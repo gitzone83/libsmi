@@ -1,3 +1,126 @@
+2005-05-29  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/BGP4-MIB: updated (RFC 4273).
+	* mibs/ietf/IP-FORWARD-MIB: updated (RFC 4292).
+	* mibs/ietf/IP-MIB: updated (RFC 4293).
+	* mibs/ietf/MOBILEIPV6-MIB: added (RFC 4295).
+	* mibs/ietf/RSTP-MIB: added (RFC 4318).
+	* mibs/ietf/DOCS-IETF-QOS-MIB: added (RFC 4323).
+	* mibs/ietf/LMP-MIB: added (RFC 4327).
+	* mibs/ietf/{P-BRIDGE-MIB,Q-BRIDGE-MIB}: updated (RFC 4363).
+	* mibs/ietf/{MPLS-LC-ATM-STD-MIB,MPLS-LC-FR-STD-MIB):
+	  added (RFC 4368).
+	* mibs/ietf/IFCP-MGMT-MIB: added (RFC 4369).
+	* mibs/ietf/MPLS-L3VPN-STD-MIB: added (RFC 4382).
+	* mibs/ietf/FCIP-MGMT-MIB: added (RFC 4404).
+	* mibs/ietf/T11-FC-NAME-SERVER-MIB: added (RFC 4438).
+	* mibs/ietf/{T11-TC-MIB,T11-FC-FABRIC-ADDR-MGR-MIB}:
+	  added (RFC 4439).
+	* mibs/ietf/ISIS-MIB: added (RFC 4444).
+	* mibs/ietf/SCSI-MIB: added (RFC 4455).
+	* mibs/ietf/{AGGREGATE-MIB,TIME-AGGREGATE-MIB}: added (RFC 4498).
+	* mibs/ietf/RMON2-MIB: updated (RFC 4502).
+
+	* libsmi-0.4.5.tar.gz: released version 0.4.5.
+	There was a bug that breaks compliation of 0.4.4, so here
+	is a new release.
+
+2006-05-16  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* libsmi-0.4.4.tar.gz: released version 0.4.4.
+	This is more or less just a snapshot to give package
+	maintainers a fresh and handy release number.
+
+2005-12-18  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/HDSL2-SHDSL-LINE-MIB: updated (RFC 4319).
+
+2005-12-16  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/{ENTITY-STATE-MIB,ENTITY-STATE-TC-MIB}:
+	  added (RFC 4268).
+
+2005-11-25  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/TE-LINK-STD-MIB: added (RFC 4220).
+
+	* mibs/ietf/VPN-TC-STD-MIB: added (RFC 4265).
+
+2005-10-10  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/DOCS-IETF-BPI2-MIB: added (RFC 4131).
+
+	* mibs/ietf/ENTITY-MIB: updated (RFC 4133).
+
+	* mibs/ietf/BRIDGE-MIB: updated (RFC 4188).
+
+2005-10-10  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/SSPM-MIB: added (RFC 4149).
+
+2005-06-23  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/TUNNEL-MIB: updated (RFC 4087).
+
+	* mibs/ietf/UDP-MIB: updated (RFC 4113).
+
+2005-05-17  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/FC-MGMT-MIB: added (RFC 4044).
+
+2005-05-12  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/VDSL-LINE-EXT-SCM-MIB: added (RFC 4069).
+
+	* mibs/ietf/VDSL-LINE-EXT-MCM-MIB: added (RFC 4070).
+
+2005-05-04  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/DOCS-IETF-SUBMGT-MIB: added (RFC 4036).
+
+2005-04-01  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/NAT-MIB: added (RFC 4008).
+
+	* mibs/ietf/POLICY-BASED-MANAGEMENT-MIB: added (RFC 4011).
+
+	* mibs/ietf/TCP-MIB: updated (RFC 4022).
+
+2005-03-04  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/INET-ADDRESS-MIB: updated (RFC 4001).
+
+2005-01-17  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/TE-MIB: added (RFC 3970).
+
+2004-11-30  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* lib/parser-smi.y, lib/data.c, lib/error.c: improved handling
+	of identifiers in the "NameAndNumberForm", incl. improved
+	warnings if OIDs or identifiers change. Thanks to Mike, David
+	Perkins, and Randy Presuhn for clarifications.
+	
+2004-11-29  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* lib/parser-smi.y, lib/data.c: fixed handling of "pending"
+	nodes when modules are imported right in the middle of another
+	module (i.e., in MODULE-COMPLIANCE statements).
+	
+2004-09-29  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/ARC-MIB: added (RFC 3878).
+
+	* mibs/ietf/SNMP-NOTIFICATION-MIB: fixed.
+
+	* mibs/ietf/ALARM-MIB: added (RFC 3877).
+
+2004-09-28  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
+
+	* mibs/ietf/{TRIP-MIB,TRIP-TC-MIB,SCTP-MIB,IANA-ITU-ALARM-TC-MIB,
+	ITU-ALARM-MIB,ITU-ALARM-TC-MIB,SNMP-NOTIFICATION-MIB,DS1-MIB,
+	DS3-MIB}: added/updated (RFCs 3872,3874,3877,3895,3896).
+
 2004-08-18  Frank Strauss  <strauss@ibr.cs.tu-bs.de>
 
 	* libsmi-0.4.3.tar.gz: released version 0.4.3. Time for a new

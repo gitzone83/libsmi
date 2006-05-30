@@ -3,21 +3,21 @@
 #
 #      Process this file with autoconf to produce a configure script.
 #
-# Copyright (c) 1999-2004 Frank Strauss, Technical University of Braunschweig.
+# Copyright (c) 1999-2006 Frank Strauss, Technical University of Braunschweig.
 #
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: configure.in 1784 2004-08-18 12:27:46Z strauss $
+# @(#) $Id: configure.in 4431 2006-05-29 15:45:09Z strauss $
 #
 
 AC_INIT(tools/smilint.c)
 
 LIBSMI_MAJOR=0
 LIBSMI_MINOR=4
-LIBSMI_PATCHLEVEL=3
+LIBSMI_PATCHLEVEL=5
 LIBTOOL_VERSION=2
-LIBTOOL_REVISION=23
+LIBTOOL_REVISION=25
 LIBTOOL_AGE=0
 
 VERSION_STRING="$LIBSMI_MAJOR.$LIBSMI_MINOR.$LIBSMI_PATCHLEVEL"
@@ -210,11 +210,11 @@ AC_PROG_MAKE_SET
 AM_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 
-AC_DEFINE_UNQUOTED([DEFAULT_GLOBALCONFIG], "/etc/smi.conf",
+AC_DEFINE_UNQUOTED([DEFAULT_GLOBALCONFIG], "${sysconfdir}/smi.conf",
 [The full pathname of the global configuration file.])
 
 AC_DEFINE([DEFAULT_USERCONFIG], ".smirc",
-[The basename of the per-user configuration file searched in HOME.])
+[The basename of the per-user configuration file searched in $HOME.])
 
 if ${CONFIG_SHELL} ./libtool --features | grep "enable static" >/dev/null; then
   STATIC=-static
@@ -300,6 +300,7 @@ tools/smidump.1
 tools/smidiff.1
 tools/smistrip.1
 tools/smicache.1
+tools/mib2svg.cgi
 test/parser.test
 test/smidump-corba.test
 test/smidump-jax.test

@@ -1,0 +1,16 @@
+usr/lib/libsmi.so.2.0.25
+usr/lib/libsmi.so.2
+usr/share/man/man3/smi_render.3
+usr/share/man/man1/smiquery.1
+usr/share/man/man1/smilint.1
+usr/share/man/man1/smidump.1
+usr/share/man/man1/smidiff.1
+usr/share/man/man1/smistrip.1
+usr/share/man/man1/smicache.1
+usr/bin/smiquery
+usr/bin/smilint
+usr/bin/smidump
+usr/bin/smidiff
+usr/bin/smistrip
+usr/bin/smicache
+etc/smi.conf
