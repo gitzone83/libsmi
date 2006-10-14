@@ -1,3 +1,10 @@
+libsmi (0.4.5+dfsg0-0.1) unstable; urgency=medium
+
+  * Non-Maintainer upload
+  * Removed RFC's from package (closes: #390666)
+
+ -- Bas Zoetekouw <bas@debian.org>  Sat, 14 Oct 2006 13:21:47 +0200
+
 libsmi (0.4.5-1) unstable; urgency=low
 
   * New upstream release
