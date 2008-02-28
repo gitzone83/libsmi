@@ -5,11 +5,11 @@ Build-Depends: flex, bison, debhelper, libtool, automake1.9, m4, autoconf
 Section: libs
 Standards-Version: 3.7.2
 
-Package: libsmi2
+Package: libsmi2ldbl
 Architecture: any
 Depends: ${shlibs:Depends}
-Conflicts: libsmi0, libsmi1
-Replaces: libsmi0, libsmi1
+Conflicts: libsmi0, libsmi1, libsmi2
+Replaces: libsmi0, libsmi1, libsmi2
 Recommends: libsmi2-common
 Section: libs
 Description: A library to access SMI MIB information 
@@ -27,7 +27,7 @@ Description: A library to access SMI MIB information
 
 Package: libsmi2-dev
 Architecture: any
-Depends: libsmi2 (= ${Source-Version}), libc6-dev
+Depends: libsmi2ldbl (= ${Source-Version}), libc6-dev
 Provides: libsmi-dev
 Conflicts: libsmi-dev
 Section: libdevel

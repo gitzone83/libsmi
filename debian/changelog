@@ -1,3 +1,26 @@
+libsmi (0.4.7-1) unstable; urgency=low
+
+  * New upstream release
+  * Update debian/watch file to version 3 (closes: #450125)
+  * Update debian/rules, split in binary-indep and binary-arch (closes:
+    #276374 #462874)
+
+ -- Remco van de Meent <remco@debian.org>  Thu, 28 Feb 2008 21:05:57 +0100
+
+libsmi (0.4.6-1) unstable; urgency=low
+
+  * New upstream release
+  * Thanks to Luk and Bas for NMUing libsmi in the past.
+
+ -- Remco van de Meent <remco@debian.org>  Wed, 27 Feb 2008 19:57:31 +0100
+
+libsmi (0.4.5+dfsg0-0.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libsmi2 for the ldbl128 transition (Closes: #430299).
+
+ -- Luk Claes <luk@debian.org>  Sat, 02 Feb 2008 14:37:24 +0000
+
 libsmi (0.4.5+dfsg0-0.1) unstable; urgency=medium
 
   * Non-Maintainer upload
