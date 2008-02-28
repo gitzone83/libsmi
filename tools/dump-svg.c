@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-svg.c 2762 2005-08-30 13:22:25Z sperner $
+ * @(#) $Id: dump-svg.c 6635 2007-03-13 21:53:21Z schoenw $
  */
 
 
@@ -1524,7 +1524,7 @@ static void calcModuleComplianceCount(int modc, SmiModule **modv,
 {
     int           i;
     char          *done = NULL;
-    char          s[100];
+    char          s[1024];
     char          *module;
     SmiNode       *smiNode, *smiNode2;
     SmiModule     *smiModule2;
@@ -1816,7 +1816,7 @@ static void printComplianceNode(SmiNode *smiNode, int modc, SmiModule **modv,
     int            j, k, foreign_exists, textColor = 0;
     char           *tooltip;
     char           *done = NULL;
-    char           s[100];
+    char           s[1024];
     char           *module;
     SmiNode        *smiNode2;
     SmiModule      *smiModule2;
@@ -2655,8 +2655,9 @@ static void printModuleInformation(int modc, SmiModule **modv,
     float scale = 1, miHeight;
     int modIdPrint = 0;
     int nTypePrint = 0, oGroupPrint = 0, nGroupPrint = 0, mComplPrint = 0;
-    StringListElem markupList[miCount];
 
+    StringListElem *markupList = xcalloc(miCount,sizeof(StringListElem));
+    
     //only print sections containig information
     for (i = 0; i < modc; i++) {
 	modIdPrint |= modId[i];
@@ -2725,6 +2726,8 @@ static void printModuleInformation(int modc, SmiModule **modv,
 								    miCount);
 
     printf(" </g>\n");
+
+    if (markupList) xfree(markupList);
 }
 
 
@@ -3141,8 +3144,12 @@ static void generateSVG(int modc, SmiModule **modv)
     int            group, nodecount=0, singleNodes=1, miCount=0;
     int            i, idCount=0, TCcount=0, miPrint=0;
     float          x=10, xMin=0, yMin=0, xMax=0, yMax=0, maxHeight=0;
-    int            modId[modc];
-    int            nType[modc], oGroup[modc], nGroup[modc], mCompl[modc];
+
+    int            *modId = xcalloc(modc,sizeof(int));
+    int            *nType = xcalloc(modc,sizeof(int));
+    int            *oGroup = xcalloc(modc,sizeof(int));
+    int            *nGroup = xcalloc(modc,sizeof(int));
+    int            *mCompl = xcalloc(modc,sizeof(int));
 
     //prepare nodes and edges for drawing
     prepareNodesAndEdges(&idCount, &xMax, &nodecount, &singleNodes, &maxHeight);
@@ -3187,12 +3194,18 @@ static void generateSVG(int modc, SmiModule **modv)
 	miPrint |= nGroup[i];
 	miPrint |= mCompl[i];
     }
-    if (miPrint)
+    if (miPrint) {
 	xMax += MODULE_INFO_WIDTH;
+    }
 
-    //Print SVG to stdout
     printSVG(modc, modv, miCount, idCount, xMin, yMin, xMax, yMax, nodecount,
-				TCcount, modId, nType, oGroup, nGroup, mCompl);
+	     TCcount, modId, nType, oGroup, nGroup, mCompl);
+    
+    xfree(mCompl);
+    xfree(nGroup);
+    xfree(oGroup);
+    xfree(nType);
+    xfree(modId);
 }
 
 

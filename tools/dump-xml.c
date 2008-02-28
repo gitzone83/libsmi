@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-xml.c 1665 2004-07-29 23:10:21Z schoenw $
+ * @(#) $Id: dump-xml.c 6635 2007-03-13 21:53:21Z schoenw $
  */
 
 /*
@@ -138,22 +138,17 @@ static char *getTimeString(time_t t)
 static void fprint(FILE *f, char *fmt, ...)
 {
     va_list ap;
-    char    s[200];
+    char    *s;
     char    *p;
 
     va_start(ap, fmt);
-#ifdef HAVE_VSNPRINTF
-    current_column += vsnprintf(s, sizeof(s), fmt, ap);
-#else
-    current_column += vsprintf(s, fmt, ap);	/* buffer overwrite */
-#endif
+    current_column += smiVasprintf(&s, fmt, ap);
     va_end(ap);
-
     fputs(s, f);
-
     if ((p = strrchr(s, '\n'))) {
-	current_column = strlen(p) - 1;
+        current_column = strlen(p) - 1;
     }
+    free(s);
 }
 
 
@@ -203,7 +198,7 @@ static void fprintMultilineString(FILE *f, int column, const char *s)
 
 static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
 {
-    static char    s[100];
+    static char    s[1024];
     char           ss[9];
     int		   n;
     unsigned int   i;

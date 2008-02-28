@@ -2,7 +2,7 @@
 LIBSMI NOTES FOR NATIVE WIN32 SUPPORT
 =====================================
 
-@(#) $Id: README.win 1471 2002-11-13 19:22:15Z schoenw $
+@(#) $Id: README.win 6571 2007-02-11 13:32:02Z schoenw $
 
 This directory contains some help to compile the libsmi and associated
 tools on a Win32 platform (Windows 95, 98, 2000, NT) with the native
@@ -60,6 +60,8 @@ fine) by running:
     cd lib
     make errormacros.h parser-smi.c parser-sming.c \
                 scanner-smi.c scanner-sming.c smi.h
+    cd ../tools
+    make dump-svg-script.h
 
 
 

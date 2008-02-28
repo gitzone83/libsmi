@@ -55,8 +55,8 @@ clean:
 	# Add here commands to clean up after the build process.
 	-$(MAKE) distclean
 	rm -f config.cache config.status
-	libtoolize -c --force
-	aclocal
+	#libtoolize -c --force
+	#aclocal
 	rm -f conftest conftest.o config.log
 
 	dh_clean
@@ -76,7 +76,7 @@ install-stamp: build-stamp
 	dh_movefiles
 	touch install-stamp
 
-binary: build install
+binary-arch: build install
 #	dh_testversion
 	dh_testdir -a
 	dh_testroot -a
@@ -138,6 +138,36 @@ binary: build install
 	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetNextNamedNumber.3.gz)
 	(cd debian/libsmi2-dev/usr/share/man/man3; ln -sf smi_type.3.gz smiGetTypeModule.3.gz)
 
+	dh_installdocs -a
+	dh_installexamples -a
+#	dh_installmenu -a
+#	dh_installemacsen -a
+#	dh_installinit -a
+#	dh_installcron -a
+#	dh_installmanpages -a
+#	dh_undocumented
+
+
+	dh_installchangelogs -a ChangeLog
+	dh_link -a
+	dh_strip -a
+	dh_compress -a
+	dh_fixperms -a
+	# You may want to make some executables suid here
+#	dh_suidregister -a
+	dh_makeshlibs -a
+	dh_installdeb -a
+#	dh_perl -a
+	dh_shlibdeps -a
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary-indep: build install
+#	dh_testversion
+	dh_testdir -i
+	dh_testroot -i
+
 	# move files from libsmi2 to libsmi2-common dir
 	mv -f debian/tmp/usr/share/mibs/* debian/libsmi2-common/usr/share/mibs
 	mv -f debian/tmp/usr/share/pibs/* debian/libsmi2-common/usr/share/pibs
@@ -158,37 +188,10 @@ binary: build install
 	dh_md5sums -i
 	dh_builddeb -i
 
-
-	dh_installdocs -a
-	dh_installexamples -a
-#	dh_installmenu -a
-#	dh_installemacsen -a
-#	dh_installinit -a
-#	dh_installcron -a
-#	dh_installmanpages -a
-	dh_undocumented
-
-
-	dh_installchangelogs -a ChangeLog
-	dh_link -a
-	dh_strip -a
-	dh_compress -a
-	dh_fixperms -a
-	# You may want to make some executables suid here
-#	dh_suidregister -a
-	dh_makeshlibs -a
-	dh_installdeb -a
-#	dh_perl -a
-	dh_shlibdeps -a
-	dh_gencontrol -a
-	dh_md5sums -a
-	dh_builddeb -a
-
 source diff:                                                                  
 	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
 
 
-binary-indep: binary
-binary-arch: binary
+binary: binary-indep binary-arch
 
-.PHONY: build clean binary-arch binary install
+.PHONY: build clean binary-indep binary-arch binary install
