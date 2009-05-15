@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-types.c 6635 2007-03-13 21:53:21Z schoenw $
+ * @(#) $Id: dump-types.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 /*
@@ -252,6 +252,8 @@ static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
 	sprintf(&s[strlen(s)], ")");
 	break;
     case SMI_BASETYPE_UNKNOWN:
+	break;
+    case SMI_BASETYPE_POINTER:
 	break;
     case SMI_BASETYPE_OBJECTIDENTIFIER:
 	nodePtr = smiGetNodeByOID(valuePtr->len, valuePtr->value.oid);

@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-netsnmp.c 5780 2006-08-21 21:21:54Z schoenw $
+ * @(#) $Id: dump-netsnmp.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 /*
@@ -58,6 +58,8 @@ static char *getBaseTypeString(SmiBasetype basetype)
 {
     switch(basetype) {
     case SMI_BASETYPE_UNKNOWN:
+	return "ASN_NULL";
+    case SMI_BASETYPE_POINTER:
 	return "ASN_NULL";
     case SMI_BASETYPE_INTEGER32:
     case SMI_BASETYPE_ENUM:

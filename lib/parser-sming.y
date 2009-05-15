@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: parser-sming.y 7734 2008-02-15 07:49:14Z schoenw $
+ * @(#) $Id: parser-sming.y 7966 2008-03-27 21:25:52Z schoenw $
  */
 
 %{
@@ -31,6 +31,10 @@
 #include <malloc.h>
 #endif
 
+#ifdef HAVE_WIN_H
+#include "win.h"
+#endif
+
 #include "smi.h"
 #include "error.h"
 #include "parser-sming.h"
@@ -42,7 +46,6 @@
 #ifdef HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
-
 
 
 /*
@@ -270,8 +273,8 @@ checkDate(Parser *parserPtr, char *date)
     return (anytime == (time_t) -1) ? 0 : anytime;
 }
 
-static char *hexToStr(char *hexStr, int len){
-   
+static char *hexToStr(char *hexStr, int len)
+{
    union{
    	char ch;
    	long l;
@@ -279,8 +282,9 @@ static char *hexToStr(char *hexStr, int len){
    
    char* res =(char*)malloc(sizeof(char)*len/2+1);
    char* tmp =(char*)malloc(sizeof(char)*3);
-   tmp[2]=0;
    int i,j = 0;
+
+   tmp[2]=0;
    for(i=2; i+1<len; i+=2)
    {
    	tmp[0]= hexStr[i];
@@ -1956,9 +1960,7 @@ refinedBaseType:	OctetStringKeyword optsep_numberSpec_01
 			}
 	|		PointerKeyword optsep_pointerRestr_01
 			{
-				List *p;
-				
-				if (!$2) {
+			    if (!$2) {
 				$$ = smiHandle->typePointerPtr;
 			    } else {
 				$$ = duplicateType(smiHandle->typePointerPtr, 0,
@@ -2111,24 +2113,22 @@ attribute_refinedBaseType:	OctetStringKeyword optsep_numberSpec_01
 			{
 			    List *p;
 			    
-				$$ = duplicateTypeToAttribute(smiHandle->typeFloat128Ptr,
-													classPtr, thisParserPtr);
-				setAttributeParentType($$, smiHandle->typeFloat128Ptr);
+			    $$ = duplicateTypeToAttribute(smiHandle->typeFloat128Ptr,
+							  classPtr, thisParserPtr);
+			    setAttributeParentType($$, smiHandle->typeFloat128Ptr);
 			    if ($2) {
-					setAttributeList($$, $2);
-					for (p = $2; p; p = p->nextPtr)
-				    	((Range *)p->ptr)->typePtr = (Type*)$$;
+				setAttributeList($$, $2);
+				for (p = $2; p; p = p->nextPtr)
+				    ((Range *)p->ptr)->typePtr = (Type*)$$;
 			    }
 			}
 	|		PointerKeyword optsep_pointerRestr_01
 			{
-				List *p;
-			    
-				$$ = duplicateTypeToAttribute(smiHandle->typePointerPtr,
-													classPtr, thisParserPtr);
-				setAttributeParentType($$, smiHandle->typePointerPtr);
+			    $$ = duplicateTypeToAttribute(smiHandle->typePointerPtr,
+							  classPtr, thisParserPtr);
+			    setAttributeParentType($$, smiHandle->typePointerPtr);
 			    if ($2) {
-					setAttributeList($$, $2);
+				setAttributeList($$, $2);
 			    }
 			}
 	|		EnumerationKeyword bitsOrEnumerationSpec
@@ -2158,15 +2158,15 @@ attribute_refinedBaseType:	OctetStringKeyword optsep_numberSpec_01
 			    List *p;
 			    
 			    $$ = duplicateTypeToAttribute(smiHandle->typeBitsPtr,
-													classPtr, thisParserPtr);
-				setAttributeParentType($$, smiHandle->typeBitsPtr);
+							  classPtr, thisParserPtr);
+			    setAttributeParentType($$, smiHandle->typeBitsPtr);
 			    if ($1) {
-					setAttributeList($$, $1);
-					for (p = $1; p; p = p->nextPtr)
-				    	((NamedNumber *)(p->ptr))->typePtr = (Type*)$$;
+				setAttributeList($$, $1);
+				for (p = $1; p; p = p->nextPtr)
+				    ((NamedNumber *)(p->ptr))->typePtr = (Type*)$$;
 			    }
 			    
-			    bitsFlag = 0;//reset flag
+			    bitsFlag = 0; /* reset flag */
 			}
 	;
 

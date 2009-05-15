@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-tree.c 5755 2006-08-15 22:15:42Z schoenw $
+ * @(#) $Id: dump-tree.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 #include <config.h>
@@ -37,6 +37,8 @@ static char *getFlags(SmiNode *smiNode)
     case SMI_ACCESS_UNKNOWN:
 	return "---";
     case SMI_ACCESS_NOT_ACCESSIBLE:
+	return "---";
+    case SMI_ACCESS_EVENT_ONLY:
 	return "---";
     case SMI_ACCESS_NOTIFY:
 	return "--n";

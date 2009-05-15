@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-yang.c 7453 2007-11-10 10:08:15Z schoenw $
+ * @(#) $Id: dump-yang.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 #include <config.h>
@@ -38,6 +38,9 @@ static int INDENT = 2;		/* indent factor */
 
 #define  INDENTVALUE	20   /* column to start values, except multiline */
 #define	 URNBASE	"urn:ietf:params:xml:ns:yang:smiv2:"
+
+
+#define FLAG_CONFIG_FALSE 0x01
 
 
 static const char *convertType[] = {
@@ -246,6 +249,8 @@ getValueString(SmiValue *valuePtr, SmiType *typePtr)
 	break;
     case SMI_BASETYPE_UNKNOWN:
 	break;
+    case SMI_BASETYPE_POINTER:
+	break;
     case SMI_BASETYPE_OBJECTIDENTIFIER:
 	nodePtr = smiGetNodeByOID(valuePtr->len, valuePtr->value.oid);
 	if (nodePtr) {
@@ -286,6 +291,7 @@ guessNicePrefix(const char *moduleName)
     int i, d;
 
     char *specials[] = {
+	"yang-smi", "smi",
 	"yang-types", "yang",
 	"inet-types", "inet",
 	"ieee-types", "ieee",
@@ -412,6 +418,14 @@ createImportList(SmiModule *smiModule)
     }
 
     /*
+     * Add import for the smi:oid extension and friends.
+     */
+
+    if (sflag) {
+	addImport("yang-smi", "oid");
+    }
+    
+    /*
      * Add import for yang-types that were originally ASN.1
      * builtins...
      */
@@ -423,7 +437,7 @@ createImportList(SmiModule *smiModule)
 	    addImport("yang-types", "object-identifier");
 	}
     }
-    
+
     for (smiNode = smiGetFirstNode(smiModule,
 				   SMI_NODEKIND_SCALAR | SMI_NODEKIND_COLUMN);
 	 smiNode;
@@ -583,7 +597,7 @@ fprintSubtype(FILE *f, int indent, SmiType *smiType)
 	    tkw = (smiType->basetype == SMI_BASETYPE_BITS) ? "bits" : "enumeration";
 	    lkw = (smiType->basetype == SMI_BASETYPE_BITS) ? "bit" : "enum";
 	    vkw = (smiType->basetype == SMI_BASETYPE_BITS) ? "position" : "value";
-	    sprintf(s, "%s %-*s \{ %s %s; }\n",
+	    sprintf(s, "%s %-*s { %s %s; }\n",
 		    lkw, len, nn->name,
 		    vkw, getValueString(&nn->value, smiType));
 	    fprintSegment(f, indent + INDENT, s, 0);
@@ -668,7 +682,7 @@ static void
 fprintFormat(FILE *f, int indent, const char *format)
 {
     if (sflag && format) {
-	fprintSegment(f, 2 * INDENT, "smi:format", 0);
+	fprintSegment(f, 2 * INDENT, "smi:display-hint", 0);
 	fprint(f, " \"%s\";\n", format);
     }
 }
@@ -874,9 +888,10 @@ fprintPath(FILE *f, SmiNode *smiNode)
 
 
 static void
-fprintLeaf(FILE *f, int indent, SmiNode *smiNode)
+fprintLeaf(FILE *f, int indent, SmiNode *smiNode, int flags)
 {
     SmiType *smiType;
+    SmiAccess config;
     
     smiType = smiGetNodeType(smiNode);
 
@@ -892,7 +907,12 @@ fprintLeaf(FILE *f, int indent, SmiNode *smiNode)
     }
     
     fprintUnits(f, indent + INDENT, smiNode->units);
-    fprintConfig(f, indent + INDENT, smiNode->access);
+    if (flags & FLAG_CONFIG_FALSE) {
+	config = SMI_ACCESS_READ_ONLY;
+    } else {
+	config = smiNode->access;
+    }
+    fprintConfig(f, indent + INDENT, config);
     fprintStatus(f, indent + INDENT, smiNode->status);
     fprintDescription(f, indent + INDENT, smiNode->description);
     fprintReference(f, indent + INDENT, smiNode->reference);
@@ -904,9 +924,10 @@ fprintLeaf(FILE *f, int indent, SmiNode *smiNode)
 
 
 static void
-fprintKeyrefLeaf(FILE *f, int indent, SmiNode *smiNode)
+fprintKeyrefLeaf(FILE *f, int indent, SmiNode *smiNode, int flags)
 {
     SmiNode *entryNode;
+    SmiAccess config;
 
     entryNode = smiGetParentNode(smiNode);
     fprintSegment(f, indent, "leaf ", 0);
@@ -916,8 +937,13 @@ fprintKeyrefLeaf(FILE *f, int indent, SmiNode *smiNode)
     fprintPath(f, smiNode);
     fprint(f, "\";\n");
     fprintSegment(f, indent + INDENT, "}\n", 0);
-    fprintConfig(f, indent + INDENT,
-	 entryNode->create ? SMI_ACCESS_READ_WRITE : SMI_ACCESS_READ_ONLY);
+    if (flags & FLAG_CONFIG_FALSE) {
+	config = SMI_ACCESS_READ_ONLY;
+    } else {
+	config = entryNode->create
+	    ? SMI_ACCESS_READ_WRITE : SMI_ACCESS_READ_ONLY;
+    }
+    fprintConfig(f, indent + INDENT, config);
     fprintStatus(f, indent + INDENT, smiNode->status);
     fprintDescription(f, indent + INDENT,
 		      "Automagically generated keyref leaf.");
@@ -956,7 +982,7 @@ fprintLeafs(FILE *f, int indent, SmiNode *smiNode)
 	 childNode = smiGetNextChildNode(childNode)) {
 	if (childNode->nodekind == SMI_NODEKIND_COLUMN) {
 	    fprint(f, "\n");
-	    fprintLeaf(f, indent, childNode);
+	    fprintLeaf(f, indent, childNode, 0);
 	    c++;
 	}
     }
@@ -994,7 +1020,7 @@ fprintList(FILE *f, int indent, SmiNode *smiNode)
 	parentNode = smiGetParentNode(childNode);
         if (childNode->nodekind == SMI_NODEKIND_COLUMN
             && parentNode != entryNode) {
-	    fprintKeyrefLeaf(f, indent + INDENT, childNode);
+	    fprintKeyrefLeaf(f, indent + INDENT, childNode, 0);
 	}
     }
 
@@ -1068,7 +1094,7 @@ fprintContainer(FILE *f, int indent, SmiNode *smiNode)
 	    fprint(f, "\n");
 	}
 	if (childNode->nodekind == SMI_NODEKIND_SCALAR) {
-	    fprintLeaf(f, indent + INDENT, childNode);
+	    fprintLeaf(f, indent + INDENT, childNode, 0);
 	    c++;
 	}
 	if (childNode->nodekind == SMI_NODEKIND_TABLE) {
@@ -1181,7 +1207,7 @@ fprintNotificationIndex(FILE *f, int indent,
 	childNode = smiGetElementNode(smiElement);
 	parentNode = smiGetParentNode(childNode);
 	if (childNode != ignoreNode) {
-	    fprintKeyrefLeaf(f, indent, childNode);
+	    fprintKeyrefLeaf(f, indent, childNode, FLAG_CONFIG_FALSE);
 	}
     }
 }
@@ -1265,9 +1291,11 @@ fprintNotification(FILE *f, SmiNode *smiNode)
 	}
 	
 	if (entryNode && isIndex(entryNode, vbNode)) {
-	    fprintKeyrefLeaf(f, INDENT + INDENT + INDENT, vbNode);
+	    fprintKeyrefLeaf(f, INDENT + INDENT + INDENT,
+			     vbNode, FLAG_CONFIG_FALSE);
 	} else {
-	    fprintLeaf(f, INDENT + INDENT + INDENT, vbNode);
+	    fprintLeaf(f, INDENT + INDENT + INDENT,
+		       vbNode, FLAG_CONFIG_FALSE);
 	}
 	fprintSegment(f, INDENT + INDENT, "}\n\n", 0);
     }

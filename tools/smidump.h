@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smidump.h 7285 2007-09-27 19:48:50Z schoenw $
+ * @(#) $Id: smidump.h 7870 2008-03-11 19:29:58Z schoenw $
  */
 
 #ifndef _SMIDUMP_H
@@ -103,6 +103,7 @@ extern void initXsd(void);
 extern void initSizes(void);
 extern void initCompliances(void);
 extern void initYang(void);
+extern void initBoilerplate(void);
 
 extern void initSql(void);
 extern void initFig(void);

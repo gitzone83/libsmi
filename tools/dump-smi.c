@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-smi.c 7694 2008-02-05 21:35:45Z schoenw $
+ * @(#) $Id: dump-smi.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 #include <config.h>
@@ -822,6 +822,8 @@ static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
 	}
 	break;
     case SMI_BASETYPE_UNKNOWN:
+	break;
+    case SMI_BASETYPE_POINTER:
 	break;
     case SMI_BASETYPE_OBJECTIDENTIFIER:
 	nodePtr = smiGetNodeByOID(valuePtr->len, valuePtr->value.oid);
