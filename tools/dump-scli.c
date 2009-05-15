@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-scli.c 6756 2007-05-08 10:43:24Z schoenw $
+ * @(#) $Id: dump-scli.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 /*
@@ -455,6 +455,8 @@ getSnmpType(SmiType *smiType)
     case SMI_BASETYPE_FLOAT128:
 	return NULL;
     case SMI_BASETYPE_UNKNOWN:
+	return NULL;
+    case SMI_BASETYPE_POINTER:
 	return NULL;
     }
     return NULL;

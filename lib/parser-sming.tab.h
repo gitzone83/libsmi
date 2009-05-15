@@ -186,7 +186,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 356 "parser-sming.y"
+#line 360 "parser-sming.y"
 {
     char           *id;				/* identifier name           */
     int            rc;				/* >=0: ok, <0: error        */

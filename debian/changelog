@@ -1,3 +1,28 @@
+libsmi (0.4.8+dfsg-1) unstable; urgency=low
+
+  * New upstream release.
+  * Adopting libsmi. Thanks to Remco van de Meent for taking care of
+    it. Closes: #527855.
+  * Thanks to Jan Lübbe for latest NMU.
+  * Clean up diff.gz.
+  * Clean up debian/rules :
+     + we don't run autotools. Closes: #206280.
+     + provide a shorter way to link manual pages.
+     + use dh_install instead of dh_movefiles
+  * Add a -dbg package. Closes: #498361.
+  * Dump to Standards-Version 3.8.1.
+  * Add Homepage field in debian/control.
+  * Add Vcs-* fields in debian/control.
+  * Add ${misc:Depends} in debian/control.
+  * Fix debian/watch with respect to +dfsg extension.
+  * smi_render manpage migrate from libsmi2 to libsmi2-dev package.
+  * Fix shipped smi.conf to not use ${HOME} macro which is not
+    supported. Closes: #499101.
+  * Add a patch to fix display of octet strings. Closes: #499098.
+  * Remove useless postinst script. This is handled by debhelper.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 15 May 2009 22:49:32 +0200
+
 libsmi (0.4.7+dfsg-0.1) unstable; urgency=high
 
   * Non-maintainer upload.
@@ -253,6 +278,4 @@ libsmi (0.1.6-1) unstable; urgency=low
 
  -- Craig Small <csmall@debian.org>  Mon, 23 Aug 1999 13:16:29 +1000
 
-Local variables:
-mode: debian-changelog
-End:
+

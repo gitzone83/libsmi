@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: fprint.c 7289 2007-09-28 06:48:22Z schoenw $
+ * @(#) $Id: fprint.c 8024 2008-04-11 13:25:26Z schoenw $
  */
 
 
@@ -25,6 +25,7 @@
 #include "win.h"
 #endif
 
+#include "smi.h"
 #include "fprint.h"
 
 /*

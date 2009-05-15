@@ -11,7 +11,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-perl.c 7679 2008-02-05 10:32:48Z schoenw $
+ * @(#) $Id: dump-perl.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 /*
@@ -263,6 +263,8 @@ static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
         sprintf(&s[strlen(s)], ")");
         break;
     case SMI_BASETYPE_UNKNOWN:
+        break;
+    case SMI_BASETYPE_POINTER:
         break;
     case SMI_BASETYPE_OBJECTIDENTIFIER:
         for (i = 0; i < valuePtr->len; i++) {

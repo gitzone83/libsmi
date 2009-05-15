@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: parser-smi.y 7678 2008-02-05 09:20:32Z schoenw $
+ * @(#) $Id: parser-smi.y 8090 2008-04-18 12:56:29Z strauss $
  */
 
 %{
@@ -4298,14 +4298,14 @@ valueofSimpleSyntax:	NUMBER			/* 0..2147483647 */
 			    } else {
 				$$->basetype = defaultBasetype;
 				$$->len = -1;  /* indicates unresolved ptr */
-				$$->value.ptr = (unsigned char *)$1; /* JS: needs strdup? */
+				$$->value.ptr = $1; /* JS: needs strdup? */
 			    }
 			}
 	|		QUOTED_STRING		/* an OCTET STRING */
 			{
 			    $$ = smiMalloc(sizeof(SmiValue));
 			    $$->basetype = SMI_BASETYPE_OCTETSTRING;
-			    $$->value.ptr = (unsigned char *)smiStrdup($1);
+			    $$->value.ptr = smiStrdup($1);
 			    $$->len = strlen($1);
 			}
 			/* NOTE: If the value is an OBJECT IDENTIFIER, then

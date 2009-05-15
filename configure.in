@@ -3,21 +3,21 @@
 #
 #      Process this file with autoconf to produce a configure script.
 #
-# Copyright (c) 1999-2006 Frank Strauss, Technical University of Braunschweig.
+# Copyright (c) 1999-2008 Frank Strauss, Technical University of Braunschweig.
 #
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: configure.in 7795 2008-02-27 10:23:25Z strauss $
+# @(#) $Id: configure.in 8090 2008-04-18 12:56:29Z strauss $
 #
 
 AC_INIT(tools/smilint.c)
 
 LIBSMI_MAJOR=0
 LIBSMI_MINOR=4
-LIBSMI_PATCHLEVEL=7
+LIBSMI_PATCHLEVEL=8
 LIBTOOL_VERSION=2
-LIBTOOL_REVISION=26
+LIBTOOL_REVISION=27
 LIBTOOL_AGE=0
 
 VERSION_STRING="$LIBSMI_MAJOR.$LIBSMI_MINOR.$LIBSMI_PATCHLEVEL"
@@ -60,7 +60,16 @@ AC_CHECK_FUNCS(timegm)
 
 AC_CHECK_FUNCS(vsnprintf snprintf asprintf asnprintf vasprintf vasnprintf)
 
-AC_CHECK_HEADERS(pwd.h unistd.h regex.h)
+AC_CHECK_HEADERS(pwd.h unistd.h regex.h stdint.h limits.h)
+
+# In case regex is not in libc
+AC_CHECK_LIB(c,regexec,LDFLAGS="$LDFLAGS",
+[
+    AC_CHECK_LIB(rxspencer,regexec,LDFLAGS="$LDFLAGS -lrxspencer",
+    [
+        AC_CHECK_LIB(regex,regexec,LDFLAGS="$LDFLAGS -lregex")
+    ])
+])
 
 if test "x$prefix" = "xNONE" ; then
   prefix=/usr/local

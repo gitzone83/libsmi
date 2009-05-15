@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am 7801 2008-02-27 14:33:12Z schoenw $
+# @(#) $Id: Makefile.am 8090 2008-04-18 12:56:29Z strauss $
 #
 
 INCLUDES		= -I../lib
@@ -31,7 +31,7 @@ smiquery_LDADD		= ../lib/libsmi.la
 smilint_SOURCES		= smilint.c shhopt.c
 smilint_LDADD		= ../lib/libsmi.la
 
-smixlate_SOURCES	= smixlate.c shhopt.c dstring.c dstring.h
+smixlate_SOURCES	= smixlate.c shhopt.c dstring.h dstring.c
 smixlate_LDADD		= ../lib/libsmi.la
 
 dump-svg-script.h: dump-svg-script.js
@@ -47,7 +47,8 @@ smidump_SOURCES		= smidump.c smidump.h shhopt.c \
 			  dump-metrics.c dump-cm.c dump-python.c \
 			  dump-perl.c dump-scli.c dump-xsd.c dump-sppi.c \
 			  dump-sizes.c dump-svg-script.h dump-svg.c \
-			  rea.h rea.c dump-compliance.c dstring.c \
+			  rea.h rea.c dump-compliance.c dump-boilerplate.c \
+			  dstring.h dstring.c \
 			  fortopat.h fortopat.c fprint.h fprint.c
 
 smidump_LDADD		= ../lib/libsmi.la -lm

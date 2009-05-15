@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: data.c 7734 2008-02-15 07:49:14Z schoenw $
+ * @(#) $Id: data.c 7822 2008-03-01 13:22:42Z schoenw $
  */
 
 #include <config.h>
@@ -2459,7 +2459,7 @@ Type *setTypeName(Type *typePtr, char *name)
     if (typePtr->export.name) {
 	smiFree(typePtr->export.name);
     }
-    typePtr->export.name = strdup(name);
+    typePtr->export.name = smiStrdup(name);
 
     if (! typePtr->export.name) {
 	return typePtr;
@@ -3772,7 +3772,7 @@ void setAttributeList(Attribute *attributePtr, List *listPtr)
 void setAttributeName(Attribute *attributePtr, char *name)
 {
     
-    attributePtr->export.name = strdup(name);
+    attributePtr->export.name = smiStrdup(name);
 }
 
 /*

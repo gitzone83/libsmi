@@ -227,7 +227,7 @@ Example configuration:
 .fi
 .SH "FILES"
 .nf
-/etc/smi.conf    global configuration file
+@sysconfdir@/smi.conf    global configuration file
 $HOME/.smirc               user configuration file
 @includedir@/smi.h   SMI library header file
 @mibdir@/     SMI module repository directory
