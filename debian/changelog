@@ -1,3 +1,19 @@
+libsmi (0.4.8+dfsg2-1) experimental; urgency=low
+
+  * Repack the upstream tarball to drop all MIB: those are licensed like
+    IETF RFC and therefore will be provided by a non-free/contrib
+    package. For the moment, we suggest libsnmp-base for this purpose.
+    Closes: #498476.
+  * libsmi2-common is now an empty transitional package (which suggests
+    libsnmp-base).
+  * Ship to experimental until we know the definitive name of the package
+    that will download MIB.
+  * Add a NEWS.Debian file to explain the change. We will change it later.
+  * Bump Standards-Version to 3.8.3.
+  * Add a patch from Jochen Friedrich to enhance smistrip. Closes: #558128.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 15 Nov 2009 12:15:07 +0100
+
 libsmi (0.4.8+dfsg-1) unstable; urgency=low
 
   * New upstream release.

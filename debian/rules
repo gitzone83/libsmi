@@ -77,7 +77,6 @@ binary-arch: build install
 binary-indep: build install
 	dh_testdir -i
 	dh_testroot -i
-	find debian/libsmi2-common -type d -empty -delete
 
 	# now make arch all package
 	dh_installdebconf -i
