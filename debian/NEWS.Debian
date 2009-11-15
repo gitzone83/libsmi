@@ -1,0 +1,9 @@
+libsmi (0.4.8+dfsg2-1) unstable; urgency=low
+
+  * MIB that were shipped in libsmi2-common were non-free: most of them
+    were licensed under the same license than the corresponding IETF
+    RFC. Therefore, libsmi2-common package becomes empty and suggests
+    libsnmp-base instead which should propose to download MIB from
+    Internet.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 28 Nov 2009 22:51:18 +0100
