@@ -1,3 +1,14 @@
+libsmi (0.4.8+dfsg2-2) unstable; urgency=low
+
+  * Suggest snmp-mibs-downloader, a package in contrib that will download
+    MIB from Internet, if requested by the user, instead of libsnmp-base.
+  * Upload to unstable.
+  * Update NEWS.Debian.
+  * Ship smistrip in a separate package.
+  * Update paths in shipped smi.conf.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 03 Dec 2009 20:38:40 +0100
+
 libsmi (0.4.8+dfsg2-1) experimental; urgency=low
 
   * Repack the upstream tarball to drop all MIB: those are licensed like
