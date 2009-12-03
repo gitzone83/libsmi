@@ -44,6 +44,8 @@ install-stamp: build-stamp
 	$(MAKE) install DESTDIR=`pwd`/debian/tmp
 
 	dh_install
+	rm debian/libsmi2ldbl/usr/bin/smistrip
+	rm debian/libsmi2ldbl/usr/share/man/man1/smistrip.1*
 	touch install-stamp
 
 binary-arch: build install

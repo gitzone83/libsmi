@@ -8,12 +8,23 @@ Homepage: http://www.ibr.cs.tu-bs.de/projects/libsmi/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/libsmi.git
 Vcs-Git: git://git.debian.org/git/collab-maint/libsmi.git
 
+Package: smistrip
+Architecture: all
+Depends: ${misc:Depends}
+Conflicts: libsmi2ldbl (<= 0.4.8+dfsg2-1)
+Replaces: libsmi2ldbl (<= 0.4.8+dfsg2-1)
+Description: extract MIB from text files like RFC
+ The smistrip program is used to extract MIB and PIB module files from
+ ASCII documents like RFCs or Internet Drafts. Modules are identified
+ by a starting ASN.1 DEFINITIONS clause and the matching END
+ clause. The output is written to files named by the modules' names.
+
 Package: libsmi2ldbl
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: libsmi0, libsmi1, libsmi2
 Replaces: libsmi0, libsmi1, libsmi2
-Suggests: libsnmp-base
+Suggests: snmp-mibs-downloader
 Description: library to access SMI MIB information 
  The purpose of libsmi is to 
    * give network management applications a concise programmer-friendly
@@ -78,9 +89,9 @@ Description: library to access SMI MIB information - debugging symbols
 Package: libsmi2-common
 Architecture: all
 Depends: ${misc:Depends}
-Suggests: libsnmp-base (>= 5.4.2.1~dfsg-1~)
+Suggests: snmp-mibs-downloader
 Section: misc
 Description: a library to access SMI MIB information - MIB module files
- This is just a transitional package to install libsnmp-base which
- should download needed MIB. You can delete it if you already have
- libsnmp-base.
+ This is just a transitional package to suggest snmp-mibs-downloader
+ which should download needed MIB. You can delete it if you already
+ have snmp-mibs-downloader.
