@@ -1,3 +1,10 @@
+libsmi (0.4.7+dfsg-0.2) stable-security; urgency=high
+
+  * Non-maintainer upload by the Security Team
+  * Fix CVE-2010-2891
+
+ -- Moritz Muehlenhoff <jmm@debian.org>  Sat, 15 Jan 2011 14:52:50 +0000
+
 libsmi (0.4.7+dfsg-0.1) unstable; urgency=high
 
   * Non-maintainer upload.
