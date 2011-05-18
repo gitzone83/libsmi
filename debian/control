@@ -1,9 +1,9 @@
 Source: libsmi
 Priority: optional
 Maintainer: Vincent Bernat <bernat@debian.org>
-Build-Depends: flex, bison, debhelper (>= 5), autotools-dev, quilt
+Build-Depends: flex, bison, debhelper (>= 5), autotools-dev
 Section: libs
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Homepage: http://www.ibr.cs.tu-bs.de/projects/libsmi/
 Vcs-Browser: http://git.debian.org/?p=collab-maint/libsmi.git
 Vcs-Git: git://git.debian.org/git/collab-maint/libsmi.git
@@ -91,7 +91,7 @@ Architecture: all
 Depends: ${misc:Depends}
 Suggests: snmp-mibs-downloader
 Section: misc
-Description: a library to access SMI MIB information - MIB module files
+Description: library to access SMI MIB information - MIB module files
  This is just a transitional package to suggest snmp-mibs-downloader
  which should download needed MIB. You can delete it if you already
  have snmp-mibs-downloader.
