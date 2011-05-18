@@ -1,3 +1,11 @@
+libsmi (0.4.8+dfsg2-4) unstable; urgency=low
+
+  * Bump Standards-Version to 3.9.2.
+  * Get rid of *.la. Closes: #622450.
+  * Switch to 3.0 (quilt) format.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 18 May 2011 13:25:14 +0200
+
 libsmi (0.4.8+dfsg2-3) unstable; urgency=high
 
   * Really ship Debian.NEWS.
