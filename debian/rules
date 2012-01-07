@@ -1,97 +1,33 @@
 #!/usr/bin/make -f
 #-*- makefile -*-
 
-package=libsmi
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
-version=$(shell expr `pwd` : '.*-\([0-9.]*\)')
-version_major=$(shell expr `pwd` : '.*-\([0-9]*\).[0-9.]*')
+%:
+	dh $@
 
-build: build-stamp
-build-stamp:
-	dh_testdir
+override_dh_auto_test:
+	# Don't do that.
 
-	ln -sf /usr/share/misc/config.sub .
-	ln -sf /usr/share/misc/config.guess .
-
-	./configure --prefix=/usr --mandir=\$${prefix}/share/man \
-		--with-mibdir=/usr/share/mibs --sysconfdir=/etc \
-		--libexecdir=/usr/lib
-
-	$(MAKE)
-	touch build-stamp
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp install-stamp
-
-	[ ! -f Makefile ] || $(MAKE) distclean
-	rm -f config.cache config.status config.guess config.sub
-	rm -f conftest conftest.o config.log
-
-	dh_clean
-
-install: install-stamp
-install-stamp: build-stamp
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	rm -f config.log
-	dh_installdirs
-
-	$(MAKE) install DESTDIR=`pwd`/debian/tmp
-
+# Don't ship smistrip in smitools package
+override_dh_install:
 	dh_install
-	rm debian/libsmi2ldbl/usr/bin/smistrip
-	rm debian/libsmi2ldbl/usr/share/man/man1/smistrip.1*
-	touch install-stamp
+	rm debian/smitools/usr/bin/smistrip
+	rm debian/smitools/usr/share/man/man1/smistrip.1*
 
-binary-arch: build install
-	dh_testdir -a
-	dh_testroot -a
-
-	# hack to put proper symlinks in place
+# Allow to invoke manual pages by function names
+override_dh_installman:
+	dh_installman
 	cd debian/libsmi2-dev/usr/share/man/man3 ; \
-	for i in *.3; do \
-	for j in `cat $$i | \
+	for i in *.3; do for j in `cat $$i | \
 		awk 'BEGIN { output=0 } ($$NF == "COPIES") { output=1-output ; next } (output == 1 && $$1 ~ /^smi/) { print $$0 }' | \
 		sed 's/,$$//'`; do \
 		ln -sf $$i $$j.3 ; \
 	done ; done
 
-	dh_installdocs -a
-	dh_installexamples -a
+# Our debug package is libsmi2-dbg and it's for libsmi2ldbl only
+override_dh_strip:
+	dh_strip -plibsmi2ldbl --dbg-package=libsmi2-dbg
+	dh_strip
 
-	dh_installchangelogs -a ChangeLog
-	dh_link -a
-	dh_strip -a --dbg-package=libsmi2-dbg
-	dh_compress -a
-	dh_fixperms -a
-	dh_makeshlibs -a
-	dh_installdeb -a
-	dh_shlibdeps -a
-	dh_gencontrol -a
-	dh_md5sums -a
-	dh_builddeb -a
-
-binary-indep: build install
-	dh_testdir -i
-	dh_testroot -i
-
-	# now make arch all package
-	dh_installdebconf -i
-	dh_installdocs -i
-	dh_installexamples -i
-	dh_installchangelogs ChangeLog -i
-	dh_link -i
-	dh_compress -i
-	dh_fixperms -i
-	dh_installdeb -i
-	dh_perl -i
-	dh_gencontrol -i
-	dh_md5sums -i
-	dh_builddeb -i
-
-binary: binary-indep binary-arch
-
-.PHONY: build clean binary-indep binary-arch binary install
+.PHONY: override_dh_strip override_dh_installman override_dh_install override_dh_auto_test
