@@ -1,3 +1,10 @@
+libsmi (0.4.8+dfsg2-6) unstable; urgency=low
+
+  * Fix a segfault when reading partially invalid MIB. Closes: #600076.
+  * Add a symbols file.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 08 Jun 2012 23:32:46 +0200
+
 libsmi (0.4.8+dfsg2-5) unstable; urgency=low
 
   * Switch to debhelper 9 with tiny set of rules.
