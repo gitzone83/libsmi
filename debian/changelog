@@ -1,3 +1,10 @@
+libsmi (0.4.8+dfsg2-7) unstable; urgency=low
+
+  * Remove debian/shlibs.local since we use a symbols file. Also, the file
+    was incorrect. Closes: #701622.
+
+ -- Vincent Bernat <bernat@debian.org>  Mon, 25 Feb 2013 20:21:27 +0100
+
 libsmi (0.4.8+dfsg2-6) unstable; urgency=low
 
   * Fix a segfault when reading partially invalid MIB. Closes: #600076.
