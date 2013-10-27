@@ -1,3 +1,13 @@
+libsmi (0.4.8+dfsg2-8) unstable; urgency=low
+
+  * Update config.{guess,sub} with autotools-dev package. This enables
+    support for AArch64 port. Closes: #727439.
+  * Bump Standards-Version to 3.9.4.
+  * Fix Vcs-* fields.
+  * Add some lintian overrides.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 27 Oct 2013 12:16:15 +0100
+
 libsmi (0.4.8+dfsg2-7) unstable; urgency=low
 
   * Remove debian/shlibs.local since we use a symbols file. Also, the file
