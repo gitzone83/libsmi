@@ -1,3 +1,9 @@
+libsmi (0.4.8+dfsg2-8ubuntu1) trusty; urgency=medium
+
+  * Build using dh-autoreconf.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 23 Mar 2014 19:53:58 +0100
+
 libsmi (0.4.8+dfsg2-8) unstable; urgency=low
 
   * Update config.{guess,sub} with autotools-dev package. This enables
