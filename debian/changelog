@@ -1,3 +1,10 @@
+libsmi (0.4.8+dfsg2-8ubuntu2) trusty; urgency=low
+
+  * lib/parser/smi{,ng}.y: follow change from *_PARAM to %*-param.
+  * lib/parser/smi{,ng}.y: follow yyerror() parameterisation changes.
+
+ -- Andy Whitcroft <apw@canonical.com>  Wed, 16 Apr 2014 23:47:00 +0100
+
 libsmi (0.4.8+dfsg2-8ubuntu1) trusty; urgency=medium
 
   * Build using dh-autoreconf.
