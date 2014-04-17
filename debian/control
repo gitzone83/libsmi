@@ -3,7 +3,7 @@ Priority: optional
 Maintainer: Vincent Bernat <bernat@debian.org>
 Build-Depends: flex, bison, debhelper (>= 9), autotools-dev
 Section: libs
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: http://www.ibr.cs.tu-bs.de/projects/libsmi/
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/libsmi.git
 Vcs-Git: git://anonscm.debian.org/collab-maint/libsmi.git
@@ -86,6 +86,7 @@ Description: library to access SMI MIB information - development files
 Package: libsmi2-dbg
 Architecture: any
 Depends: libsmi2ldbl (= ${binary:Version}), ${misc:Depends}
+Multi-Arch: same
 Section: debug
 Priority: extra
 Description: library to access SMI MIB information - debugging symbols

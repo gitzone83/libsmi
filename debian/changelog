@@ -1,3 +1,12 @@
+libsmi (0.4.8+dfsg2-9) unstable; urgency=low
+
+  * Make the -dbg package multi-arch "same".
+  * Fix FTBFS due to a change in Bison. Closes: #733361.
+    Thanks to Andy Whitcroft.
+  * Bump Standards-Version to 3.9.5.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 17 Apr 2014 08:23:19 +0200
+
 libsmi (0.4.8+dfsg2-8) unstable; urgency=low
 
   * Update config.{guess,sub} with autotools-dev package. This enables
