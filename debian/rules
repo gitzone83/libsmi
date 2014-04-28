@@ -3,8 +3,11 @@
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
+export AUTOMAKE = automake-1.10
+export ACLOCAL = aclocal-1.10
+
 %:
-	dh $@ --with autotools_dev
+	dh $@ --with autoreconf
 
 override_dh_auto_test:
 	# Don't do that.

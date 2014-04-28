@@ -1,3 +1,12 @@
+libsmi (0.4.8+dfsg2-9ubuntu1) utopic; urgency=medium
+
+  * Merge from Debian unstable. Remaining changes:
+    - Build using dh-autoreconf.
+  * Drop autotools-dev, as dh-autoreconf takes its place (this package uses
+    automake).
+
+ -- Logan Rosen <logan@ubuntu.com>  Mon, 28 Apr 2014 16:01:52 -0400
+
 libsmi (0.4.8+dfsg2-9) unstable; urgency=low
 
   * Make the -dbg package multi-arch "same".
@@ -6,6 +15,19 @@ libsmi (0.4.8+dfsg2-9) unstable; urgency=low
   * Bump Standards-Version to 3.9.5.
 
  -- Vincent Bernat <bernat@debian.org>  Thu, 17 Apr 2014 08:23:19 +0200
+
+libsmi (0.4.8+dfsg2-8ubuntu2) trusty; urgency=low
+
+  * lib/parser/smi{,ng}.y: follow change from *_PARAM to %*-param.
+  * lib/parser/smi{,ng}.y: follow yyerror() parameterisation changes.
+
+ -- Andy Whitcroft <apw@canonical.com>  Wed, 16 Apr 2014 23:47:00 +0100
+
+libsmi (0.4.8+dfsg2-8ubuntu1) trusty; urgency=medium
+
+  * Build using dh-autoreconf.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 23 Mar 2014 19:53:58 +0100
 
 libsmi (0.4.8+dfsg2-8) unstable; urgency=low
 
