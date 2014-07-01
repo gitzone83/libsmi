@@ -1,3 +1,9 @@
+libsmi (0.4.8+dfsg2-9ubuntu2) utopic; urgency=medium
+
+  * Build with the latest version of automake.
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Tue, 01 Jul 2014 10:14:46 +0100
+
 libsmi (0.4.8+dfsg2-9ubuntu1) utopic; urgency=medium
 
   * Merge from Debian unstable. Remaining changes:
