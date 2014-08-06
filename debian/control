@@ -1,7 +1,7 @@
 Source: libsmi
 Priority: optional
 Maintainer: Vincent Bernat <bernat@debian.org>
-Build-Depends: flex, bison, debhelper (>= 9), autotools-dev
+Build-Depends: flex, bison, debhelper (>= 9), dh-autoreconf
 Section: libs
 Standards-Version: 3.9.5
 Homepage: http://www.ibr.cs.tu-bs.de/projects/libsmi/
