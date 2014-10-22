@@ -1,3 +1,9 @@
+libsmi (0.4.8+dfsg2-9ubuntu3) utopic; urgency=medium
+
+  * Build using PIE.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 22 Oct 2014 23:49:07 +0200
+
 libsmi (0.4.8+dfsg2-9ubuntu2) utopic; urgency=medium
 
   * Build with the latest version of automake.
