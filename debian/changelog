@@ -1,3 +1,9 @@
+libsmi (0.4.8+dfsg2-11) unstable; urgency=medium
+
+  * Ensure build with -A is possible. Closes: #806062.
+
+ -- Vincent Bernat <bernat@debian.org>  Fri, 27 Nov 2015 22:27:02 +0100
+
 libsmi (0.4.8+dfsg2-10) unstable; urgency=medium
 
   * Use dh-autoreconf to fix FTBFS on ppc64el. Closes: #757214.
