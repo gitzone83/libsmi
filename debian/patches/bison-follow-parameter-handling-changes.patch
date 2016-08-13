@@ -73,29 +73,3 @@ Index: libsmi-0.4.8+dfsg2/lib/error.h
  
  
  extern int smiErrorLevel;	/* Higher levels produce more warnings */
-diff --git a/lib/scanner-smi.h b/lib/scanner-smi.h
-index e9aa0759952c..ba43583f7cbf 100644
---- a/lib/scanner-smi.h
-+++ b/lib/scanner-smi.h
-@@ -21,7 +21,7 @@
- #define YY_NO_UNPUT
- 
- extern char *yytext;
--extern int yyleng;
-+extern size_t yyleng;
- 
- extern int smiEnterLexRecursion(FILE *file);
- extern void smiLeaveLexRecursion();
-diff --git a/lib/scanner-sming.h b/lib/scanner-sming.h
-index 22130947ce1d..d2f7fb335118 100644
---- a/lib/scanner-sming.h
-+++ b/lib/scanner-sming.h
-@@ -21,7 +21,7 @@
- #define YY_NO_UNPUT
- 
- extern char *yytext;
--extern int yyleng;
-+extern size_t yyleng;
- 
- extern int smingEnterLexRecursion(FILE *file);
- extern void smingLeaveLexRecursion();

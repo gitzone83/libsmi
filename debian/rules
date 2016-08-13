@@ -23,6 +23,5 @@ override_dh_installman-arch:
 		ln -sf $$i $$j.3 ; \
 	done ; done
 
-# Our debug package is libsmi2-dbg and it's for libsmi2ldbl only
 override_dh_strip:
-	dh_strip -plibsmi2ldbl --dbg-package=libsmi2-dbg
+	dh_strip --dbgsym-migration='libsmi2-dbg (<< 0.4.8+dfsg2-12~)'
