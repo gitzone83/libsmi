@@ -1,3 +1,13 @@
+libsmi (0.4.8+dfsg2-12) unstable; urgency=medium
+
+  * Fix FTBFS due to type mismatch introduced by the Bison patch.
+    Closes: #834157.
+  * d/control: bump Standards-Version.
+  * d/control: use secure URL for Vcs-*.
+  * d/control: remove -dbg package, use automatic -dbgsym package instead.
+
+ -- Vincent Bernat <bernat@debian.org>  Sat, 13 Aug 2016 13:06:20 +0200
+
 libsmi (0.4.8+dfsg2-11) unstable; urgency=medium
 
   * Ensure build with -A is possible. Closes: #806062.

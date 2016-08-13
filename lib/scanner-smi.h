@@ -21,7 +21,7 @@
 #define YY_NO_UNPUT
 
 extern char *yytext;
-extern size_t yyleng;
+extern int yyleng;
 
 extern int smiEnterLexRecursion(FILE *file);
 extern void smiLeaveLexRecursion();
