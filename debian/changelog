@@ -1,3 +1,10 @@
+libsmi (0.4.8+dfsg2-14) unstable; urgency=medium
+
+  * d/watch: update to new URL. Thanks to Martin Bagge for the
+    patch. Closes: #839806.
+
+ -- Vincent Bernat <bernat@debian.org>  Wed, 05 Oct 2016 13:32:13 +0200
+
 libsmi (0.4.8+dfsg2-13) unstable; urgency=medium
 
   * Fix default paths to MIB files as they have been moved by

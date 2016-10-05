@@ -1,2 +1,3 @@
 version=3
-opts=dversionmangle=s/\+dfsg$// ftp://ftp.ibr.cs.tu-bs.de/pub/local/libsmi/libsmi-([^c].*)\.tar\.gz	debian	uupdate
+opts=dversionmangle=s/\+dfsg$// http://www.ibr.cs.tu-bs.de/projects/libsmi/download/ \
+libsmi-(\d+\.\d+\.\d+)\.tar\.gz
