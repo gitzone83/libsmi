@@ -1,3 +1,9 @@
+libsmi (0.4.8+dfsg2-15) unstable; urgency=medium
+
+  * Add /var/lib/snmp/mibs/site to the default search path for MIB files.
+
+ -- Vincent Bernat <bernat@debian.org>  Thu, 17 Nov 2016 15:33:25 +0100
+
 libsmi (0.4.8+dfsg2-14) unstable; urgency=medium
 
   * d/watch: update to new URL. Thanks to Martin Bagge for the
