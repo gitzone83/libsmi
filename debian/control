@@ -5,8 +5,6 @@ Build-Depends: flex, bison, debhelper (>= 9), dh-autoreconf
 Section: libs
 Standards-Version: 3.9.8
 Homepage: http://www.ibr.cs.tu-bs.de/projects/libsmi/
-Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/libsmi.git
-Vcs-Git: https://alioth.debian.org/anonscm/git/collab-maint/libsmi.git
 
 Package: smitools
 Architecture: any
@@ -88,7 +86,6 @@ Architecture: all
 Depends: ${misc:Depends}
 Suggests: snmp-mibs-downloader
 Section: oldlibs
-Priority: extra
 Description: library to access SMI MIB information - MIB module files
  This is just a transitional package to suggest snmp-mibs-downloader
  which should download needed MIB. You can delete it if you already
