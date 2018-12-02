@@ -1,3 +1,15 @@
+libsmi (0.4.8+dfsg2-16) unstable; urgency=medium
+
+  [ Ansgar Burchardt ]
+  * Explicit pass SH=/bin/sh to configure to make build reproducible
+    between merged-usr and non-merged-usr systems. Closes: #915164.
+
+  [ Vincent Bernat ]
+  * d/control: promote libsmi-common to priority optional.
+  * d/control: remove obsolete Vcs-* fields.
+
+ -- Vincent Bernat <bernat@debian.org>  Sun, 02 Dec 2018 14:45:48 +0100
+
 libsmi (0.4.8+dfsg2-15) unstable; urgency=medium
 
   * Add /var/lib/snmp/mibs/site to the default search path for MIB files.
