@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.34 2003/09/17 12:37:58 schoenw Exp $
+# @(#) $Id: Makefile.am 1588 2003-09-17 12:37:58Z schoenw $
 #
 
 INCLUDES		= -I../lib

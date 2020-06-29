@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.22 2002/07/24 11:54:18 strauss Exp $
+# @(#) $Id: Makefile.am 1675 2004-08-10 10:55:30Z strauss $
 #
 
 
@@ -72,18 +72,27 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
+AR = @AR@
 AS = @AS@
 AWK = @AWK@
 BASH = @BASH@
 BISON = @BISON@
 CC = @CC@
 CFLAGS = @CFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
 DIFF = @DIFF@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+F77 = @F77@
 FLEX = @FLEX@
+GCJ = @GCJ@
+GCJFLAGS = @GCJFLAGS@
+HAVE_LIB = @HAVE_LIB@
 INT64_TYPE = @INT64_TYPE@
+LIB = @LIB@
 LIBSMI_MAJOR = @LIBSMI_MAJOR@
 LIBSMI_MINOR = @LIBSMI_MINOR@
 LIBSMI_PATCHLEVEL = @LIBSMI_PATCHLEVEL@
@@ -93,11 +102,13 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIBTOOL_REVISION = @LIBTOOL_REVISION@
 LIBTOOL_VERSION = @LIBTOOL_VERSION@
 LN_S = @LN_S@
+LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+RC = @RC@
 SH = @SH@
 STATIC = @STATIC@
 STRIP = @STRIP@
@@ -328,7 +339,7 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
 	  awk '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+	  || (cd $(srcdir) && etags -o $$here/TAGS $(ETAGS_ARGS) $$tags  $$unique $(LISP))
 
 mostlyclean-tags:
 
@@ -366,9 +377,7 @@ parser-sming.lo parser-sming.o : parser-sming.c ../config.h
 scanner-smi.lo scanner-smi.o : scanner-smi.c ../config.h error.h data.h \
 	smi.h errormacros.h util.h parser-smi.h parser-smi.tab.h \
 	scanner-smi.h
-scanner-sming.lo scanner-sming.o : scanner-sming.c ../config.h error.h \
-	data.h smi.h errormacros.h util.h parser-smi.h parser-sming.h \
-	parser-sming.tab.h scanner-sming.h
+scanner-sming.lo scanner-sming.o : scanner-sming.c ../config.h
 smi.lo smi.o : smi.c ../config.h smi.h data.h error.h errormacros.h \
 	util.h parser-smi.h snprintf.h scanner-smi.h
 snprintf.lo snprintf.o : snprintf.c ../config.h snprintf.h
@@ -511,7 +520,7 @@ error.h data.lo: errormacros.h
 errormacros.h: error.c
 	cat error.c | grep ERR_ | \
 	sed -e 's/^.*\(ERR_[a-zA-Z0-9_]*\).*$$/\1/' | \
-	awk '{printf "#define %-40s %d\n", $$1, NR-1}' > errormacros.h
+	awk '{printf "#define %-50s %d\n", $$1, NR-1}' > errormacros.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

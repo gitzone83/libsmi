@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: data.h,v 1.83 2003/04/30 14:29:31 strauss Exp $
+ * @(#) $Id: data.h 1553 2003-04-30 14:29:31Z strauss $
  */
 
 #ifndef _DATA_H

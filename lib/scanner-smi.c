@@ -11388,7 +11388,7 @@ char *smitext;
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: scanner-smi.l,v 1.38 2003/05/16 11:22:50 strauss Exp $
+ * @(#) $Id: scanner-smi.l 1561 2003-05-16 11:22:50Z strauss $
  */
 #line 17 "scanner-smi.l"
 
@@ -11491,11 +11491,13 @@ smiLeaveLexRecursion()
 #define Comment 4
 #define Skipline 5
 
+#ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
  * down here because we want the user's section 1 to have been scanned first.
  * The user has a chance to override it with an option.
  */
 #include <unistd.h>
+#endif
 
 #ifndef YY_EXTRA_TYPE
 #define YY_EXTRA_TYPE void *
@@ -11649,7 +11651,7 @@ YY_DECL
   * Lex rules for skipping MACRO.
   */
 
-#line 11653 "<stdout>"
+#line 11655 "<stdout>"
 
 	if ( (yy_init) )
 		{
@@ -13170,7 +13172,7 @@ YY_RULE_SETUP
 #line 898 "scanner-smi.l"
 ECHO;
 	YY_BREAK
-#line 13174 "<stdout>"
+#line 13176 "<stdout>"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(Macro):
 case YY_STATE_EOF(Choice):
@@ -13903,10 +13905,10 @@ YY_BUFFER_STATE smi_scan_buffer  (char * base, yy_size_t  size )
  * @note If you want to scan bytes that may contain NUL values, then use
  *       smi_scan_bytes() instead.
  */
-YY_BUFFER_STATE smi_scan_string (yyconst char * str )
+YY_BUFFER_STATE smi_scan_string (yyconst char * yy_str )
 {
     
-	return smi_scan_bytes(str,strlen(str) );
+	return smi_scan_bytes(yy_str,strlen(yy_str) );
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to smilex() will

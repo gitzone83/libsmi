@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.1 2000/11/13 11:47:51 strauss Exp $
+# @(#) $Id: Makefile.am 1038 2000-11-13 11:39:43Z strauss $
 #
 
 EXTRA_DIST              = $(shell ls -1 | egrep -v 'CVS|Makefile')

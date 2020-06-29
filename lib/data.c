@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: data.c,v 1.120 2003/10/02 11:57:41 strauss Exp $
+ * @(#) $Id: data.c 1661 2004-07-22 11:52:39Z strauss $
  */
 
 #include <config.h>
@@ -369,6 +369,9 @@ void setModuleLastUpdated(Module *modulePtr, time_t lastUpdated)
 void setModuleOrganization(Module *modulePtr, char *organization)
 {
     modulePtr->export.organization = organization;
+    while (strlen(organization) && organization[strlen(organization)-1] == '\n') {
+	    organization[strlen(organization) - 1] = 0;
+    }
 }
 
 
@@ -509,7 +512,7 @@ Module *findModuleByName(const char *modulename)
 
 Revision *addRevision(time_t date, char *description, Parser *parserPtr)
 {
-    Revision	  *revisionPtr;
+    Revision	  *revisionPtr, *r;
     Module	  *modulePtr;
 
     revisionPtr = (Revision *) smiMalloc(sizeof(Revision));
@@ -526,16 +529,30 @@ Revision *addRevision(time_t date, char *description, Parser *parserPtr)
     }
     revisionPtr->line			 = parserPtr ? parserPtr->line : -1;
 
-    /* TODO: probably, we should sort revisions by date by inserting
-       new ones at the right position!? */
-    revisionPtr->nextPtr		 = NULL;
-    revisionPtr->prevPtr		 = modulePtr->lastRevisionPtr;
-    if (!modulePtr->firstRevisionPtr)
-	modulePtr->firstRevisionPtr	 = revisionPtr;
-    if (modulePtr->lastRevisionPtr)
-	modulePtr->lastRevisionPtr->nextPtr = revisionPtr;
-    modulePtr->lastRevisionPtr		 = revisionPtr;
-    
+    for (r = modulePtr->lastRevisionPtr; r; r = r->prevPtr) {
+	if (r->export.date > date) break;
+    }
+    if (r) {
+	revisionPtr->nextPtr = r->nextPtr;
+	revisionPtr->prevPtr = r;
+	if (r->nextPtr) {
+	    r->nextPtr->prevPtr = revisionPtr;
+	} else {
+	    modulePtr->lastRevisionPtr = revisionPtr;
+	}
+	r->nextPtr = revisionPtr;
+    } else {
+	revisionPtr->prevPtr = NULL;
+	if (modulePtr->firstRevisionPtr) {
+	    modulePtr->firstRevisionPtr->prevPtr = revisionPtr;
+	    revisionPtr->nextPtr = modulePtr->firstRevisionPtr;
+	} else {
+	    modulePtr->lastRevisionPtr = revisionPtr;
+	    revisionPtr->nextPtr = NULL;
+	}
+	modulePtr->firstRevisionPtr = revisionPtr;
+    }
+
     return (revisionPtr);
 }
 
@@ -3637,9 +3654,13 @@ Module *loadModule(const char *modulename, Parser *parserPtr)
     Parser	    parser;
     char	    *path = NULL, *dir, *smipath;
     int		    sming = 0;
-    int             c;
+    int             c, i;
     FILE	    *file;
     char	    sep[2];
+
+    static const char *ext[] = {
+	"", ".my", ".smiv1", ".smiv2", ".sming", ".mib", ".txt", NULL
+    };
     
     if ((!modulename) || !strlen(modulename)) {
 	return NULL;
@@ -3657,36 +3678,32 @@ Module *loadModule(const char *modulename, Parser *parserPtr)
 	sep[0] = PATH_SEPARATOR; sep[1] = 0;
 	for (dir = strtok(smipath, sep);
 	     dir; dir = strtok(NULL, sep)) {
-	    smiAsprintf(&path, "%s%c%s", dir, DIR_SEPARATOR, modulename);
-	    if (! access(path, R_OK)) {
-		break;
+	    for (i = 0; ext[i]; i++) {
+		smiAsprintf(&path, "%s%c%s%s", dir, DIR_SEPARATOR,
+			    modulename, ext[i]);
+		if (! access(path, R_OK)) {
+		    break;
+		}
+		smiFree(path);
 	    }
-	    smiFree(path);
-	    smiAsprintf(&path, "%s%c%s.my", dir, DIR_SEPARATOR, modulename);
-	    if (! access(path, R_OK)) {
-		break;
+	    if (ext[i]) break;
+	    {
+		char *newmodulename = smiStrdup(modulename);
+		for (i = 0; newmodulename[i]; i++) {
+		    newmodulename[i] = tolower(newmodulename[i]);
+		}
+		for (i = 0; ext[i]; i++) {
+		    smiAsprintf(&path, "%s%c%s%s", dir, DIR_SEPARATOR,
+				newmodulename, ext[i]);
+		    if (! access(path, R_OK)) {
+			break;
+		    }
+		    smiFree(path);
+		}
+		smiFree(newmodulename);
+		if (ext[i]) break;
 	    }
-	    smiFree(path);
-	    smiAsprintf(&path, "%s%c%s.smiv2", dir, DIR_SEPARATOR, modulename);
-	    if (! access(path, R_OK)) {
-		break;
-	    }
-	    smiFree(path);
-	    smiAsprintf(&path, "%s%c%s.sming", dir, DIR_SEPARATOR, modulename);
-	    if (! access(path, R_OK)) {
-		break;
-	    }
-	    smiFree(path);
-	    smiAsprintf(&path, "%s%c%s.mib", dir, DIR_SEPARATOR, modulename);
-	    if (! access(path, R_OK)) {
-		break;
-	    }
-	    smiFree(path);
-	    smiAsprintf(&path, "%s%c%s.txt", dir, DIR_SEPARATOR, modulename);
-	    if (! access(path, R_OK)) {
-		break;
-	    }
-	    smiFree(path);
+	    
 	    path = NULL;
 	}
 	smiFree(smipath);

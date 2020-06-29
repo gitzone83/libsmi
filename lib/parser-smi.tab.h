@@ -224,7 +224,7 @@
 
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 1254 "parser-smi.y"
+#line 1273 "parser-smi.y"
 typedef union YYSTYPE {
     char           *text;	  		/* scanned quoted text       */
     char           *id;				/* identifier name           */

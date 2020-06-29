@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.5 2000/11/13 11:39:47 strauss Exp $
+# @(#) $Id: Makefile.am 1037 2000-11-13 11:32:20Z strauss $
 #
 
 SUBDIRS = corba imports jax mosy orig-smiv2 smilint-smiv2 \

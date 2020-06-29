@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.1 2000/11/13 00:11:06 strauss Exp $
+# @(#) $Id: Makefile.am 1030 2000-11-13 00:06:35Z strauss $
 #
 
 
@@ -72,18 +72,27 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
+AR = @AR@
 AS = @AS@
 AWK = @AWK@
 BASH = @BASH@
 BISON = @BISON@
 CC = @CC@
 CFLAGS = @CFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
 DIFF = @DIFF@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+F77 = @F77@
 FLEX = @FLEX@
+GCJ = @GCJ@
+GCJFLAGS = @GCJFLAGS@
+HAVE_LIB = @HAVE_LIB@
 INT64_TYPE = @INT64_TYPE@
+LIB = @LIB@
 LIBSMI_MAJOR = @LIBSMI_MAJOR@
 LIBSMI_MINOR = @LIBSMI_MINOR@
 LIBSMI_PATCHLEVEL = @LIBSMI_PATCHLEVEL@
@@ -93,11 +102,13 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIBTOOL_REVISION = @LIBTOOL_REVISION@
 LIBTOOL_VERSION = @LIBTOOL_VERSION@
 LN_S = @LN_S@
+LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+RC = @RC@
 SH = @SH@
 STATIC = @STATIC@
 STRIP = @STRIP@

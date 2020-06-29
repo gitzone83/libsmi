@@ -3280,10 +3280,10 @@ Internet-Draft                   SMIng                     February 2000
    module IRTF-NMRG-SMING {
 
    //
-   // $RCSfile: draft-irtf-nmrg-sming-02.txt,v $
-   // $Revision: 1.1 $
+   // $RCSfile: IRTF-NMRG-SMING,v $
+   // $Revision: 1.2 $
    // $Author: strauss $
-   // $Date: 2000/02/15 10:41:05 $
+   // $Date: 2000-02-15 11:41:02 +0100 (Tue, 15 Feb 2000) $
    //
 
        organization    "IRTF Network Management Research Group (NMRG),
@@ -3350,10 +3350,10 @@ Internet-Draft                   SMIng                     February 2000
    module IRTF-NMRG-SMING-TYPES {
 
    //
-   // $RCSfile: draft-irtf-nmrg-sming-02.txt,v $
-   // $Revision: 1.1 $
+   // $RCSfile: IRTF-NMRG-SMING-TYPES,v $
+   // $Revision: 1.3 $
    // $Author: strauss $
-   // $Date: 2000/02/15 10:41:05 $
+   // $Date: 2000-02-15 11:41:02 +0100 (Tue, 15 Feb 2000) $
 
 
 Strauss                 Expires August 15, 2000                [Page 60]
@@ -4406,10 +4406,10 @@ Internet-Draft                   SMIng                     February 2000
    module IRTF-NMRG-SMING-EXTENSIONS {
 
    //
-   // $RCSfile: draft-irtf-nmrg-sming-02.txt,v $
-   // $Revision: 1.1 $
+   // $RCSfile: IRTF-NMRG-SMING-EXTENSIONS,v $
+   // $Revision: 1.3 $
    // $Author: strauss $
-   // $Date: 2000/02/15 10:41:05 $
+   // $Date: 2000-02-15 11:41:02 +0100 (Tue, 15 Feb 2000) $
    //
 
        organization    "IRTF Network Management Research Group (NMRG),
@@ -5052,7 +5052,7 @@ Appendix A. The SMIng ABNF grammar
    ;;
    ;; sming.abnf -- SMIng grammar in ABNF notation (RFC 2234).
    ;;
-   ;; @(#) $Id: draft-irtf-nmrg-sming-02.txt,v 1.1 2000/02/15 10:41:05 strauss Exp $
+   ;; @(#) $Id: draft-irtf-nmrg-sming-02.txt 817 2000-02-15 10:41:02Z strauss $
    ;;
    ;; Copyright (C) The Internet Society (1999). All Rights Reserved.
    ;;

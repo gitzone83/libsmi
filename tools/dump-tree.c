@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-tree.c,v 1.37 2003/07/14 22:58:42 schoenw Exp $
+ * @(#) $Id: dump-tree.c 1571 2003-07-14 22:58:42Z schoenw $
  */
 
 #include <config.h>

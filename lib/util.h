@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: util.h,v 1.26 2002/11/13 13:15:03 strauss Exp $
+ * @(#) $Id: util.h 1470 2002-11-13 13:15:03Z strauss $
  */
 
 #ifndef _UTIL_H

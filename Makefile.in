@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.29 2003/11/06 10:15:26 strauss Exp $
+# @(#) $Id: Makefile.am 1670 2004-08-09 14:06:04Z strauss $
 #
 
 
@@ -72,18 +72,27 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
+AR = @AR@
 AS = @AS@
 AWK = @AWK@
 BASH = @BASH@
 BISON = @BISON@
 CC = @CC@
 CFLAGS = @CFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
 DIFF = @DIFF@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+F77 = @F77@
 FLEX = @FLEX@
+GCJ = @GCJ@
+GCJFLAGS = @GCJFLAGS@
+HAVE_LIB = @HAVE_LIB@
 INT64_TYPE = @INT64_TYPE@
+LIB = @LIB@
 LIBSMI_MAJOR = @LIBSMI_MAJOR@
 LIBSMI_MINOR = @LIBSMI_MINOR@
 LIBSMI_PATCHLEVEL = @LIBSMI_PATCHLEVEL@
@@ -93,11 +102,13 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIBTOOL_REVISION = @LIBTOOL_REVISION@
 LIBTOOL_VERSION = @LIBTOOL_VERSION@
 LN_S = @LN_S@
+LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+RC = @RC@
 SH = @SH@
 STATIC = @STATIC@
 STRIP = @STRIP@
@@ -131,8 +142,8 @@ DATA =  $(m4data_DATA) $(pkgconfig_DATA)
 
 DIST_COMMON =  README ./stamp-h.in COPYING ChangeLog Makefile.am \
 Makefile.in THANKS TODO aclocal.m4 config.guess config.h.in config.sub \
-configure configure.in install-sh libsmi.pc.in ltconfig ltmain.sh \
-missing mkinstalldirs
+configure configure.in install-sh libsmi.pc.in ltmain.sh missing \
+mkinstalldirs
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -151,7 +162,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 $(ACLOCAL_M4):  configure.in 
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -260,7 +271,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -302,7 +313,7 @@ TAGS: tags-recursive $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) $(LI
 	  awk '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)config.h.in$$unique$(LISP)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.h.in $$unique $(LISP) -o $$here/TAGS)
+	  || (cd $(srcdir) && etags -o $$here/TAGS $(ETAGS_ARGS) $$tags config.h.in $$unique $(LISP))
 
 mostlyclean-tags:
 
@@ -453,14 +464,6 @@ $(pkgconfig_DATA):	config.status
 
 anoncvs:
 	RSYNC_RSH=ssh rsync -rlt --delete $(HOME)/.cvs-repository/libsmi anoncvs@anoncvs:/var/lib/cvs
-#	ssh agitator chgrp -R anoncvs /var/lib/cvs/libsmi
-#	ssh agitator chmod -R ug+rw /var/lib/cvs/libsmi
-#
-#	mkdir /tmp/libsmi-diff
-#	tar xzCf /tmp/libsmi-diff /ftp/local/libsmi/libsmi-current.tar.gz
-#	cd /tmp/libsmi-diff ; cvs -Q co libsmi
-#	-cd /tmp/libsmi-diff ; diff -r -u -N libsmi-* libsmi > /ftp/local/libsmi/libsmi-current-cvs.diff
-#	rm -rf /tmp/libsmi-diff
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

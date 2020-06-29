@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-imports.c,v 1.22 2002/11/19 10:33:56 schoenw Exp $
+ * @(#) $Id: dump-imports.c 1475 2002-11-19 10:33:56Z schoenw $
  */
 
 #include <config.h>

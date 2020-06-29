@@ -8,7 +8,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am,v 1.3 2003/12/01 19:01:42 strauss Exp $
+# @(#) $Id: Makefile.am 1607 2003-12-01 19:01:38Z strauss $
 #
 
 tubsdir			= $(mibdir)/tubs

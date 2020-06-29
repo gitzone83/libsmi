@@ -9,7 +9,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: win.h,v 1.8 2002/11/13 12:31:22 schoenw Exp $
+ * @(#) $Id: win.h 1615 2003-12-11 13:10:51Z schoenw $
  */
 
 #ifndef _WIN_H
@@ -44,7 +44,7 @@
 /*
  * other function prototypes 
  */
-#if defined(__STDC__)
+#if ! defined(__GNUC__) && defined(__STDC__)
 int __cdecl fileno(FILE *); 
 #endif
 
