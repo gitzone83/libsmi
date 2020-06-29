@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-scli.c 3203 2006-02-15 17:25:13Z schoenw $
+ * @(#) $Id: dump-scli.c 6756 2007-05-08 10:43:24Z schoenw $
  */
 
 /*
@@ -403,102 +403,6 @@ isWritable(SmiNode *treeNode, SmiNodekind nodekind)
 
 
 
-static unsigned int
-getMinSize(SmiType *smiType)
-{
-    SmiRange *smiRange;
-    SmiType  *parentType;
-    unsigned int min = 65535, size;
-    
-    switch (smiType->basetype) {
-    case SMI_BASETYPE_BITS:
-	return 0;
-    case SMI_BASETYPE_OCTETSTRING:
-    case SMI_BASETYPE_OBJECTIDENTIFIER:
-	size = 0;
-	break;
-    default:
-	return 0;
-    }
-
-    for (smiRange = smiGetFirstRange(smiType);
-	 smiRange ; smiRange = smiGetNextRange(smiRange)) {
-	if (smiRange->minValue.value.unsigned32 < min) {
-	    min = smiRange->minValue.value.unsigned32;
-	}
-    }
-    if (min < 65535 && min > size) {
-	size = min;
-    }
-
-    parentType = smiGetParentType(smiType);
-    if (parentType) {
-	unsigned int psize = getMinSize(parentType);
-	if (psize > size) {
-	    size = psize;
-	}
-    }
-
-    return size;
-}
-
-
-
-static unsigned int
-getMaxSize(SmiType *smiType)
-{
-    SmiRange *smiRange;
-    SmiType  *parentType;
-    SmiNamedNumber *nn;
-    unsigned int max = 0, size;
-    
-    switch (smiType->basetype) {
-    case SMI_BASETYPE_BITS:
-    case SMI_BASETYPE_OCTETSTRING:
-	size = 65535;
-	break;
-    case SMI_BASETYPE_OBJECTIDENTIFIER:
-	size = 128;
-	break;
-    default:
-	return 0xffffffff;
-    }
-
-    if (smiType->basetype == SMI_BASETYPE_BITS) {
-	for (nn = smiGetFirstNamedNumber(smiType);
-	     nn;
-	     nn = smiGetNextNamedNumber(nn)) {
-	    if (nn->value.value.unsigned32 > max) {
-		max = nn->value.value.unsigned32;
-	    }
-	}
-	size = (max / 8) + 1;
-	return size;
-    }
-
-    for (smiRange = smiGetFirstRange(smiType);
-	 smiRange ; smiRange = smiGetNextRange(smiRange)) {
-	if (smiRange->maxValue.value.unsigned32 > max) {
-	    max = smiRange->maxValue.value.unsigned32;
-	}
-    }
-    if (max > 0 && max < size) {
-	size = max;
-    }
-
-    parentType = smiGetParentType(smiType);
-    if (parentType) {
-	unsigned int psize = getMaxSize(parentType);
-	if (psize < size) {
-	    size = psize;
-	}
-    }
-
-    return size;
-}
-
-
-
 static char*
 getSnmpType(SmiType *smiType)
 {
@@ -644,8 +548,8 @@ printIndexParamsFunc(FILE *f, SmiNode *smiNode, SmiNode *iNode,
     cName = translate(name ? name : iNode->name);
     switch (iType->basetype) {
     case SMI_BASETYPE_OBJECTIDENTIFIER:
-	maxSize = getMaxSize(iType);
-	minSize = getMinSize(iType);
+	maxSize = smiGetMaxSize(iType);
+	minSize = smiGetMinSize(iType);
 	fprintf(f, ", %s%s", flags ? "guint32 *" : "", cName);
 	if (minSize != maxSize) {
 	    fprintf(f, ", %s_%sLength",
@@ -654,8 +558,8 @@ printIndexParamsFunc(FILE *f, SmiNode *smiNode, SmiNode *iNode,
 	break;
     case SMI_BASETYPE_OCTETSTRING:
     case SMI_BASETYPE_BITS:
-	maxSize = getMaxSize(iType);
-	minSize = getMinSize(iType);
+	maxSize = smiGetMaxSize(iType);
+	minSize = smiGetMinSize(iType);
 	fprintf(f, ", %s%s", flags ? "guchar *" : "", cName);
 	if (minSize != maxSize) {
 	    fprintf(f, ", %s_%sLength",
@@ -698,8 +602,8 @@ printIndexParamsPassFunc(FILE *f, SmiNode *smiNode, SmiNode *iNode,
     case SMI_BASETYPE_BITS:
     case SMI_BASETYPE_OCTETSTRING:
     case SMI_BASETYPE_OBJECTIDENTIFIER:
-	maxSize = getMaxSize(iType);
-	minSize = getMinSize(iType);
+	maxSize = smiGetMaxSize(iType);
+	minSize = smiGetMinSize(iType);
 	if (minSize != maxSize) {
 	    fprintf(f, ", %s->_%sLength", gName, cName);
 	}
@@ -737,8 +641,8 @@ printIndexAssignmentFunc(FILE *f, SmiNode *smiNode, SmiNode *iNode,
 	break;
     case SMI_BASETYPE_OCTETSTRING:
     case SMI_BASETYPE_BITS:
-	maxSize = getMaxSize(iType);
-	minSize = getMinSize(iType);
+	maxSize = smiGetMaxSize(iType);
+	minSize = smiGetMinSize(iType);
 	if (minSize != maxSize) {
 	    fprintf(f, "    memcpy(%s->%s, %s, _%sLength);\n",
 		    gName, cName, cName, cName);
@@ -992,8 +896,8 @@ printParam(FILE *f, SmiNode *smiNode)
     dModuleName = translateUpper(smiModule ? smiModule->name : "");
     switch (smiType->basetype) {
     case SMI_BASETYPE_OBJECTIDENTIFIER:
-	maxSize = getMaxSize(smiType);
-	minSize = getMinSize(smiType);
+	maxSize = smiGetMaxSize(smiType);
+	minSize = smiGetMinSize(smiType);
 	fprintf(f,
 		", guint32 *%s", cName);
 	if (maxSize != minSize) {
@@ -1003,8 +907,8 @@ printParam(FILE *f, SmiNode *smiNode)
 	break;
     case SMI_BASETYPE_OCTETSTRING:
     case SMI_BASETYPE_BITS:
-	maxSize = getMaxSize(smiType);
-	minSize = getMinSize(smiType);
+	maxSize = smiGetMaxSize(smiType);
+	minSize = smiGetMinSize(smiType);
 	fprintf(f,
 		", guchar *%s", cName);
 	if (maxSize != minSize) {
@@ -1191,8 +1095,8 @@ printHeaderTypedefMember(FILE *f, SmiNode *smiNode,
     dModuleName = translateUpper(smiModule ? smiModule->name : "");
     switch (smiType->basetype) {
     case SMI_BASETYPE_OBJECTIDENTIFIER:
-	maxSize = getMaxSize(smiType);
-	minSize = getMinSize(smiType);
+	maxSize = smiGetMaxSize(smiType);
+	minSize = smiGetMinSize(smiType);
 	if (isIndex && maxSize > 128 - smiNode->oidlen) {
 	    maxSize = 128 - smiNode->oidlen;
 	}
@@ -1224,8 +1128,8 @@ printHeaderTypedefMember(FILE *f, SmiNode *smiNode,
 	break;
     case SMI_BASETYPE_OCTETSTRING:
     case SMI_BASETYPE_BITS:
-	maxSize = getMaxSize(smiType);
-	minSize = getMinSize(smiType);
+	maxSize = smiGetMaxSize(smiType);
+	minSize = smiGetMinSize(smiType);
 	if (isIndex && maxSize > 128 - smiNode->oidlen) {
 	    maxSize = 128 - smiNode->oidlen;
 	}
@@ -2020,8 +1924,8 @@ printAttribute(FILE *f, SmiNode *smiNode, SmiNode *groupNode, int flags)
     case SMI_BASETYPE_OCTETSTRING:
     case SMI_BASETYPE_BITS:
     case SMI_BASETYPE_OBJECTIDENTIFIER:
-	maxSize = getMaxSize(smiType);
-	minSize = getMinSize(smiType);
+	maxSize = smiGetMaxSize(smiType);
+	minSize = smiGetMinSize(smiType);
 	break;
     default:
 	break;
@@ -2304,8 +2208,8 @@ printUnpackMethod(FILE *f, SmiModule *smiModule, SmiNode *groupNode)
 		printUnsigned32RangeChecks(f, cGroupName, cName, iType);
 		break;
 	    case SMI_BASETYPE_OCTETSTRING:
-		maxSize = getMaxSize(iType);
-		minSize = getMinSize(iType);
+		maxSize = smiGetMaxSize(iType);
+		minSize = smiGetMinSize(iType);
 		if (maxSize > 128 - iNode->oidlen) {
 		    maxSize = 128 - iNode->oidlen;
 		}
@@ -2347,8 +2251,8 @@ printUnpackMethod(FILE *f, SmiModule *smiModule, SmiNode *groupNode)
 		}
 		break;
 	    case SMI_BASETYPE_OBJECTIDENTIFIER:
-		maxSize = getMaxSize(iType);
-		minSize = getMinSize(iType);
+		maxSize = smiGetMaxSize(iType);
+		minSize = smiGetMinSize(iType);
 		if (maxSize > 128 - iNode->oidlen) {
 		    maxSize = 128 - iNode->oidlen;
 		}
@@ -2498,8 +2402,8 @@ printPackMethod(FILE *f, SmiModule *smiModule, SmiNode *groupNode)
 			cName);
 		break;
 	    case SMI_BASETYPE_OCTETSTRING:
-		maxSize = getMaxSize(iType);
-		minSize = getMinSize(iType);
+		maxSize = smiGetMaxSize(iType);
+		minSize = smiGetMinSize(iType);
 		if (maxSize > 128 - iNode->oidlen) {
 		    maxSize = 128 - iNode->oidlen;
 		}
@@ -2542,8 +2446,8 @@ printPackMethod(FILE *f, SmiModule *smiModule, SmiNode *groupNode)
 			cName);
 		break;
 	    case SMI_BASETYPE_OBJECTIDENTIFIER:
-		maxSize = getMaxSize(iType);
-		minSize = getMinSize(iType);
+		maxSize = smiGetMaxSize(iType);
+		minSize = smiGetMinSize(iType);
 		if (maxSize > 128 - iNode->oidlen) {
 		    maxSize = 128 - iNode->oidlen;
 		}
@@ -2688,15 +2592,17 @@ printGetTableMethod(FILE *f, SmiModule *smiModule, SmiNode *rowNode)
 	    "    GList *row;\n"
 	    "    int i;\n");
 
-    fprintf(f, "    static guint32 base[] = {");
+    fprintf(f, "    static guint32 const _base[] = {");
     for (i = 0; i < rowNode->oidlen; i++) {
 	fprintf(f, "%u, ", rowNode->oid[i]);
     }
     fprintf(f, "0};\n");
+    fprintf(f, "    guint32 base[128];\n");
 
     fprintf(f,
 	    "\n"
 	    "    *%s = NULL;\n"
+	    "    memcpy(base, _base, sizeof(_base));\n"
 	    "\n",
 	    cRowName);
 
@@ -3043,8 +2949,8 @@ printSetMethod(FILE *f, SmiNode *groupNode, SmiNode *smiNode)
     switch (smiType->basetype) {
     case SMI_BASETYPE_OBJECTIDENTIFIER:
     case SMI_BASETYPE_OCTETSTRING:
-	maxSize = getMaxSize(smiType);
-	minSize = getMinSize(smiType);
+	maxSize = smiGetMaxSize(smiType);
+	minSize = smiGetMinSize(smiType);
 	fprintf(f, "    %s->%s = %s;\n",
 		cGroupName, cNodeName, cNodeName);
 	if (minSize != maxSize) {
@@ -3099,15 +3005,17 @@ printGetScalarsMethod(FILE *f, SmiModule *smiModule, SmiNode *groupNode)
 	    "    GList *in = NULL, *out = NULL;\n",
 	    cPrefix, cGroupName, cPrefix, cGroupName, cGroupName);
 
-    fprintf(f, "    static guint32 base[] = {");
+    fprintf(f, "    static const guint32 _base[] = {");
     for (i = 0; i < groupNode->oidlen; i++) {
 	fprintf(f, "%u, ", groupNode->oid[i]);
     }
     fprintf(f, "0};\n");
+    fprintf(f, "    guint32 base[128];\n");
 
     fprintf(f,
 	    "\n"
 	    "    *%s = NULL;\n"
+	    "    memcpy(base, _base, sizeof(_base));\n"
 	    "\n",
 	    cGroupName);
 

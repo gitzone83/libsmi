@@ -12,7 +12,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: makefile 3226 2006-02-27 21:48:23Z schoenw $
+# @(#) $Id: makefile 7286 2007-09-27 20:22:20Z schoenw $
 
 ##
 ## Project directories -- these may need to be customized for your site
@@ -58,7 +58,7 @@ MKDIR	= md
 ##
 # DEBUG = -W3 -Zi -Od /Yd
 INCLUDES = -I$(ROOT)\lib -I$(ROOT)\win -I$(TOOLS32)\include
-DEFINES = $(DEBUG)
+DEFINES = $(DEBUG) -D_CRT_SECURE_NO_DEPRECATE=1
 
 !include <win32.mak>
 
@@ -85,6 +85,10 @@ SMIQUERYOBJS =					\
 SMILINTOBJS =					\
 	$(TMPDIR)\smilint.obj
 
+SMIXLATEOBJS =					\
+	$(TMPDIR)\smixlate.obj			\
+	$(TMPDIR)\dstring.obj
+
 SMIDUMPOBJS =					\
 	$(TMPDIR)\smidump.obj			\
 	$(TMPDIR)\dump-sming.obj		\
@@ -108,6 +112,7 @@ SMIDUMPOBJS =					\
 	$(TMPDIR)\dump-sizes.obj		\
 	$(TMPDIR)\dump-svg.obj			\
 	$(TMPDIR)\dump-compliance.obj		\
+	$(TMPDIR)\fprint.obj			\
 	$(TMPDIR)\rea.obj
 
 SMIDIFFOBJS =					\
@@ -152,7 +157,7 @@ $(TMPDIR)\scanner-sming.obj : $(ROOT)\lib\scanner-sming.c
 $(SMILIB):	$(LIBSMIOBJS)
 	$(implib) /out:smi.lib $(LIBSMIOBJS)
 
-tools:	smiquery.exe smilint.exe smidump.exe smidiff.exe
+tools:	smiquery.exe smilint.exe smixlate.exe smidump.exe smidiff.exe
 
 smiquery.exe:	$(SMIQUERYOBJS) $(SMILIB)
 	$(cc32) $(DEFINES) /osmiquery.exe $(SMIQUERYOBJS) $(SMILIB)
@@ -167,6 +172,10 @@ smidump.exe:	$(SMIDUMPOBJS) $(SMILIB)
 smidiff.exe:	$(SMIDIFFOBJS) $(SMILIB)
 	$(cc32) $(DEFINES) \
 		/osmidiff.exe $(SMIDIFFOBJS) $(SMILIB)
+
+smixlate.exe:	$(SMIXLATEOBJS) $(SMILIB)
+	$(cc32) $(DEFINES) \
+		/osmixlate.exe $(SMIXLATEOBJS) $(SMILIB)
 
 clean:
 	del *.lib

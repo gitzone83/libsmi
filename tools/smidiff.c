@@ -11,7 +11,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smidiff.c 3209 2006-02-18 22:38:16Z schoenw $ 
+ * @(#) $Id: smidiff.c 6635 2007-03-13 21:53:21Z schoenw $ 
  */
 
 /*
@@ -947,7 +947,7 @@ iterateTypeImports(char *typeName,
 
 static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
 {
-    static char    s[100];
+    static char    s[1024];
     char           ss[9];
     int		   n;
     unsigned int   i;

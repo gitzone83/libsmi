@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-cm.c 2078 2005-03-03 15:17:55Z sperner $
+ * @(#) $Id: rea.c 7289 2007-09-28 06:48:22Z schoenw $
  */
 
 
@@ -72,7 +72,7 @@ int       SHOW_DEPR_OBSOLETE    = 0; /* false, show deprecated and
 int       STATIC_OUTPUT         = 0; /* false, enable interactivity */
 //variables for cm-driver
 int       XPLAIN                = 0; /* false, generates ASCII output */
-int       DEBUG                 = 0; /* false, generates additional
+int       XPLAIN_DEBUG          = 0; /* false, generates additional
 					       output in xplain-mode */
 int       SUPPRESS_DEPRECATED   = 1; /* true, suppresses deprecated
 					       objects */
@@ -470,7 +470,7 @@ static void graphShowEdges(Graph *graph)
   
     for (tEdge = graph->edges; tEdge; tEdge = tEdge->nextPtr) {
 
-	if (DEBUG) {
+	if (XPLAIN_DEBUG) {
 	    switch (tEdge->enhancedindex) {
 	    case GRAPH_ENHINDEX_UNKNOWN :
 		printf("[UNKNOWN] ");
