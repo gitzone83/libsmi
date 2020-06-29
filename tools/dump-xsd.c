@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-xsd.c 1638 2004-03-29 16:30:04Z tklie $
+ * @(#) $Id: dump-xsd.c 2609 2005-07-12 07:44:57Z strauss $
  */
 
 #include <config.h>
@@ -21,6 +21,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#ifdef HAVE_WIN_H
+#include "win.h"
+#endif
 
 #include "smi.h"
 #include "smidump.h"
@@ -614,7 +617,7 @@ static char* getStrDHType( char *hint,
 			    smiAsprintf( &ret, "%s%c", ret, iterDH->separator );
 			}
 
-			smiAsprintf( &ret, "%s{%u,%u})%s",
+			smiAsprintf( &ret, "(%s){%u,%u})%s",
 				     ret, lengths[ i ] - 1, lengths[ i+1 ] - 1,
 				     baseRegexp );
 			
@@ -1024,7 +1027,7 @@ static void fprintRestriction(FILE *f, SmiType *smiType)
 	SmiUnsigned64 min, max;
 
 	min = 0;
-	max = 18446744073709551615ULL;
+	max = LIBSMI_UINT64_MAX;
 
 	fprintStdRestHead( f, smiType );
 	
@@ -1261,7 +1264,7 @@ static void fprintSubRangeType( FILE *f,
 	SmiUnsigned64 min, max;
 
 	min = 0;
-	max = 18446744073709551615ULL;
+	max = LIBSMI_UINT64_MAX;
 
 	if( smiRange->minValue.value.unsigned64 < min ) {
 	    min = smiRange->minValue.value.unsigned64;

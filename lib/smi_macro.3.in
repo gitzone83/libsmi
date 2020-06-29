@@ -1,5 +1,5 @@
 .\"
-.\" $Id: smi_macro.3.in 1147 2001-08-16 10:53:21Z strauss $
+.\" $Id: smi_macro.3.in 4432 2006-05-29 16:21:11Z strauss $
 .\"
 .TH smi_macro 3  "August 16, 2001" "IBR" "SMI Management Information Library"
 .SH NAME
@@ -59,7 +59,7 @@ The \fBsmiGetMacroModule()\fP function returns the module that defines
 the macro or extension given by \fIstruct SmiMacroPtr\fP.
 .SH "FILES"
 .nf
-@prefix@/include/smi.h    SMI library header file
+@includedir@/smi.h    SMI library header file
 .fi
 .SH "SEE ALSO"
 .BR libsmi "(3), "

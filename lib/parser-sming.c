@@ -1,7 +1,7 @@
-/* A Bison parser, made by GNU Bison 1.875a.  */
+/* A Bison parser, made by GNU Bison 1.875d.  */
 
 /* Skeleton parser for Yacc-like parsing with Bison,
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -594,7 +594,7 @@ typedef union YYSTYPE {
     Revision	   *revisionPtr;
 } YYSTYPE;
 /* Line 191 of yacc.c.  */
-#line 598 "parser-sming.tab.c"
+#line 598 "parser-sming.c"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -606,22 +606,29 @@ typedef union YYSTYPE {
 
 
 /* Line 214 of yacc.c.  */
-#line 610 "parser-sming.tab.c"
+#line 610 "parser-sming.c"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
+# ifndef YYFREE
+#  define YYFREE free
+# endif
+# ifndef YYMALLOC
+#  define YYMALLOC malloc
+# endif
+
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
-# if YYSTACK_USE_ALLOCA
-#  define YYSTACK_ALLOC alloca
+# ifdef YYSTACK_USE_ALLOCA
+#  if YYSTACK_USE_ALLOCA
+#   define YYSTACK_ALLOC alloca
+#  endif
 # else
-#  ifndef YYSTACK_USE_ALLOCA
-#   if defined (alloca) || defined (_ALLOCA_H)
-#    define YYSTACK_ALLOC alloca
-#   else
-#    ifdef __GNUC__
-#     define YYSTACK_ALLOC __builtin_alloca
-#    endif
+#  if defined (alloca) || defined (_ALLOCA_H)
+#   define YYSTACK_ALLOC alloca
+#  else
+#   ifdef __GNUC__
+#    define YYSTACK_ALLOC __builtin_alloca
 #   endif
 #  endif
 # endif
@@ -634,20 +641,20 @@ typedef union YYSTYPE {
 #   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
 #   define YYSIZE_T size_t
 #  endif
-#  define YYSTACK_ALLOC malloc
-#  define YYSTACK_FREE free
+#  define YYSTACK_ALLOC YYMALLOC
+#  define YYSTACK_FREE YYFREE
 # endif
 #endif /* ! defined (yyoverflow) || YYERROR_VERBOSE */
 
 
 #if (! defined (yyoverflow) \
      && (! defined (__cplusplus) \
-	 || (YYSTYPE_IS_TRIVIAL)))
+	 || (defined (YYSTYPE_IS_TRIVIAL) && YYSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  short yyss;
+  short int yyss;
   YYSTYPE yyvs;
   };
 
@@ -657,13 +664,13 @@ union yyalloc
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (short) + sizeof (YYSTYPE))				\
+     ((N) * (sizeof (short int) + sizeof (YYSTYPE))			\
       + YYSTACK_GAP_MAXIMUM)
 
 /* Copy COUNT objects from FROM to TO.  The source and destination do
    not overlap.  */
 # ifndef YYCOPY
-#  if 1 < __GNUC__
+#  if defined (__GNUC__) && 1 < __GNUC__
 #   define YYCOPY(To, From, Count) \
       __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
 #  else
@@ -699,7 +706,7 @@ union yyalloc
 #if defined (__STDC__) || defined (__cplusplus)
    typedef signed char yysigned_char;
 #else
-   typedef short yysigned_char;
+   typedef short int yysigned_char;
 #endif
 
 /* YYFINAL -- State number of the termination state. */
@@ -764,7 +771,7 @@ static const unsigned char yytranslate[] =
 #if YYDEBUG
 /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
    YYRHS.  */
-static const unsigned short yyprhs[] =
+static const unsigned short int yyprhs[] =
 {
        0,     0,     3,     6,     7,     9,    11,    14,    17,    18,
       19,    20,    21,    22,    53,    54,    56,    58,    61,    64,
@@ -803,7 +810,7 @@ static const unsigned short yyprhs[] =
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS. */
-static const short yyrhs[] =
+static const short int yyrhs[] =
 {
       80,     0,    -1,   314,    81,    -1,    -1,    82,    -1,    83,
       -1,    82,    83,    -1,    84,   314,    -1,    -1,    -1,    -1,
@@ -920,7 +927,7 @@ static const short yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const unsigned short yyrline[] =
+static const unsigned short int yyrline[] =
 {
        0,   665,   665,   676,   679,   685,   689,   704,   719,   749,
      756,   763,   774,   718,   852,   855,   865,   869,   885,   900,
@@ -964,94 +971,92 @@ static const unsigned short yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals. */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "DOT_DOT", "COLON_COLON", "ucIdentifier", 
-  "lcIdentifier", "floatValue", "textSegment", "decimalNumber", 
-  "hexadecimalNumber", "moduleKeyword", "importKeyword", 
-  "revisionKeyword", "identityKeyword", "oidKeyword", "dateKeyword", 
-  "organizationKeyword", "contactKeyword", "descriptionKeyword", 
-  "referenceKeyword", "extensionKeyword", "typedefKeyword", "typeKeyword", 
-  "writetypeKeyword", "nodeKeyword", "scalarKeyword", "tableKeyword", 
-  "columnKeyword", "rowKeyword", "notificationKeyword", "groupKeyword", 
-  "complianceKeyword", "formatKeyword", "unitsKeyword", "statusKeyword", 
-  "accessKeyword", "defaultKeyword", "impliedKeyword", "indexKeyword", 
-  "augmentsKeyword", "reordersKeyword", "sparseKeyword", "expandsKeyword", 
-  "createKeyword", "membersKeyword", "objectsKeyword", "mandatoryKeyword", 
-  "optionalKeyword", "refineKeyword", "abnfKeyword", "OctetStringKeyword", 
-  "ObjectIdentifierKeyword", "Integer32Keyword", "Unsigned32Keyword", 
-  "Integer64Keyword", "Unsigned64Keyword", "Float32Keyword", 
-  "Float64Keyword", "Float128Keyword", "BitsKeyword", 
-  "EnumerationKeyword", "currentKeyword", "deprecatedKeyword", 
-  "obsoleteKeyword", "noaccessKeyword", "notifyonlyKeyword", 
-  "readonlyKeyword", "readwriteKeyword", "readcreateKeyword", "'{'", 
-  "'}'", "';'", "'('", "')'", "'|'", "','", "'-'", "'.'", "$accept", 
-  "smingFile", "moduleStatement_optsep_0n", "moduleStatement_optsep_1n", 
-  "moduleStatement_optsep", "moduleStatement", "@1", "@2", "@3", "@4", 
-  "@5", "extensionStatement_stmtsep_0n", "extensionStatement_stmtsep_1n", 
-  "extensionStatement_stmtsep", "extensionStatement", "@6", "@7", "@8", 
-  "@9", "@10", "typedefStatement_stmtsep_0n", 
-  "typedefStatement_stmtsep_1n", "typedefStatement_stmtsep", 
-  "typedefStatement", "@11", "@12", "@13", "@14", "@15", "@16", "@17", 
-  "@18", "anyObjectStatement_stmtsep_0n", "anyObjectStatement_stmtsep_1n", 
-  "anyObjectStatement_stmtsep", "anyObjectStatement", "nodeStatement", 
-  "@19", "@20", "@21", "@22", "@23", "scalarStatement", "@24", "@25", 
-  "@26", "@27", "@28", "@29", "@30", "@31", "@32", "@33", 
-  "tableStatement", "@34", "@35", "@36", "@37", "@38", "rowStatement", 
-  "@39", "@40", "@41", "@42", "@43", "@44", "@45", 
-  "columnStatement_stmtsep_1n", "columnStatement_stmtsep", 
-  "columnStatement", "@46", "@47", "@48", "@49", "@50", "@51", "@52", 
-  "@53", "@54", "@55", "notificationStatement_stmtsep_0n", 
-  "notificationStatement_stmtsep_1n", "notificationStatement_stmtsep", 
-  "notificationStatement", "@56", "@57", "@58", "@59", "@60", "@61", 
-  "groupStatement_stmtsep_0n", "groupStatement_stmtsep_1n", 
-  "groupStatement_stmtsep", "groupStatement", "@62", "@63", "@64", "@65", 
-  "@66", "@67", "complianceStatement_stmtsep_0n", 
-  "complianceStatement_stmtsep_1n", "complianceStatement_stmtsep", 
-  "complianceStatement", "@68", "@69", "@70", "@71", "@72", "@73", "@74", 
-  "@75", "importStatement_stmtsep_0n", "importStatement_stmtsep_1n", 
-  "importStatement_stmtsep", "importStatement", "@76", "@77", 
-  "revisionStatement_stmtsep_0n", "revisionStatement_stmtsep_1n", 
-  "revisionStatement_stmtsep", "revisionStatement", 
-  "identityStatement_stmtsep_01", "identityStatement", 
-  "typedefTypeStatement", "typeStatement_stmtsep_01", "typeStatement", 
-  "writetypeStatement_stmtsep_01", "writetypeStatement", 
-  "anyIndexStatement", "indexStatement", "augmentsStatement", 
-  "reordersStatement", "sparseStatement", "expandsStatement", 
-  "sep_impliedKeyword_01", "createStatement_stmtsep_01", 
-  "createStatement", "oidStatement", "dateStatement", 
-  "organizationStatement", "contactStatement", 
-  "formatStatement_stmtsep_01", "formatStatement", 
-  "unitsStatement_stmtsep_01", "unitsStatement", 
-  "statusStatement_stmtsep_01", "statusStatement", 
-  "accessStatement_stmtsep_01", "accessStatement", 
-  "defaultStatement_stmtsep_01", "defaultStatement", 
-  "descriptionStatement_stmtsep_01", "descriptionStatement", 
-  "referenceStatement_stmtsep_01", "referenceStatement", 
-  "abnfStatement_stmtsep_01", "abnfStatement", "membersStatement", 
-  "objectsStatement_stmtsep_01", "objectsStatement", 
-  "mandatoryStatement_stmtsep_01", "mandatoryStatement", 
-  "optionalStatement_stmtsep_0n", "optionalStatement_stmtsep_1n", 
-  "optionalStatement_stmtsep", "optionalStatement", 
-  "refineStatement_stmtsep_0n", "refineStatement_stmtsep_1n", 
-  "refineStatement_stmtsep", "refineStatement", 
-  "refinedBaseType_refinedType", "refinedBaseType", "refinedType", 
-  "optsep_anySpec_01", "anySpec", "optsep_numberSpec_01", "numberSpec", 
-  "furtherNumberElement_0n", "furtherNumberElement_1n", 
-  "furtherNumberElement", "numberElement", "numberUpperLimit_01", 
-  "numberUpperLimit", "optsep_floatSpec_01", "floatSpec", 
-  "furtherFloatElement_0n", "furtherFloatElement_1n", 
-  "furtherFloatElement", "floatElement", "floatUpperLimit_01", 
-  "floatUpperLimit", "bitsOrEnumerationSpec", "bitsOrEnumerationList", 
-  "furtherBitsOrEnumerationItem_0n", "furtherBitsOrEnumerationItem_1n", 
-  "furtherBitsOrEnumerationItem", "bitsOrEnumerationItem", 
-  "identifierList", "furtherIdentifier_0n", "furtherIdentifier_1n", 
-  "furtherIdentifier", "qlcIdentifierList", "furtherQlcIdentifier_0n", 
-  "furtherQlcIdentifier_1n", "furtherQlcIdentifier", "bitsValue", 
-  "bitsList", "furtherLcIdentifier_0n", "furtherLcIdentifier_1n", 
-  "furtherLcIdentifier", "identifier", "qucIdentifier", "qlcIdentifier", 
-  "text", "optsep_textSegment_0n", "optsep_textSegment_1n", 
-  "optsep_textSegment", "date", "format", "units", "anyValue", "status", 
-  "access", "objectIdentifier", "qlcIdentifier_subid", "dot_subid_0127", 
-  "dot_subid_1n", "dot_subid", "subid", "number", "negativeNumber", 
+  "$end", "error", "$undefined", "DOT_DOT", "COLON_COLON", "ucIdentifier",
+  "lcIdentifier", "floatValue", "textSegment", "decimalNumber",
+  "hexadecimalNumber", "moduleKeyword", "importKeyword", "revisionKeyword",
+  "identityKeyword", "oidKeyword", "dateKeyword", "organizationKeyword",
+  "contactKeyword", "descriptionKeyword", "referenceKeyword",
+  "extensionKeyword", "typedefKeyword", "typeKeyword", "writetypeKeyword",
+  "nodeKeyword", "scalarKeyword", "tableKeyword", "columnKeyword",
+  "rowKeyword", "notificationKeyword", "groupKeyword", "complianceKeyword",
+  "formatKeyword", "unitsKeyword", "statusKeyword", "accessKeyword",
+  "defaultKeyword", "impliedKeyword", "indexKeyword", "augmentsKeyword",
+  "reordersKeyword", "sparseKeyword", "expandsKeyword", "createKeyword",
+  "membersKeyword", "objectsKeyword", "mandatoryKeyword",
+  "optionalKeyword", "refineKeyword", "abnfKeyword", "OctetStringKeyword",
+  "ObjectIdentifierKeyword", "Integer32Keyword", "Unsigned32Keyword",
+  "Integer64Keyword", "Unsigned64Keyword", "Float32Keyword",
+  "Float64Keyword", "Float128Keyword", "BitsKeyword", "EnumerationKeyword",
+  "currentKeyword", "deprecatedKeyword", "obsoleteKeyword",
+  "noaccessKeyword", "notifyonlyKeyword", "readonlyKeyword",
+  "readwriteKeyword", "readcreateKeyword", "'{'", "'}'", "';'", "'('",
+  "')'", "'|'", "','", "'-'", "'.'", "$accept", "smingFile",
+  "moduleStatement_optsep_0n", "moduleStatement_optsep_1n",
+  "moduleStatement_optsep", "moduleStatement", "@1", "@2", "@3", "@4",
+  "@5", "extensionStatement_stmtsep_0n", "extensionStatement_stmtsep_1n",
+  "extensionStatement_stmtsep", "extensionStatement", "@6", "@7", "@8",
+  "@9", "@10", "typedefStatement_stmtsep_0n",
+  "typedefStatement_stmtsep_1n", "typedefStatement_stmtsep",
+  "typedefStatement", "@11", "@12", "@13", "@14", "@15", "@16", "@17",
+  "@18", "anyObjectStatement_stmtsep_0n", "anyObjectStatement_stmtsep_1n",
+  "anyObjectStatement_stmtsep", "anyObjectStatement", "nodeStatement",
+  "@19", "@20", "@21", "@22", "@23", "scalarStatement", "@24", "@25",
+  "@26", "@27", "@28", "@29", "@30", "@31", "@32", "@33", "tableStatement",
+  "@34", "@35", "@36", "@37", "@38", "rowStatement", "@39", "@40", "@41",
+  "@42", "@43", "@44", "@45", "columnStatement_stmtsep_1n",
+  "columnStatement_stmtsep", "columnStatement", "@46", "@47", "@48", "@49",
+  "@50", "@51", "@52", "@53", "@54", "@55",
+  "notificationStatement_stmtsep_0n", "notificationStatement_stmtsep_1n",
+  "notificationStatement_stmtsep", "notificationStatement", "@56", "@57",
+  "@58", "@59", "@60", "@61", "groupStatement_stmtsep_0n",
+  "groupStatement_stmtsep_1n", "groupStatement_stmtsep", "groupStatement",
+  "@62", "@63", "@64", "@65", "@66", "@67",
+  "complianceStatement_stmtsep_0n", "complianceStatement_stmtsep_1n",
+  "complianceStatement_stmtsep", "complianceStatement", "@68", "@69",
+  "@70", "@71", "@72", "@73", "@74", "@75", "importStatement_stmtsep_0n",
+  "importStatement_stmtsep_1n", "importStatement_stmtsep",
+  "importStatement", "@76", "@77", "revisionStatement_stmtsep_0n",
+  "revisionStatement_stmtsep_1n", "revisionStatement_stmtsep",
+  "revisionStatement", "identityStatement_stmtsep_01", "identityStatement",
+  "typedefTypeStatement", "typeStatement_stmtsep_01", "typeStatement",
+  "writetypeStatement_stmtsep_01", "writetypeStatement",
+  "anyIndexStatement", "indexStatement", "augmentsStatement",
+  "reordersStatement", "sparseStatement", "expandsStatement",
+  "sep_impliedKeyword_01", "createStatement_stmtsep_01", "createStatement",
+  "oidStatement", "dateStatement", "organizationStatement",
+  "contactStatement", "formatStatement_stmtsep_01", "formatStatement",
+  "unitsStatement_stmtsep_01", "unitsStatement",
+  "statusStatement_stmtsep_01", "statusStatement",
+  "accessStatement_stmtsep_01", "accessStatement",
+  "defaultStatement_stmtsep_01", "defaultStatement",
+  "descriptionStatement_stmtsep_01", "descriptionStatement",
+  "referenceStatement_stmtsep_01", "referenceStatement",
+  "abnfStatement_stmtsep_01", "abnfStatement", "membersStatement",
+  "objectsStatement_stmtsep_01", "objectsStatement",
+  "mandatoryStatement_stmtsep_01", "mandatoryStatement",
+  "optionalStatement_stmtsep_0n", "optionalStatement_stmtsep_1n",
+  "optionalStatement_stmtsep", "optionalStatement",
+  "refineStatement_stmtsep_0n", "refineStatement_stmtsep_1n",
+  "refineStatement_stmtsep", "refineStatement",
+  "refinedBaseType_refinedType", "refinedBaseType", "refinedType",
+  "optsep_anySpec_01", "anySpec", "optsep_numberSpec_01", "numberSpec",
+  "furtherNumberElement_0n", "furtherNumberElement_1n",
+  "furtherNumberElement", "numberElement", "numberUpperLimit_01",
+  "numberUpperLimit", "optsep_floatSpec_01", "floatSpec",
+  "furtherFloatElement_0n", "furtherFloatElement_1n",
+  "furtherFloatElement", "floatElement", "floatUpperLimit_01",
+  "floatUpperLimit", "bitsOrEnumerationSpec", "bitsOrEnumerationList",
+  "furtherBitsOrEnumerationItem_0n", "furtherBitsOrEnumerationItem_1n",
+  "furtherBitsOrEnumerationItem", "bitsOrEnumerationItem",
+  "identifierList", "furtherIdentifier_0n", "furtherIdentifier_1n",
+  "furtherIdentifier", "qlcIdentifierList", "furtherQlcIdentifier_0n",
+  "furtherQlcIdentifier_1n", "furtherQlcIdentifier", "bitsValue",
+  "bitsList", "furtherLcIdentifier_0n", "furtherLcIdentifier_1n",
+  "furtherLcIdentifier", "identifier", "qucIdentifier", "qlcIdentifier",
+  "text", "optsep_textSegment_0n", "optsep_textSegment_1n",
+  "optsep_textSegment", "date", "format", "units", "anyValue", "status",
+  "access", "objectIdentifier", "qlcIdentifier_subid", "dot_subid_0127",
+  "dot_subid_1n", "dot_subid", "subid", "number", "negativeNumber",
   "signedNumber", "optsep_comma_01", "sep", "optsep", "stmtsep", 0
 };
 #endif
@@ -1059,7 +1064,7 @@ static const char *const yytname[] =
 # ifdef YYPRINT
 /* YYTOKNUM[YYLEX-NUM] -- Internal token number corresponding to
    token YYLEX-NUM.  */
-static const unsigned short yytoknum[] =
+static const unsigned short int yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -1073,7 +1078,7 @@ static const unsigned short yytoknum[] =
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const unsigned short yyr1[] =
+static const unsigned short int yyr1[] =
 {
        0,    79,    80,    81,    81,    82,    82,    83,    85,    86,
       87,    88,    89,    84,    90,    90,    91,    91,    92,    94,
@@ -1153,7 +1158,7 @@ static const unsigned char yyr2[] =
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
    STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
-static const unsigned short yydefact[] =
+static const unsigned short int yydefact[] =
 {
      333,     0,     3,     1,   332,     2,     4,     5,   333,     0,
        6,     7,     8,   333,     0,   334,   130,   332,     0,   131,
@@ -1235,7 +1240,7 @@ static const unsigned short yydefact[] =
 };
 
 /* YYDEFGOTO[NTERM-NUM]. */
-static const short yydefgoto[] =
+static const short int yydefgoto[] =
 {
       -1,     1,     5,     6,     7,     8,    13,    33,    50,    71,
       82,   102,   103,   104,   105,   137,   208,   235,   296,   360,
@@ -1266,7 +1271,7 @@ static const short yydefgoto[] =
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
 #define YYPACT_NINF -649
-static const short yypact[] =
+static const short int yypact[] =
 {
     -649,    26,    28,  -649,  -649,  -649,    28,  -649,  -649,    32,
     -649,  -649,  -649,  -649,   -20,  -649,    47,  -649,    50,    47,
@@ -1348,7 +1353,7 @@ static const short yypact[] =
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const short yypgoto[] =
+static const short int yypgoto[] =
 {
     -649,  -649,  -649,  -649,   296,  -649,  -649,  -649,  -649,  -649,
     -649,  -649,  -649,   246,  -649,  -649,  -649,  -649,  -649,  -649,
@@ -1381,7 +1386,7 @@ static const short yypgoto[] =
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -334
-static const short yytable[] =
+static const short int yytable[] =
 {
        2,   511,   386,    49,   541,   229,   230,   317,    11,   320,
      519,   561,   349,    14,   286,   262,   661,   385,   414,   379,
@@ -1520,7 +1525,7 @@ static const short yytable[] =
        0,     0,   759
 };
 
-static const short yycheck[] =
+static const short int yycheck[] =
 {
        0,   493,   351,    46,   528,   213,   214,   290,     8,   292,
      498,   551,   315,    13,   254,   235,   649,   350,   373,   339,
@@ -1661,7 +1666,7 @@ static const short yycheck[] =
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
-static const unsigned short yystos[] =
+static const unsigned short int yystos[] =
 {
        0,    80,   314,     0,    11,    81,    82,    83,    84,   313,
       83,   314,     5,    85,   314,    70,   315,    12,   191,   192,
@@ -1765,7 +1770,7 @@ static const unsigned short yystos[] =
 
 #define YYACCEPT	goto yyacceptlab
 #define YYABORT		goto yyabortlab
-#define YYERROR		goto yyerrlab1
+#define YYERROR		goto yyerrorlab
 
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
@@ -1800,11 +1805,11 @@ while (0)
    are run).  */
 
 #ifndef YYLLOC_DEFAULT
-# define YYLLOC_DEFAULT(Current, Rhs, N)         \
-  Current.first_line   = Rhs[1].first_line;      \
-  Current.first_column = Rhs[1].first_column;    \
-  Current.last_line    = Rhs[N].last_line;       \
-  Current.last_column  = Rhs[N].last_column;
+# define YYLLOC_DEFAULT(Current, Rhs, N)		\
+   ((Current).first_line   = (Rhs)[1].first_line,	\
+    (Current).first_column = (Rhs)[1].first_column,	\
+    (Current).last_line    = (Rhs)[N].last_line,	\
+    (Current).last_column  = (Rhs)[N].last_column)
 #endif
 
 /* YYLEX -- calling `yylex' with the right arguments.  */
@@ -1848,17 +1853,17 @@ do {								\
 
 /*------------------------------------------------------------------.
 | yy_stack_print -- Print the state stack from its BOTTOM up to its |
-| TOP (cinluded).                                                   |
+| TOP (included).                                                   |
 `------------------------------------------------------------------*/
 
 #if defined (__STDC__) || defined (__cplusplus)
 static void
-yy_stack_print (short *bottom, short *top)
+yy_stack_print (short int *bottom, short int *top)
 #else
 static void
 yy_stack_print (bottom, top)
-    short *bottom;
-    short *top;
+    short int *bottom;
+    short int *top;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
@@ -1888,9 +1893,9 @@ yy_reduce_print (yyrule)
 #endif
 {
   int yyi;
-  unsigned int yylineno = yyrline[yyrule];
+  unsigned int yylno = yyrline[yyrule];
   YYFPRINTF (stderr, "Reducing stack by rule %d (line %u), ",
-             yyrule - 1, yylineno);
+             yyrule - 1, yylno);
   /* Print the symbols being reduced, and their result.  */
   for (yyi = yyprhs[yyrule]; 0 <= yyrhs[yyi]; yyi++)
     YYFPRINTF (stderr, "%s ", yytname [yyrhs[yyi]]);
@@ -1927,7 +1932,7 @@ int yydebug;
    SIZE_MAX < YYSTACK_BYTES (YYMAXDEPTH)
    evaluated with infinite-precision integer arithmetic.  */
 
-#if YYMAXDEPTH == 0
+#if defined (YYMAXDEPTH) && YYMAXDEPTH == 0
 # undef YYMAXDEPTH
 #endif
 
@@ -2066,7 +2071,7 @@ int yyparse ();
 # endif
 #else /* ! YYPARSE_PARAM */
 #if defined (__STDC__) || defined (__cplusplus)
-int yyparse ();
+int yyparse (void);
 #else
 int yyparse ();
 #endif
@@ -2125,9 +2130,9 @@ int yynerrs;
      to reallocate them elsewhere.  */
 
   /* The state stack.  */
-  short	yyssa[YYINITDEPTH];
-  short *yyss = yyssa;
-  register short *yyssp;
+  short int yyssa[YYINITDEPTH];
+  short int *yyss = yyssa;
+  register short int *yyssp;
 
   /* The semantic value stack.  */
   YYSTYPE yyvsa[YYINITDEPTH];
@@ -2164,6 +2169,7 @@ int yynerrs;
   yyssp = yyss;
   yyvsp = yyvs;
 
+
   goto yysetstate;
 
 /*------------------------------------------------------------.
@@ -2189,7 +2195,7 @@ int yynerrs;
 	   these so that the &'s don't force the real ones into
 	   memory.  */
 	YYSTYPE *yyvs1 = yyvs;
-	short *yyss1 = yyss;
+	short int *yyss1 = yyss;
 
 
 	/* Each stack pointer address is followed by the size of the
@@ -2217,7 +2223,7 @@ int yynerrs;
 	yystacksize = YYMAXDEPTH;
 
       {
-	short *yyss1 = yyss;
+	short int *yyss1 = yyss;
 	union yyalloc *yyptr =
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
@@ -5803,8 +5809,8 @@ yyreduce:
 
     }
 
-/* Line 999 of yacc.c.  */
-#line 5808 "parser-sming.tab.c"
+/* Line 1010 of yacc.c.  */
+#line 5814 "parser-sming.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -5845,18 +5851,33 @@ yyerrlab:
 	{
 	  YYSIZE_T yysize = 0;
 	  int yytype = YYTRANSLATE (yychar);
+	  const char* yyprefix;
 	  char *yymsg;
-	  int yyx, yycount;
+	  int yyx;
 
-	  yycount = 0;
 	  /* Start YYX at -YYN if negative to avoid negative indexes in
 	     YYCHECK.  */
-	  for (yyx = yyn < 0 ? -yyn : 0;
-	       yyx < (int) (sizeof (yytname) / sizeof (char *)); yyx++)
+	  int yyxbegin = yyn < 0 ? -yyn : 0;
+
+	  /* Stay within bounds of both yycheck and yytname.  */
+	  int yychecklim = YYLAST - yyn;
+	  int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+	  int yycount = 0;
+
+	  yyprefix = ", expecting ";
+	  for (yyx = yyxbegin; yyx < yyxend; ++yyx)
 	    if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
-	      yysize += yystrlen (yytname[yyx]) + 15, yycount++;
-	  yysize += yystrlen ("syntax error, unexpected ") + 1;
-	  yysize += yystrlen (yytname[yytype]);
+	      {
+		yysize += yystrlen (yyprefix) + yystrlen (yytname [yyx]);
+		yycount += 1;
+		if (yycount == 5)
+		  {
+		    yysize = 0;
+		    break;
+		  }
+	      }
+	  yysize += (sizeof ("syntax error, unexpected ")
+		     + yystrlen (yytname[yytype]));
 	  yymsg = (char *) YYSTACK_ALLOC (yysize);
 	  if (yymsg != 0)
 	    {
@@ -5865,16 +5886,13 @@ yyerrlab:
 
 	      if (yycount < 5)
 		{
-		  yycount = 0;
-		  for (yyx = yyn < 0 ? -yyn : 0;
-		       yyx < (int) (sizeof (yytname) / sizeof (char *));
-		       yyx++)
+		  yyprefix = ", expecting ";
+		  for (yyx = yyxbegin; yyx < yyxend; ++yyx)
 		    if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
 		      {
-			const char *yyq = ! yycount ? ", expecting " : " or ";
-			yyp = yystpcpy (yyp, yyq);
+			yyp = yystpcpy (yyp, yyprefix);
 			yyp = yystpcpy (yyp, yytname[yyx]);
-			yycount++;
+			yyprefix = " or ";
 		      }
 		}
 	      yyerror (yymsg);
@@ -5895,25 +5913,27 @@ yyerrlab:
       /* If just tried and failed to reuse lookahead token after an
 	 error, discard it.  */
 
-      /* Return failure if at end of input.  */
-      if (yychar == YYEOF)
+      if (yychar <= YYEOF)
         {
-	  /* Pop the error token.  */
-          YYPOPSTACK;
-	  /* Pop the rest of the stack.  */
-	  while (yyss < yyssp)
-	    {
-	      YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
-	      yydestruct (yystos[*yyssp], yyvsp);
-	      YYPOPSTACK;
-	    }
-	  YYABORT;
+          /* If at end of input, pop the error token,
+	     then the rest of the stack, then return failure.  */
+	  if (yychar == YYEOF)
+	     for (;;)
+	       {
+		 YYPOPSTACK;
+		 if (yyssp == yyss)
+		   YYABORT;
+		 YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
+		 yydestruct (yystos[*yyssp], yyvsp);
+	       }
         }
+      else
+	{
+	  YYDSYMPRINTF ("Error: discarding", yytoken, &yylval, &yylloc);
+	  yydestruct (yytoken, &yylval);
+	  yychar = YYEMPTY;
 
-      YYDSYMPRINTF ("Error: discarding", yytoken, &yylval, &yylloc);
-      yydestruct (yytoken, &yylval);
-      yychar = YYEMPTY;
-
+	}
     }
 
   /* Else will try to reuse lookahead token after shifting the error
@@ -5921,9 +5941,27 @@ yyerrlab:
   goto yyerrlab1;
 
 
-/*----------------------------------------------------.
-| yyerrlab1 -- error raised explicitly by an action.  |
-`----------------------------------------------------*/
+/*---------------------------------------------------.
+| yyerrorlab -- error raised explicitly by YYERROR.  |
+`---------------------------------------------------*/
+yyerrorlab:
+
+#ifdef __GNUC__
+  /* Pacify GCC when the user code never invokes YYERROR and the label
+     yyerrorlab therefore never appears in user code.  */
+  if (0)
+     goto yyerrorlab;
+#endif
+
+  yyvsp -= yylen;
+  yyssp -= yylen;
+  yystate = *yyssp;
+  goto yyerrlab1;
+
+
+/*-------------------------------------------------------------.
+| yyerrlab1 -- common code for both syntax error and YYERROR.  |
+`-------------------------------------------------------------*/
 yyerrlab1:
   yyerrstatus = 3;	/* Each real token shifted decrements this.  */
 
@@ -5947,9 +5985,8 @@ yyerrlab1:
 
       YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
       yydestruct (yystos[yystate], yyvsp);
-      yyvsp--;
-      yystate = *--yyssp;
-
+      YYPOPSTACK;
+      yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
     }
 

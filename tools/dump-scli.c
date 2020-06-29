@@ -5,11 +5,12 @@
  *
  * Copyright (c) 2001 J. Schoenwaelder, Technical University of Braunschweig.
  * Copyright (c) 2002 J. Schoenwaelder, University of Osnabrueck.
+ * Copyright (c) 2004 J. Schoenwaelder, International University Bremen.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-scli.c 1655 2004-07-21 07:59:03Z schoenw $
+ * @(#) $Id: dump-scli.c 3203 2006-02-15 17:25:13Z schoenw $
  */
 
 /*
@@ -924,6 +925,55 @@ printHeaderIdentities(FILE *f, SmiModule *smiModule)
 
 
 static void
+printHeaderNotifications(FILE *f, SmiModule *smiModule)
+{
+    SmiNode      *smiNode;
+    int          cnt = 0;
+    unsigned int i;
+    char         *dName, *dModuleName;
+    char         *cModuleName;
+
+    dModuleName = translateUpper(smiModule->name);
+
+    for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_NOTIFICATION);
+	 smiNode;
+	 smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_NOTIFICATION)) {
+	if (smiNode->status == SMI_STATUS_UNKNOWN) {
+	    continue;
+	}
+	if (! cnt) {
+	    fprintf(f,
+		    "/*\n"
+		    " * Tables to map notifications to strings and vice versa.\n"
+		    " */\n"
+		    "\n");
+	}
+	cnt++;
+	dName = translateUpper(smiNode->name);
+	fprintf(f, "#define %s_%s\t", dModuleName, dName);
+	for (i = 0; i < smiNode->oidlen; i++) {
+	    fprintf(f, "%s%u", i ? "," : "", smiNode->oid[i]);
+	}
+	fprintf(f, "\n");
+	xfree(dName);
+    }
+    
+    if (cnt) {
+	cModuleName = translateLower(smiModule->name);
+	fprintf(f,
+		"\n"
+		"extern GNetSnmpIdentity const %s_notifications[];\n"
+		"\n",
+		cModuleName);
+	xfree(cModuleName);
+    }
+
+    xfree(dModuleName);
+}
+
+
+
+static void
 printParam(FILE *f, SmiNode *smiNode)
 {
     char *cName, *dNodeName, *dModuleName;
@@ -1116,6 +1166,11 @@ printHeaderTypedefMemberComment(FILE *f, SmiNode *smiNode, SmiType *smiType)
     if (s) {
 	fprintf(f, " %s", s);
 	free(s);
+    }
+    if (smiNode->units) {
+	fprintf(f, " [%s]", smiNode->units);
+    } else if (smiType->units) {
+	fprintf(f, " [%s]", smiNode->units);
     }
 }
 
@@ -1425,6 +1480,7 @@ dumpHeader(SmiModule *smiModule, char *baseName)
 
     printHeaderEnumerations(f, smiModule);
     printHeaderIdentities(f, smiModule);
+    printHeaderNotifications(f, smiModule);
     printHeaderTypedefs(f, smiModule);
 
     fprintf(f,
@@ -1586,6 +1642,66 @@ printStubIdentities(FILE *f, SmiModule *smiModule)
 		continue;
 	    }
 	    if (smiNode == moduleIdentityNode) {
+		continue;
+	    }
+	    cName = translate(smiNode->name);
+	    fprintf(f, "    { %s,\n"
+		    "      G_N_ELEMENTS(%s),\n"
+		    "      \"%s\" },\n",
+		    cName, cName, smiNode->name);
+	    xfree(cName);
+	}
+	
+	fprintf(f,
+		"    { 0, 0, NULL }\n"
+		"};\n"
+		"\n"
+		"\n");
+    }
+
+    xfree(dModuleName);
+    xfree(cModuleName);
+}
+
+
+
+static void
+printStubNotifications(FILE *f, SmiModule *smiModule)
+{
+    SmiNode   *smiNode;
+    char      *cName, *cModuleName;
+    char      *dName, *dModuleName;
+    int       cnt = 0;
+    
+    cModuleName = translateLower(smiModule->name);
+    dModuleName = translateUpper(smiModule->name);
+    
+    for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_NOTIFICATION);
+	 smiNode;
+	 smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_NOTIFICATION)) {
+	if (smiNode->status == SMI_STATUS_UNKNOWN) {
+	    continue;
+	}
+	cnt++;
+	cName = translate(smiNode->name);
+	dName = translateUpper(smiNode->name);
+	fprintf(f,
+		"static guint32 const %s[]\n\t= { %s_%s };\n",
+		cName, dModuleName, dName);
+	xfree(dName);
+	xfree(cName);
+    }
+
+    if (cnt) {
+	fprintf(f,
+		"\n"
+		"GNetSnmpIdentity const %s_notifications[] = {\n",
+		cModuleName);
+    
+	for (smiNode = smiGetFirstNode(smiModule, SMI_NODEKIND_NOTIFICATION);
+	     smiNode;
+	     smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_NOTIFICATION)) {
+	    if (smiNode->status == SMI_STATUS_UNKNOWN) {
 		continue;
 	    }
 	    cName = translate(smiNode->name);
@@ -2649,7 +2765,7 @@ printGetRowMethod(FILE *f, SmiModule *smiModule, SmiNode *rowNode)
 	    ");\n"
 	    "    if (len < 0) {\n"
 	    "        g_warning(\"%%s: invalid index values\", \"%s\");\n"
-	    "        s->error_status = GNET_SNMP_ERR_INTERNAL;\n"
+	    "        s->error_status = GNET_SNMP_PDU_ERR_INTERNAL;\n"
 	    "        return;\n"
 	    "    }\n",
 	    cRowName);
@@ -2670,7 +2786,7 @@ printGetRowMethod(FILE *f, SmiModule *smiModule, SmiNode *rowNode)
 	    "    g_list_foreach(in, (GFunc) gnet_snmp_varbind_delete, NULL);\n"
 	    "    g_list_free(in);\n"
 	    "    if (out) {\n"
-	    "        if (s->error_status != GNET_SNMP_ERR_NOERROR) {\n"
+	    "        if (s->error_status != GNET_SNMP_PDU_ERR_NOERROR) {\n"
 	    "            g_list_foreach(out, (GFunc) gnet_snmp_varbind_delete, NULL);\n"
 	    "            g_list_free(out);\n"
 	    "            return;\n"
@@ -2724,7 +2840,7 @@ printSetRowMethod(FILE *f, SmiModule *smiModule, SmiNode *rowNode)
 	    ");\n"
 	    "    if (len < 0) {\n"
 	    "        g_warning(\"%%s: invalid index values\", \"%s\");\n"
-	    "        s->error_status = GNET_SNMP_ERR_INTERNAL;\n"
+	    "        s->error_status = GNET_SNMP_PDU_ERR_INTERNAL;\n"
 	    "        return;\n"
 	    "    }\n"
 	    "\n",
@@ -3005,7 +3121,7 @@ printGetScalarsMethod(FILE *f, SmiModule *smiModule, SmiNode *groupNode)
 	    "    g_list_foreach(in, (GFunc) gnet_snmp_varbind_delete, NULL);\n"
 	    "    g_list_free(in);\n"
 	    "    if (out) {\n"
-	    "        if (s->error_status != GNET_SNMP_ERR_NOERROR) {\n"
+	    "        if (s->error_status != GNET_SNMP_PDU_ERR_NOERROR) {\n"
 	    "            g_list_foreach(out, (GFunc) gnet_snmp_varbind_delete, NULL);\n"
 	    "            g_list_free(out);\n"
 	    "            return;\n"
@@ -3265,6 +3381,7 @@ dumpStubs(SmiModule *smiModule, char *baseName)
 
     printStubEnumerations(f, smiModule);
     printStubIdentities(f, smiModule);
+    printStubNotifications(f, smiModule);
 
     printStubContraints(f, smiModule);
     printStubAttributes(f, smiModule);

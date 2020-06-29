@@ -10,7 +10,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smidump.h 1589 2003-09-17 12:45:28Z schoenw $
+ * @(#) $Id: smidump.h 3012 2005-11-14 16:23:17Z schoenw $
  */
 
 #ifndef _SMIDUMP_H
@@ -90,6 +90,7 @@ extern void initSmi(void);
 extern void initSming(void);
 extern void initSmiv3(void);
 extern void initSppi(void);
+extern void initSvg(void);
 extern void initImports(void);
 extern void initTypes(void);
 extern void initTree(void);
@@ -106,6 +107,7 @@ extern void initPerl(void);
 extern void initScli(void);
 extern void initXsd(void);
 extern void initSizes(void);
+extern void initCompliances(void);
 
 extern void initSql(void);
 extern void initFig(void);

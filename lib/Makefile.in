@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am 1675 2004-08-10 10:55:30Z strauss $
+# @(#) $Id: Makefile.am 3176 2006-02-08 10:02:50Z strauss $
 #
 
 
@@ -72,27 +72,18 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
-AR = @AR@
 AS = @AS@
 AWK = @AWK@
 BASH = @BASH@
 BISON = @BISON@
 CC = @CC@
 CFLAGS = @CFLAGS@
-CXX = @CXX@
-CXXCPP = @CXXCPP@
 DIFF = @DIFF@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
-EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-F77 = @F77@
 FLEX = @FLEX@
-GCJ = @GCJ@
-GCJFLAGS = @GCJFLAGS@
-HAVE_LIB = @HAVE_LIB@
 INT64_TYPE = @INT64_TYPE@
-LIB = @LIB@
 LIBSMI_MAJOR = @LIBSMI_MAJOR@
 LIBSMI_MINOR = @LIBSMI_MINOR@
 LIBSMI_PATCHLEVEL = @LIBSMI_PATCHLEVEL@
@@ -102,13 +93,11 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIBTOOL_REVISION = @LIBTOOL_REVISION@
 LIBTOOL_VERSION = @LIBTOOL_VERSION@
 LN_S = @LN_S@
-LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
-RC = @RC@
 SH = @SH@
 STATIC = @STATIC@
 STRIP = @STRIP@
@@ -126,6 +115,8 @@ EXTRA_DIST = parser-sming.y parser-smi.y 			  scanner-sming.l scanner-smi.l 			 
 
 include_HEADERS = smi.h
 CLEANFILES = parser-smi.output parser-sming.output
+MAINTAINERCLEANFILES = parser-smi.c parser-sming.c 			  scanner-smi.c scanner-sming.c 			  parser-smi.tab.h parser-sming.tab.h 			  errormacros.h
+
 man_MANS = libsmi.3 smi_config.3 smi_module.3 smi_macro.3 			  smi_node.3 smi_type.3 smi_render.3
 
 lib_LTLIBRARIES = libsmi.la
@@ -423,6 +414,7 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-libLTLIBRARIES mostlyclean-compile \
 		mostlyclean-libtool mostlyclean-tags \
 		mostlyclean-generic
@@ -465,55 +457,17 @@ installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
-parser-smi.c: parser-smi.y scanner-smi.h parser-smi.h
-	@if [ "$(BISON)" ] ; then \
-	    echo "$(BISON)" -v -t -d -psmi parser-smi.y ; \
-	    "$(BISON)" -v -t -d -psmi parser-smi.y ; \
-	else \
-	    echo "" ; \
-	    echo "NOTE: we cannot build the new parser-smi.c from parser-smi.y" ; \
-	    echo "" ; \
-	fi
-#	# bison-1.25 has a wrong yyparse() definition for pure reentrant code.
-	sed -e 's/int yyparse (void);/int yyparse ();/' \
-	    parser-smi.tab.c > parser-smi.tmp && \
-	mv parser-smi.tmp parser-smi.c
-	rm parser-smi.tab.c
+parser-smi.c parser-smi.tab.h: parser-smi.y scanner-smi.h parser-smi.h
+	$(BISON) --defines=parser-smi.tab.h -t -psmi -o parser-smi.c parser-smi.y
 
 parser-sming.c: parser-sming.y scanner-sming.h parser-sming.h
-	@if [ "$(BISON)" ] ; then \
-	    echo "$(BISON)" -v -t -d -psming parser-sming.y ; \
-	    "$(BISON)" -v -t -d -psming parser-sming.y ; \
-	else \
-	    echo "" ; \
-	    echo "NOTE: we cannot build the new parser-sming.c from parser-sming.y" ; \
-	    echo "" ; \
-	fi
-#	# bison-1.25 has a wrong yyparse() definition for pure reentrant code.
-	sed -e 's/int yyparse (void);/int yyparse ();/' \
-	    parser-sming.tab.c > parser-sming.tmp && \
-	mv parser-sming.tmp parser-sming.c
-	rm parser-sming.tab.c
+	$(BISON) --defines=parser-sming.tab.h -t -psming -o parser-sming.c parser-sming.y
 
 scanner-smi.c: scanner-smi.l scanner-smi.h parser-smi.tab.h
-	@if [ "$(FLEX)" ] ; then \
-	    echo "$(FLEX) -Cfe -Psmi -t scanner-smi.l > scanner-smi.c" ; \
-	    "$(FLEX)" -Cfe -Psmi -t scanner-smi.l > scanner-smi.c ; \
-	else \
-	    echo "" ; \
-	    echo "NOTE: we cannot build the new scanner-smi.c from scanner-smi.l" ; \
-	    echo "" ; \
-	fi
+	$(FLEX) -Cfe -Psmi -t scanner-smi.l > scanner-smi.c
 
 scanner-sming.c: scanner-sming.l scanner-sming.h parser-sming.tab.h
-	@if [ "$(FLEX)" ] ; then \
-	    echo "$(FLEX) -Cfe -Psming -t scanner-sming.l > scanner-sming.c" ; \
-	    "$(FLEX)" -Cfe -Psming -t scanner-sming.l > scanner-sming.c ; \
-	else \
-	    echo "" ; \
-	    echo "NOTE: we cannot build the new scanner-sming.c from scanner-sming.l" ; \
-	    echo "" ; \
-	fi
+	$(FLEX) -Cfe -Psming -t scanner-sming.l > scanner-sming.c
 
 error.h data.lo: errormacros.h
 

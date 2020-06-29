@@ -20,7 +20,7 @@
 # See the file "COPYING" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: Makefile.am 1588 2003-09-17 12:37:58Z schoenw $
+# @(#) $Id: Makefile.am 4432 2006-05-29 16:21:11Z strauss $
 #
 
 
@@ -72,27 +72,18 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
-AR = @AR@
 AS = @AS@
 AWK = @AWK@
 BASH = @BASH@
 BISON = @BISON@
 CC = @CC@
 CFLAGS = @CFLAGS@
-CXX = @CXX@
-CXXCPP = @CXXCPP@
 DIFF = @DIFF@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
-EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-F77 = @F77@
 FLEX = @FLEX@
-GCJ = @GCJ@
-GCJFLAGS = @GCJFLAGS@
-HAVE_LIB = @HAVE_LIB@
 INT64_TYPE = @INT64_TYPE@
-LIB = @LIB@
 LIBSMI_MAJOR = @LIBSMI_MAJOR@
 LIBSMI_MINOR = @LIBSMI_MINOR@
 LIBSMI_PATCHLEVEL = @LIBSMI_PATCHLEVEL@
@@ -102,13 +93,11 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIBTOOL_REVISION = @LIBTOOL_REVISION@
 LIBTOOL_VERSION = @LIBTOOL_VERSION@
 LN_S = @LN_S@
-LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
-RC = @RC@
 SH = @SH@
 STATIC = @STATIC@
 STRIP = @STRIP@
@@ -124,7 +113,7 @@ srcdir = @srcdir@
 
 INCLUDES = -I../lib
 
-EXTRA_DIST = smidump.h shhopt.h 			  $(man_MANS) 			  dump-fig.c
+EXTRA_DIST = smidump.h shhopt.h 			  $(man_MANS) 			  dump-fig.c 			  dump-svg-script.js
 
 
 bin_PROGRAMS = smiquery smilint smidump smidiff
@@ -140,17 +129,18 @@ smiquery_LDADD = ../lib/libsmi.la
 smilint_SOURCES = smilint.c shhopt.c
 smilint_LDADD = ../lib/libsmi.la
 
-smidump_SOURCES = smidump.c smidump.h shhopt.c 			  dump-sming.c dump-smi.c 			  dump-imports.c dump-types.c dump-tree.c 			  dump-mosy.c dump-corba.c dump-netsnmp.c 			  dump-jax.c dump-xml.c dump-identifiers.c 			  dump-metrics.c dump-cm.c dump-python.c 			  dump-perl.c dump-scli.c dump-xsd.c dump-sppi.c 			  dump-sizes.c
+smidump_SOURCES = smidump.c smidump.h shhopt.c 			  dump-sming.c dump-smi.c 			  dump-imports.c dump-types.c dump-tree.c 			  dump-mosy.c dump-corba.c dump-netsnmp.c 			  dump-jax.c dump-xml.c dump-identifiers.c 			  dump-metrics.c dump-cm.c dump-python.c 			  dump-perl.c dump-scli.c dump-xsd.c dump-sppi.c 			  dump-sizes.c dump-svg-script.h dump-svg.c 			  rea.h rea.c dump-compliance.c
 
-#			  dump-fig.c dump-smiv3.c 
-smidump_LDADD = ../lib/libsmi.la
+smidump_LDADD = ../lib/libsmi.la -lm
 
 smidiff_SOURCES = smidiff.c shhopt.c
 smidiff_LDADD = ../lib/libsmi.la
+
+MOSTLYCLEANFILES = dump-svg-script.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES =  smistrip smicache smiquery.1 smilint.1 smidump.1 \
-smidiff.1 smistrip.1 smicache.1
+smidiff.1 smistrip.1 smicache.1 mib2svg.cgi
 bin_PROGRAMS =  smiquery$(EXEEXT) smilint$(EXEEXT) smidump$(EXEEXT) \
 smidiff$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS)
@@ -173,7 +163,8 @@ dump-corba.$(OBJEXT) dump-netsnmp.$(OBJEXT) dump-jax.$(OBJEXT) \
 dump-xml.$(OBJEXT) dump-identifiers.$(OBJEXT) dump-metrics.$(OBJEXT) \
 dump-cm.$(OBJEXT) dump-python.$(OBJEXT) dump-perl.$(OBJEXT) \
 dump-scli.$(OBJEXT) dump-xsd.$(OBJEXT) dump-sppi.$(OBJEXT) \
-dump-sizes.$(OBJEXT)
+dump-sizes.$(OBJEXT) dump-svg.$(OBJEXT) rea.$(OBJEXT) \
+dump-compliance.$(OBJEXT)
 smidump_DEPENDENCIES =  ../lib/libsmi.la
 smidump_LDFLAGS = 
 smidiff_OBJECTS =  smidiff.$(OBJEXT) shhopt.$(OBJEXT)
@@ -189,9 +180,9 @@ man1dir = $(mandir)/man1
 MANS = $(man_MANS)
 
 NROFF = nroff
-DIST_COMMON =  Makefile.am Makefile.in smicache.1.in smicache.in \
-smidiff.1.in smidump.1.in smilint.1.in smiquery.1.in smistrip.1.in \
-smistrip.in
+DIST_COMMON =  Makefile.am Makefile.in mib2svg.cgi.in smicache.1.in \
+smicache.in smidiff.1.in smidump.1.in smilint.1.in smiquery.1.in \
+smistrip.1.in smistrip.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -226,6 +217,8 @@ smidiff.1: $(top_builddir)/config.status smidiff.1.in
 smistrip.1: $(top_builddir)/config.status smistrip.1.in
 	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 smicache.1: $(top_builddir)/config.status smicache.1.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+mib2svg.cgi: $(top_builddir)/config.status mib2svg.cgi.in
 	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-binPROGRAMS:
@@ -415,7 +408,9 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-dump-cm.o: dump-cm.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-cm.o: dump-cm.c ../config.h ../lib/smi.h smidump.h shhopt.h rea.h
+dump-compliance.o: dump-compliance.c ../config.h ../lib/smi.h smidump.h \
+	shhopt.h
 dump-corba.o: dump-corba.c ../config.h ../lib/smi.h smidump.h shhopt.h
 dump-identifiers.o: dump-identifiers.c ../config.h ../lib/smi.h \
 	smidump.h shhopt.h
@@ -434,10 +429,13 @@ dump-sizes.o: dump-sizes.c ../config.h ../lib/smi.h smidump.h shhopt.h
 dump-smi.o: dump-smi.c ../config.h ../lib/smi.h smidump.h shhopt.h
 dump-sming.o: dump-sming.c ../config.h ../lib/smi.h smidump.h shhopt.h
 dump-sppi.o: dump-sppi.c ../config.h ../lib/smi.h smidump.h shhopt.h
+dump-svg.o: dump-svg.c ../config.h ../lib/smi.h smidump.h shhopt.h rea.h \
+	dump-svg-script.h
 dump-tree.o: dump-tree.c ../config.h ../lib/smi.h smidump.h shhopt.h
 dump-types.o: dump-types.c ../config.h ../lib/smi.h smidump.h shhopt.h
 dump-xml.o: dump-xml.c ../config.h ../lib/smi.h smidump.h shhopt.h
 dump-xsd.o: dump-xsd.c ../config.h ../lib/smi.h smidump.h shhopt.h
+rea.o: rea.c ../config.h ../lib/smi.h smidump.h shhopt.h rea.h
 shhopt.o: shhopt.c shhopt.h
 smidiff.o: smidiff.c ../config.h ../lib/smi.h shhopt.h
 smidump.o: smidump.c ../config.h ../lib/smi.h shhopt.h smidump.h
@@ -473,6 +471,7 @@ installdirs:
 
 
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -521,6 +520,11 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
+
+dump-svg-script.h: dump-svg-script.js
+	(echo "const char *code =";cat dump-svg-script.js | sed -e 's/\\/&&/g;s/"/\\"/g;s/^/"/;s/$$/\\n"/'; echo ";") > dump-svg-script.h
+
+dump-svg.o: dump-svg-script.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
