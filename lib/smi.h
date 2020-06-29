@@ -1,14 +1,14 @@
 /*
  * smi.h --
  *
- *      Interface Definition of libsmi (version 2:26:0).
+ *      Interface Definition of libsmi (version 2:27:0).
  *
  * Copyright (c) 1999,2000 Frank Strauss, Technical University of Braunschweig.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smi.h.in 7734 2008-02-15 07:49:14Z schoenw $
+ * @(#) $Id: smi.h.in 8090 2008-04-18 12:56:29Z strauss $
  */
 
 #ifndef _SMI_H
@@ -16,7 +16,12 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
+#ifdef HAVE_LIMITS_H
+#include "limits.h"
+#endif
 #include <time.h>
 
 
@@ -25,13 +30,13 @@ extern "C" {
 #endif
 
 
-#define SMI_LIBRARY_VERSION "2:26:0"
+#define SMI_LIBRARY_VERSION "2:27:0"
 extern const char *smi_library_version;
 
 #define SMI_VERSION_MAJOR 0
 #define SMI_VERSION_MINOR 4
-#define SMI_VERSION_PATCHLEVEL 7
-#define SMI_VERSION_STRING "0.4.7"
+#define SMI_VERSION_PATCHLEVEL 8
+#define SMI_VERSION_STRING "0.4.8"
 extern const char *smi_version_string;
 
 
@@ -90,12 +95,24 @@ typedef enum SmiBasetype {
     SMI_BASETYPE_POINTER		= 12  /* only SMIng                  */
 } SmiBasetype;
 
+#ifdef INT32_MIN
 #define SMI_BASETYPE_INTEGER32_MIN  INT32_MIN
+#else
+#define SMI_BASETYPE_INTEGER32_MIN  INT_MIN
+#endif
+#ifdef INT32_MAX
 #define SMI_BASETYPE_INTEGER32_MAX  INT32_MAX
+#else
+#define SMI_BASETYPE_INTEGER32_MAX  INT_MAX
+#endif
 #define SMI_BASETYPE_INTEGER64_MIN  LIBSMI_INT64_MIN
 #define SMI_BASETYPE_INTEGER64_MAX  LIBSMI_INT64_MAX
 #define SMI_BASETYPE_UNSIGNED32_MIN 0
+#ifdef UINT32_MAX
 #define SMI_BASETYPE_UNSIGNED32_MAX UINT32_MAX
+#else
+#define SMI_BASETYPE_UNSIGNED32_MAX UINT_MAX
+#endif
 #define SMI_BASETYPE_UNSIGNED64_MIN 0
 #define SMI_BASETYPE_UNSIGNED64_MAX LIBSMI_UINT64_MAX
 
@@ -200,7 +217,7 @@ typedef struct SmiValue {
         SmiFloat64          float64;
         SmiFloat128         float128;
         SmiSubid	    *oid;
-        unsigned char       *ptr;	 /* OctetString, Bits                */
+        char                *ptr;	 /* OctetString, Bits                */
     } value;
 } SmiValue;
 
@@ -247,7 +264,7 @@ typedef struct SmiMacro {
     SmiStatus           status;
     char                *description;
     char                *reference;
-    char		*abnf; //only for SMIng
+    char		*abnf; /* only for SMIng */
 } SmiMacro;
 
 /* SmiIdentity -- the main structure of a SMIng Identity.		     */
@@ -611,6 +628,37 @@ extern int smiAsprintf(char **strp, const char *format, ...);
 extern int smiVasprintf(char **strp, const char *format, va_list ap);
 
 
+/*
+ * The functions smiMalloc() and friends are used within the library
+ * for all memory allocations and deallocations. These functions are
+ * simple wrappers around the standard malloc() and friends functions,
+ * sometimes with some additional checking. We export these functions
+ * because on some systems (e.g. Windows) it is necessary to allocate
+ * / deallocate memory with the 'right' version of malloc() and
+ * friends.
+ */
+
+#ifdef HAVE_DMALLOC_H
+
+extern void *_smiMalloc(char *, int, size_t);
+extern void *_smiRealloc(char *, int, void *ptr, size_t size);
+extern char *_smiStrdup(char *, int, const char *s1);
+extern char *_smiStrndup(char *, int, const char *s1, size_t n);
+extern void _smiFree(char *, int, void *ptr);
+
+#define	smiMalloc(s)	_smiMalloc(__FILE__, __LINE__, s)
+#define	smiRealloc(p,s)	_smiRealloc(__FILE__, __LINE__, p, s)
+#define	smiStrdup(s)	_smiStrdup(__FILE__, __LINE__, s)
+#define	smiStrndup(s,n)	_smiStrndup(__FILE__, __LINE__, s, n)
+#define	smiFree(p)	_smiFree(__FILE__, __LINE__, p)
+
+#else
+extern void *smiMalloc(size_t size);
+extern void *smiRealloc(void *ptr, size_t size);
+extern char *smiStrdup(const char *s1);
+extern char *smiStrndup(const char *s1, size_t n);
+extern void smiFree(void *ptr);
+#endif
 
 #ifdef __cplusplus
 }

@@ -8,7 +8,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-sizes.c 7678 2008-02-05 09:20:32Z schoenw $
+ * @(#) $Id: dump-sizes.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 #include <config.h>
@@ -830,6 +830,7 @@ append_index(SmiSubid *oid, unsigned int *oidlen,
      case SMI_BASETYPE_FLOAT32:
      case SMI_BASETYPE_FLOAT64:
      case SMI_BASETYPE_FLOAT128:
+     case SMI_BASETYPE_POINTER:
 	 /* should never really get here */
 	 break;
      }

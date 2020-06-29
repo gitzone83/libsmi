@@ -11,7 +11,7 @@
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: dump-xsd.c 7768 2008-02-22 13:34:52Z tklie $
+ * @(#) $Id: dump-xsd.c 8090 2008-04-18 12:56:29Z strauss $
  */
 
 #include <config.h>
@@ -705,6 +705,9 @@ static void fprintRestriction(FILE *f, SmiType *smiType)
     case SMI_BASETYPE_UNKNOWN:
 	/* should not occur */
 	break;
+    case SMI_BASETYPE_POINTER:
+	/* TODO */
+	break;
     }
 }
     
@@ -891,6 +894,7 @@ static void fprintSubRangeType( FILE *f,
     case SMI_BASETYPE_BITS:
     case SMI_BASETYPE_OBJECTIDENTIFIER:
     case SMI_BASETYPE_UNKNOWN:
+    case SMI_BASETYPE_POINTER:
 	/* should not occur */
 	break;
 	
