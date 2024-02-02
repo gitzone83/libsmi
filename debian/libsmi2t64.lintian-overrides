@@ -1,0 +1,4 @@
+# The package does not match the soname because there was an ABI
+# change and no new upstream version since.
+libsmi2t64: package-name-doesnt-match-sonames libsmi2
+libsmi2t64: package-name-doesnt-match-sonames libsmi2ldbl

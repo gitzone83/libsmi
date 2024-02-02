@@ -9,8 +9,8 @@ Homepage: http://www.ibr.cs.tu-bs.de/projects/libsmi/
 Package: smitools
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Conflicts: libsmi2ldbl (<= 0.4.8+dfsg2-4)
-Replaces: libsmi2ldbl (<= 0.4.8+dfsg2-4)
+Conflicts: libsmi2t64 (<= 0.4.8+dfsg2-4)
+Replaces: libsmi2t64 (<= 0.4.8+dfsg2-4)
 Description: various tools operating on MIB module files
  This package includes the following tools:
    * smidiff: check differences between a pair of SMI or SPPI modules
@@ -26,21 +26,24 @@ Description: various tools operating on MIB module files
 Package: smistrip
 Architecture: all
 Depends: ${misc:Depends}
-Conflicts: libsmi2ldbl (<= 0.4.8+dfsg2-1)
-Replaces: libsmi2ldbl (<= 0.4.8+dfsg2-1)
+Conflicts: libsmi2t64 (<= 0.4.8+dfsg2-1)
+Replaces: libsmi2t64 (<= 0.4.8+dfsg2-1)
 Description: extract MIB from text files like RFC
  The smistrip program is used to extract MIB and PIB module files from
  ASCII documents like RFCs or Internet Drafts. Modules are identified
  by a starting ASN.1 DEFINITIONS clause and the matching END
  clause. The output is written to files named by the modules' names.
 
-Package: libsmi2ldbl
+Package: libsmi2t64
+Provides: ${t64:Provides}
+X-Time64-Compat: libsmi2ldbl
+Breaks: libsmi2ldbl (<< ${source:Version})
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Conflicts: libsmi0, libsmi1, libsmi2
-Replaces: libsmi0, libsmi1, libsmi2
+Replaces: libsmi2ldbl, libsmi0, libsmi1, libsmi2
 Suggests: snmp-mibs-downloader
 Description: library to access SMI MIB information 
  The purpose of libsmi is to 
@@ -59,10 +62,10 @@ Description: library to access SMI MIB information
 
 Package: libsmi2-dev
 Architecture: any
-Depends: libsmi2ldbl (= ${binary:Version}), ${misc:Depends}
+Depends: libsmi2t64 (= ${binary:Version}), ${misc:Depends}
 Provides: libsmi-dev
 Conflicts: libsmi-dev
-Replaces: libsmi2ldbl (<< 0.4.8)
+Replaces: libsmi2t64 (<< 0.4.8)
 Section: libdevel
 Description: library to access SMI MIB information - development files
  These are the files needed to compile programs using libsmi.
