@@ -1,4 +1,4 @@
-libsmi.so.2 libsmi2ldbl #MINVER#
+libsmi.so.2 libsmi2t64 #MINVER#
  addAttribute@Base 0.4.7
  addClass@Base 0.4.7
  addEvent@Base 0.4.7
