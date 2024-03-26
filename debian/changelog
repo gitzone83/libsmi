@@ -1,3 +1,9 @@
+libsmi (0.4.8+dfsg2-17) unstable; urgency=medium
+
+  * Add /var/lib/mibs/site to default search path. Closes: #1067768.
+
+ -- Vincent Bernat <bernat@debian.org>  Tue, 26 Mar 2024 21:29:53 +0100
+
 libsmi (0.4.8+dfsg2-16.1) unstable; urgency=medium
 
   * Non-maintainer upload.
