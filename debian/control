@@ -1,6 +1,7 @@
 Source: libsmi
 Priority: optional
-Maintainer: Vincent Bernat <bernat@debian.org>
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Vincent Bernat <bernat@debian.org>
 Build-Depends: dpkg-dev (>= 1.22.5), flex, bison, debhelper (>= 9), dh-autoreconf
 Section: libs
 Standards-Version: 3.9.8
