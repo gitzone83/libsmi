@@ -1,3 +1,9 @@
+libsmi (0.4.8+dfsg2-16.1build1) noble; urgency=medium
+
+  * No-change rebuild for CVE-2024-3094
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 31 Mar 2024 02:16:58 +0000
+
 libsmi (0.4.8+dfsg2-16.1) unstable; urgency=medium
 
   * Non-maintainer upload.
