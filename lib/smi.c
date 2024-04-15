@@ -60,7 +60,6 @@ const char *smi_version_string = SMI_VERSION_STRING;
 Handle *smiHandle = NULL;
 
 
-
 /*
  * Internal functions.
  */
@@ -318,14 +317,10 @@ int smiSetPath(const char *s)
     
 }
 
-
-
 void smiSetSeverity(char *pattern, int severity)
 {
     smiSetErrorSeverity(pattern, severity);
 }
-
-
 
 int smiReadConfig(const char *filename, const char *tag)
 {
@@ -381,6 +376,8 @@ int smiReadConfig(const char *filename, const char *tag)
 		}
 	    } else if (!strcmp(cmd, "level")) {
 		smiSetErrorLevel(atoi(arg));
+	    } else if (!strcmp(cmd, "width")) {
+	    smiSetWidth(atoi(arg));
 	    } else if (!strcmp(cmd, "hide")) {
 		smiSetSeverity(arg, 9);
 	    } else {
@@ -402,8 +399,6 @@ int smiIsLoaded(const char *module)
     
     return isInView(module);
 }
-
-
 
 char *smiLoadModule(const char *module)
 {
@@ -454,7 +449,18 @@ void smiSetErrorLevel(int level)
     smiHandle->errorLevel = level;
 }
 
+void smiSetWidth(int width)
+{
+    if (!smiHandle) smiInit(NULL);
 
+    smiHandle->width = width;
+}
+
+int smiGetWidth()
+{
+    if (!smiHandle) smiInit(NULL);
+    return smiHandle->width;
+}
 
 void smiSetFlags(int userflags)
 {
@@ -462,8 +468,6 @@ void smiSetFlags(int userflags)
     
     smiHandle->flags = (smiHandle->flags & ~SMI_FLAG_MASK) | userflags;
 }
-
-
 
 int smiGetFlags()
 {
@@ -1314,14 +1318,9 @@ SmiNode *smiGetNode(SmiModule *smiModulePtr, const char *node)
     }
 
     if (isdigit((int)node2[0])) {
-	for (oidlen = 0, p = strtok(node2, ". ");
-	     p && oidlen < sizeof(oid)/sizeof(oid[0]);
+	for (oidlen = 0, p = strtok(node2, ". "); p;
 	     oidlen++, p = strtok(NULL, ". ")) {
 	    oid[oidlen] = strtoul(p, NULL, 0);
-	}
-	if (p) {
-	    /* the numeric OID is too long */
-	    return NULL;
 	}
 	nodePtr = getNode(oidlen, oid);
 	if (nodePtr) {
@@ -2139,7 +2138,6 @@ char *smiRenderValue(SmiValue *smiValuePtr, SmiType *smiTypePtr, int flags)
 	break;
     case SMI_BASETYPE_OCTETSTRING:
 	if (!(flags & SMI_RENDER_FORMAT) ||
-            (!smiTypePtr->format && !smiTypePtr->name) ||
 	    (!smiTypePtr->format &&
 	     (smiTypePtr->name && strcmp( smiTypePtr->name, "IpAddress")) ) ) {
 	    for (i = 0; i < smiValuePtr->len; i++) {
