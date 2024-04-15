@@ -33,7 +33,7 @@ extern int smiAsprintf(char **strp, const char *format, ...);
 #define  INDENTVALUE	16   /* column to start values, except multiline */
 #define  INDENTTEXTS	 9   /* column to start multiline texts */
 #define  INDENTTEXTS2	15   /* column to start indented multiline texts */
-#define  INDENTMAX	72   /* max column to fill, break lines otherwise */
+#define  INDENTMAX	68   /* max column to fill, break lines otherwise */
 
 
 
@@ -154,8 +154,6 @@ typedef struct Import {
 
 static Import *importList = NULL;
 
-
-
 static int invalidType(SmiBasetype basetype)
 {
     if (smiv1) {
@@ -175,8 +173,6 @@ static int invalidType(SmiBasetype basetype)
 	    || (basetype == SMI_BASETYPE_FLOAT128);
     }
 }
-
-
 
 static char *getStatusString(SmiStatus status)
 {
@@ -198,8 +194,6 @@ static char *getStatusString(SmiStatus status)
 					         "<unknown>";
     }
 }
-
-
 
 static char *getAccessString(SmiAccess access, int create)
 {
@@ -235,8 +229,6 @@ static char *getAccessString(SmiAccess access, int create)
     }
 }
 
-
-
 static char *getTimeString(time_t t)
 {
     static char   *s = NULL;
@@ -250,8 +242,6 @@ static char *getTimeString(time_t t)
 		tm->tm_hour, tm->tm_min);
     return s;
 }
-
-
 
 static char *getTypeString(SmiBasetype basetype, SmiType *smiType)
 {
@@ -301,8 +291,6 @@ static char *getTypeString(SmiBasetype basetype, SmiType *smiType)
 
     return typeName;
 }
-
-
 
 static char *getOidString(SmiNode *smiNode, int importedParent)
 {
@@ -362,8 +350,6 @@ static char *getOidString(SmiNode *smiNode, int importedParent)
     return s;
 }
 
-
-
 static char *getUppercaseString(char *s)
 {
     static char *ss;
@@ -372,8 +358,6 @@ static char *getUppercaseString(char *s)
     ss[0] = (char)toupper((int)ss[0]);
     return ss;
 }
-
-
 
 static int isObjectGroup(SmiNode *groupNode)
 {
@@ -394,8 +378,6 @@ static int isObjectGroup(SmiNode *groupNode)
     return 1;
 }
 
-
-
 static int isNotificationGroup(SmiNode *groupNode)
 {
     SmiNode     *smiNode;
@@ -413,8 +395,6 @@ static int isNotificationGroup(SmiNode *groupNode)
 
     return 1;
 }
-
-
 
 static Import* addImport(char *module, char *name)
 {
@@ -465,8 +445,6 @@ static Import* addImport(char *module, char *name)
 	
     return *import;
 }
-
-
 
 static void createImportList(SmiModule *smiModule)
 {
@@ -630,8 +608,6 @@ static void createImportList(SmiModule *smiModule)
     }
 }
 
-
-
 static void freeImportList(void)
 {
     Import *import, *freeme;
@@ -643,8 +619,6 @@ static void freeImportList(void)
     }
     importList = NULL;
 }
-
-
 
 static void fprint(FILE *f, char *fmt, ...)
 {
@@ -661,8 +635,6 @@ static void fprint(FILE *f, char *fmt, ...)
     }
     free(s);
 }
-
-
 
 static void fprintSegment(FILE *f, int column, char *string,
 			  int length, int comment)
@@ -682,8 +654,6 @@ static void fprintSegment(FILE *f, int column, char *string,
     }
 }
 
-
-
 static void fprintWrapped(FILE *f, int column, char *string, int comment)
 {
     if ((current_column + strlen(string)) > INDENTMAX) {
@@ -694,51 +664,196 @@ static void fprintWrapped(FILE *f, int column, char *string, int comment)
     fprint(f, "%s", string);
 }
 
-
-
 static void fprintMultilineString(FILE *f, const char *s, const int comment)
 {
     int i, len;
     
+    int width = smiGetWidth() > 0 ? smiGetWidth() : INDENTMAX;
+
     fprintSegment(f, INDENTTEXTS - 1, "\"", 0, comment);
-    if (s) {
+
+	// get the length of the string
 	len = strlen(s);
-	for (i=0; i < len; i++) {
-	    putc(s[i], f);
-	    current_column++;
-	    if (s[i] == '\n') {
-		current_column = 0;
-		fprintSegment(f, INDENTTEXTS, "", 0, comment);
-	    }
-	}
+
+    // process the string
+    if (s) {
+
+        // copy the input string (s) to a new temporary array
+        char * s_new = xstrdup(s);
+
+    	// remove any newline characters from text and convert them into spaces
+        for (i=0; i < len; i++)
+    		if (s_new[i] == '\n')
+    			s_new[i] = ' ';
+
+        // delimiter
+        char s_delimiter[] = " ";
+
+        // set the column number
+        int current_column_local = INDENTTEXTS;
+
+        // split the string s_new and print the output
+        char * s_new_split = strtok(s_new, s_delimiter);
+        while (s_new_split != NULL) {
+
+        	// put a newline when the length of the next segment would exceed the established limit (INDENTMAX)
+        	if (current_column_local + strlen(s_new_split) >= width) {
+        		putc('\n', f);
+        		current_column_local = INDENTTEXTS;
+				fprintSegment(f, INDENTTEXTS, "", 0, comment);
+        	}
+
+        	// add space after the last printed block if some text was previously printed
+        	if (current_column_local > INDENTTEXTS) {
+        		putc(' ', f);
+        		current_column_local++;
+        	}
+
+        	// print the next segment
+       		fprintf(f, "%s", s_new_split);
+       		current_column_local += strlen(s_new_split);
+
+       		// continue with the text split
+        	s_new_split = strtok(NULL, s_delimiter);
+        }
+
+        // release the memory
+        xfree(s_new);
     }
+
     putc('\"', f);
-    current_column++;
+
 }
 
+static void freplaceSpaces(char *s)
+{
+    char *p = s;
+    char *orig = s;
+
+    while (*s != '\0')
+    {
+        while (isspace(*s) && isspace(*(s + 1)))
+            s++;
+
+        if (p == orig && *s == ' ')
+            s++;
+
+       *p++ = *s++;
+    }
+
+    *p = '\0';
+}
+
+static void fprintMultilineStringNoRewrite(FILE *f, const char *s, const int comment)
+{
+    int i, len;
+
+    int width = smiGetWidth() > 0 ? smiGetWidth() : INDENTMAX;
+
+    fprintSegment(f, INDENTTEXTS - 1, "\"", 0, comment);
+
+	// get the length of the string
+	len = strlen(s);
+
+    // process the string
+    if (s) {
+
+        // copy the input string (s) to a new temporary array
+        char * s_new = xstrdup(s);
+
+        // remove any double spaces
+        freplaceSpaces(s_new);
+
+        // delimiter
+        char s_delimiter[] = "\n";
+
+        // set the column number
+        int current_line_local = 0;
+
+        // split the string s_new and print the output
+        char * s_new_split = strtok(s_new, s_delimiter);
+        while (s_new_split != NULL) {
+
+        	// print the next line
+        	if (current_line_local != 0) {
+        		putc('\n', f);
+        		fprintSegment(f, INDENTTEXTS, "", 0, comment);
+        	}
+        	fprintf(f, "%s", s_new_split);
+        	current_line_local++;
+
+       		// continue with the text split
+        	s_new_split = strtok(NULL, s_delimiter);
+        }
+
+        // release the memory
+        xfree(s_new);
+    }
+
+    putc('\"', f);
+
+}
 
 
 static void fprintMultilineString2(FILE *f, const char *s, const int comment)
 {
     int i, len;
     
+    int width = smiGetWidth() > 0 ? smiGetWidth() : INDENTMAX;
+
     fprintSegment(f, INDENTTEXTS2 - 1, "\"", 0, comment);
-    if (s) {
+
+	// get the length of the string
 	len = strlen(s);
-	for (i=0; i < len; i++) {
-	    putc(s[i], f);
-	    current_column++;
-	    if (s[i] == '\n') {
-		current_column = 0;
-		fprintSegment(f, INDENTTEXTS2, "", 0, comment);
-	    }
-	}
+
+    // process the string
+    if (s) {
+
+        // copy the input string (s) to a new temporary array
+        char * s_new = xstrdup(s);
+
+    	// remove any newline characters from text and convert them into spaces
+    	for (i=0; i < len; i++)
+    		if (s_new[i] == '\n')
+    			s_new[i] = ' ';
+
+        // delimiter
+        char s_delimiter[] = " ";
+
+        // set the column number
+        int current_column_local = INDENTTEXTS2;
+
+        // split the string s_new and print the output
+        char * s_new_split = strtok(s_new, s_delimiter);
+        while (s_new_split != NULL) {
+
+        	// put a newline when the length of the next segment would exceed the established limit (INDENTMAX)
+        	if (current_column_local + strlen(s_new_split) >= INDENTMAX) {
+        		putc('\n', f);
+        		current_column_local = INDENTTEXTS2;
+				fprintSegment(f, INDENTTEXTS2, "", 0, comment);
+        	}
+
+        	// add space after the last printed block if some text was previously printed
+        	if (current_column_local > INDENTTEXTS2) {
+        		putc(' ', f);
+        		current_column_local++;
+        	}
+
+        	// print the next segment
+       		fprintf(f, "%s", s_new_split);
+       		current_column_local += strlen(s_new_split);
+
+       		// continue with the text split
+        	s_new_split = strtok(NULL, s_delimiter);
+        }
+
+        // release the memory
+        xfree(s_new);
     }
+
     putc('\"', f);
-    current_column++;
 }
-
-
 
 static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
 {
@@ -843,8 +958,6 @@ static char *getValueString(SmiValue *valuePtr, SmiType *typePtr)
     return s;
 }
 
-
-
 static void fprintSubtype(FILE *f, SmiType *smiType, const int comment)
 {
     SmiRange       *range;
@@ -912,8 +1025,6 @@ static void fprintSubtype(FILE *f, SmiType *smiType, const int comment)
     }
 }
 
-
-
 static void fprintIndex(FILE *f, SmiNode *indexNode, const int comment)
 {
     SmiElement *smiElement, *smiFirstElement;
@@ -941,8 +1052,6 @@ static void fprintIndex(FILE *f, SmiNode *indexNode, const int comment)
     } /* TODO: empty? -> print error */
     fprint(f, " }\n");
 }
-
-
 
 static void fprintImports(FILE *f)
 {
@@ -1002,8 +1111,6 @@ static void fprintImports(FILE *f)
     }
 }
 
-
-
 static void fprintModuleIdentity(FILE *f, SmiModule *smiModule)
 {
     SmiRevision  *smiRevision;
@@ -1022,31 +1129,37 @@ static void fprintModuleIdentity(FILE *f, SmiModule *smiModule)
 	if (! smiv1 || ! silent) {
 
 	    if (smiv1) {
-		fprint(f, "-- %s MODULE-IDENTITY\n", smiNode->name);
+	    	fprint(f, "-- %s MODULE-IDENTITY\n", smiNode->name);
 	    } else {
-		fprint(f, "%s MODULE-IDENTITY\n", smiNode->name);
+	    	fprint(f, "%s MODULE-IDENTITY\n", smiNode->name);
 	    }
+
 	    fprintSegment(f, INDENT, "LAST-UPDATED", INDENTVALUE, smiv1);
 	    smiRevision = smiGetFirstRevision(smiModule);
+
 	    if (smiRevision)
-		fprint(f, "\"%s\"\n", getTimeString(smiRevision->date));
+	    	fprint(f, "\"%s\"\n", getTimeString(smiRevision->date));
 	    else
-		fprint(f, "\"197001010000Z\"\n");
+	    	fprint(f, "\"197001010000Z\"\n");
+
 	    fprintSegment(f, INDENT, "ORGANIZATION", INDENTVALUE, smiv1);
 	    fprint(f, "\n");
 	    fprintMultilineString(f, smiModule->organization, smiv1);
 	    fprint(f, "\n");
 	    fprintSegment(f, INDENT, "CONTACT-INFO", INDENTVALUE, smiv1);
 	    fprint(f, "\n");
-	    fprintMultilineString(f, smiModule->contactinfo, smiv1);
+	    fprintf(stderr, "\n========================\nfprintModuleIdentity:\n%s\n========================\n",smiModule->contactinfo);
+	    fprintMultilineStringNoRewrite(f, smiModule->contactinfo, smiv1);
 	    fprint(f, "\n");
 	    fprintSegment(f, INDENT, "DESCRIPTION", INDENTVALUE, smiv1);
 	    fprint(f, "\n");
+
 	    if (smiModule->description) {
-		fprintMultilineString(f, smiModule->description, smiv1);
+	    	fprintMultilineString(f, smiModule->description, smiv1);
 	    } else {
-		fprintMultilineString(f, "...", smiv1);
+	    	fprintMultilineString(f, "...", smiv1);
 	    }
+
 	    fprint(f, "\n");
 	    
 	    for(; smiRevision;
@@ -1084,11 +1197,11 @@ static void fprintModuleIdentity(FILE *f, SmiModule *smiModule)
     }
 }
 
-
-
 static void fprintTypeDefinition(FILE *f, SmiType *smiType)
 {
     int		 invalid;
+
+    // fprintf(stderr, "\nX-fprintTypeDefinition: %s\n",smiType->description);
 
     if (smiType->status == SMI_STATUS_UNKNOWN) {
 	invalid = invalidType(smiType->basetype);
@@ -1105,8 +1218,6 @@ static void fprintTypeDefinition(FILE *f, SmiType *smiType)
     }
 }
 
-
-
 static void fprintTypeDefinitions(FILE *f, SmiModule *smiModule)
 {
     SmiType	 *smiType;
@@ -1116,8 +1227,6 @@ static void fprintTypeDefinitions(FILE *f, SmiModule *smiModule)
 	fprintTypeDefinition(f, smiType);
     }
 }
-
-
 
 static void fprintTextualConvention(FILE *f, SmiType *smiType)
 {
@@ -1213,8 +1322,6 @@ static void fprintTextualConvention(FILE *f, SmiType *smiType)
     }
 }
 
-
-
 static void fprintTextualConventions(FILE *f, SmiModule *smiModule)
 {
     SmiType	 *smiType;
@@ -1224,7 +1331,6 @@ static void fprintTextualConventions(FILE *f, SmiModule *smiModule)
 	fprintTextualConvention(f, smiType);
     }
 }
-
 
 static int isInIndex(SmiNode *node, SmiNode *parentNode)
 {
@@ -1242,7 +1348,6 @@ static int isInIndex(SmiNode *node, SmiNode *parentNode)
             return 1;
     return 0;
 }
-
 
 static void fprintObjects(FILE *f, SmiModule *smiModule)
 {
@@ -1552,8 +1657,6 @@ static void fprintObjects(FILE *f, SmiModule *smiModule)
     }
 }
 
-
-
 static void fprintNotifications(FILE *f, SmiModule *smiModule)
 {
     SmiNode	 *smiNode, *parentNode;
@@ -1626,8 +1729,6 @@ static void fprintNotifications(FILE *f, SmiModule *smiModule)
 	}
     }
 }
-
-
 
 static void fprintGroups(FILE *f, SmiModule *smiModule)
 {
@@ -1705,8 +1806,6 @@ static void fprintGroups(FILE *f, SmiModule *smiModule)
 	}
     }
 }
-
-
 
 static void fprintModuleCompliances(FILE *f, SmiModule *smiModule)
 {
@@ -1909,7 +2008,7 @@ static void fprintModuleCompliances(FILE *f, SmiModule *smiModule)
     xfree(done);
 }
 
-
+// the actual high level function to print SMI code
 
 static void dumpSmi(FILE *f, SmiModule *smiModule, int flags)
 {
@@ -1984,6 +2083,7 @@ static void dumpSmiV1(int modc, SmiModule **modv, int flags, char *output)
     }
 }
 
+// extra comments, prints SMIv2 code for the target modules
 
 static void dumpSmiV2(int modc, SmiModule **modv, int flags, char *output)
 {
