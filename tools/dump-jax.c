@@ -1,672 +1,1528 @@
 /*
- * smi.h --
+ * dump-jax.c --
  *
- *      Interface Definition of libsmi (version 2:27:0).
+ *      Operations to generate JAX AgentX class files.
  *
- * Copyright (c) 1999,2000 Frank Strauss, Technical University of Braunschweig.
+ * Copyright (c) 2000 Frank Strauss, Technical University of Braunschweig.
  *
  * See the file "COPYING" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * @(#) $Id: smi.h.in 8090 2008-04-18 12:56:29Z strauss $
+ * @(#) $Id: dump-jax.c 1455 2002-10-30 09:17:37Z schoenw $
  */
 
-#ifndef _SMI_H
-#define _SMI_H
+#include <config.h>
 
 #include <stdlib.h>
-#include <stdarg.h>
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
-#ifdef HAVE_LIMITS_H
-#include "limits.h"
-#endif
-#include <time.h>
-
-
-#ifdef __cplusplus
-extern "C" {
+#ifdef HAVE_WIN_H
+#include "win.h"
 #endif
 
-
-#define SMI_LIBRARY_VERSION "2:27:0"
-extern const char *smi_library_version;
-
-#define SMI_VERSION_MAJOR 0
-#define SMI_VERSION_MINOR 4
-#define SMI_VERSION_PATCHLEVEL 9
-#define SMI_VERSION_STRING "0.4.9"
-extern const char *smi_version_string;
-
-
-
-#define SMI_FLAG_NODESCR   0x0800 /* do not load descriptions/references.    */
-#define SMI_FLAG_VIEWALL   0x1000 /* all modules are `known', need no views. */
-#define SMI_FLAG_ERRORS    0x2000 /* print parser errors.                    */
-#define SMI_FLAG_RECURSIVE 0x4000 /* recursively parse imported modules.     */
-#define SMI_FLAG_STATS     0x8000 /* print statistics after parsing module.  */
-#define SMI_FLAG_MASK      (SMI_FLAG_NODESCR|SMI_FLAG_VIEWALL|SMI_FLAG_STATS|\
-			    SMI_FLAG_RECURSIVE|SMI_FLAG_ERRORS)
-
-
-
-/* misc mappings of SMI types to C types                                     */
-typedef char                    *SmiIdentifier;
-typedef unsigned long           SmiUnsigned32;
-typedef long                    SmiInteger32;
-#ifdef _MSC_VER /* if using MSVC and not configure */
-typedef __int64                 SmiInteger64;
-typedef unsigned __int64        SmiUnsigned64;
-#else
-typedef unsigned long long           SmiUnsigned64;
-typedef long long            SmiInteger64;
-#endif
-typedef unsigned int            SmiSubid;
-typedef float                   SmiFloat32;
-typedef double                  SmiFloat64;
-typedef long double             SmiFloat128;
-
-
-
-/* SmiLanguage -- language of an actual MIB module                           */
-typedef enum SmiLanguage {
-    SMI_LANGUAGE_UNKNOWN                = 0,  /* should not occur            */
-    SMI_LANGUAGE_SMIV1                  = 1,
-    SMI_LANGUAGE_SMIV2                  = 2,
-    SMI_LANGUAGE_SMING                  = 3,
-    SMI_LANGUAGE_SPPI                   = 4
-} SmiLanguage;
-
-/* SmiBasetype -- base types of all languages                                */
-typedef enum SmiBasetype {
-    SMI_BASETYPE_UNKNOWN                = 0,  /* should not occur            */
-    SMI_BASETYPE_INTEGER32              = 1,  /* also SMIv1/v2 INTEGER       */
-    SMI_BASETYPE_OCTETSTRING            = 2,
-    SMI_BASETYPE_OBJECTIDENTIFIER       = 3,
-    SMI_BASETYPE_UNSIGNED32             = 4,
-    SMI_BASETYPE_INTEGER64              = 5,  /* SMIng and SPPI              */
-    SMI_BASETYPE_UNSIGNED64             = 6,  /* SMIv2, SMIng and SPPI       */
-    SMI_BASETYPE_FLOAT32                = 7,  /* only SMIng                  */
-    SMI_BASETYPE_FLOAT64                = 8,  /* only SMIng                  */
-    SMI_BASETYPE_FLOAT128               = 9,  /* only SMIng                  */
-    SMI_BASETYPE_ENUM                   = 10,
-    SMI_BASETYPE_BITS                   = 11, /* SMIv2, SMIng and SPPI       */
-    SMI_BASETYPE_POINTER		= 12  /* only SMIng                  */
-} SmiBasetype;
-
-#ifdef INT32_MIN
-#define SMI_BASETYPE_INTEGER32_MIN  INT32_MIN
-#else
-#define SMI_BASETYPE_INTEGER32_MIN  INT_MIN
-#endif
-#ifdef INT32_MAX
-#define SMI_BASETYPE_INTEGER32_MAX  INT32_MAX
-#else
-#define SMI_BASETYPE_INTEGER32_MAX  INT_MAX
-#endif
-#define SMI_BASETYPE_INTEGER64_MIN  LIBSMI_INT64_MIN
-#define SMI_BASETYPE_INTEGER64_MAX  LIBSMI_INT64_MAX
-#define SMI_BASETYPE_UNSIGNED32_MIN 0
-#ifdef UINT32_MAX
-#define SMI_BASETYPE_UNSIGNED32_MAX UINT32_MAX
-#else
-#define SMI_BASETYPE_UNSIGNED32_MAX UINT_MAX
-#endif
-#define SMI_BASETYPE_UNSIGNED64_MIN 0
-#define SMI_BASETYPE_UNSIGNED64_MAX LIBSMI_UINT64_MAX
-
-/* SmiStatus -- values of status levels                                      */
-typedef enum SmiStatus {
-    SMI_STATUS_UNKNOWN          = 0, /* should not occur                     */
-    SMI_STATUS_CURRENT          = 1, /* only SMIv2, SMIng and SPPI           */
-    SMI_STATUS_DEPRECATED       = 2, /* SMIv1, SMIv2, SMIng and SPPI         */
-    SMI_STATUS_MANDATORY        = 3, /* only SMIv1                           */
-    SMI_STATUS_OPTIONAL         = 4, /* only SMIv1                           */
-    SMI_STATUS_OBSOLETE         = 5  /* SMIv1, SMIv2, SMIng and SPPI         */
-} SmiStatus;
-
-/* SmiAccess -- values of access levels                                      */
-typedef enum SmiAccess {
-    SMI_ACCESS_UNKNOWN          = 0, /* should not occur                     */
-    SMI_ACCESS_NOT_IMPLEMENTED  = 1, /* only for agent capability variations */
-    SMI_ACCESS_NOT_ACCESSIBLE   = 2, /* the values 2 to 5 are allowed to be  */
-    SMI_ACCESS_NOTIFY           = 3, /* compared by relational operators.    */
-    SMI_ACCESS_READ_ONLY        = 4,
-    SMI_ACCESS_READ_WRITE       = 5,
-    SMI_ACCESS_INSTALL          = 6, /* these three entries are only valid   */
-    SMI_ACCESS_INSTALL_NOTIFY   = 7, /* for SPPI                             */
-    SMI_ACCESS_REPORT_ONLY      = 8,
-    SMI_ACCESS_EVENT_ONLY      	= 9	 /* this entry is valid only for SMIng	 */
-} SmiAccess;
-
-/* SmiNodekind -- type or statement that leads to a definition               */
-typedef unsigned int SmiNodekind;
-#define SMI_NODEKIND_UNKNOWN      0x0000     /* should not occur             */
-#define SMI_NODEKIND_NODE         0x0001
-#define SMI_NODEKIND_SCALAR       0x0002
-#define SMI_NODEKIND_TABLE        0x0004
-#define SMI_NODEKIND_ROW          0x0008
-#define SMI_NODEKIND_COLUMN       0x0010
-#define SMI_NODEKIND_NOTIFICATION 0x0020
-#define SMI_NODEKIND_GROUP        0x0040
-#define SMI_NODEKIND_COMPLIANCE   0x0080
-#define SMI_NODEKIND_CAPABILITIES 0x0100
-#define SMI_NODEKIND_ANY          0xffff
-
-/* SmiDecl -- type or statement that leads to a definition                   */
-typedef enum SmiDecl {
-    SMI_DECL_UNKNOWN            = 0,  /* should not occur                    */
-    /* SMIv1/v2 ASN.1 statements and macros */
-    SMI_DECL_IMPLICIT_TYPE      = 1,
-    SMI_DECL_TYPEASSIGNMENT     = 2,
-    SMI_DECL_IMPL_SEQUENCEOF    = 4,	/* this will go away */
-    SMI_DECL_VALUEASSIGNMENT    = 5,
-    SMI_DECL_OBJECTTYPE         = 6,    /* values >= 6 are assumed to be */
-    SMI_DECL_OBJECTIDENTITY     = 7,    /* registering an OID, see check.c */
-    SMI_DECL_MODULEIDENTITY     = 8,
-    SMI_DECL_NOTIFICATIONTYPE   = 9,
-    SMI_DECL_TRAPTYPE           = 10,
-    SMI_DECL_OBJECTGROUP        = 11, 
-    SMI_DECL_NOTIFICATIONGROUP  = 12,
-    SMI_DECL_MODULECOMPLIANCE   = 13,
-    SMI_DECL_AGENTCAPABILITIES  = 14,
-    SMI_DECL_TEXTUALCONVENTION  = 15,
-    SMI_DECL_MACRO	        = 16,
-    SMI_DECL_COMPL_GROUP        = 17,
-    SMI_DECL_COMPL_OBJECT       = 18,
-    SMI_DECL_IMPL_OBJECT        = 19,	/* object label in sth like "iso(1)" */
-    /* SMIng statements */
-    SMI_DECL_MODULE             = 33,
-    SMI_DECL_EXTENSION          = 34,
-    SMI_DECL_TYPEDEF            = 35,
-    SMI_DECL_NODE               = 36,
-    SMI_DECL_SCALAR             = 37,
-    SMI_DECL_TABLE              = 38,
-    SMI_DECL_ROW                = 39,
-    SMI_DECL_COLUMN             = 40,
-    SMI_DECL_NOTIFICATION       = 41,
-    SMI_DECL_GROUP              = 42,
-    SMI_DECL_COMPLIANCE         = 43,
-    SMI_DECL_IDENTITY	        = 44,
-    SMI_DECL_CLASS		= 45,
-    SMI_DECL_ATTRIBUTE		= 46,
-    SMI_DECL_EVENT		= 47
-} SmiDecl;
-
-/* SmiIndexkind -- actual kind of a table row's index method                 */
-typedef enum SmiIndexkind {
-    SMI_INDEX_UNKNOWN           = 0, 
-    SMI_INDEX_INDEX             = 1,
-    SMI_INDEX_AUGMENT           = 2,
-    SMI_INDEX_REORDER           = 3,
-    SMI_INDEX_SPARSE            = 4,
-    SMI_INDEX_EXPAND            = 5
-} SmiIndexkind;
-
-/* SmiValue -- any single value; for use in default values and subtyping     */
-typedef struct SmiValue {
-    SmiBasetype             basetype;
-    unsigned int	    len;         /* OID, OctetString, Bits           */
-    union {
-        SmiUnsigned64       unsigned64;
-        SmiInteger64        integer64;
-        SmiUnsigned32       unsigned32;
-        SmiInteger32        integer32;
-        SmiFloat32          float32;
-        SmiFloat64          float64;
-        SmiFloat128         float128;
-        SmiSubid	    *oid;
-        char                *ptr;	 /* OctetString, Bits                */
-    } value;
-} SmiValue;
-
-/* SmiNamedNumber -- a named number; for enumeration and bitset types        */
-typedef struct SmiNamedNumber {
-    SmiIdentifier       name;
-    SmiValue            value;
-} SmiNamedNumber;
-
-/* SmiRange -- a min-max value range; for subtyping of sizes or numbers      */
-typedef struct SmiRange {
-    SmiValue            minValue;
-    SmiValue            maxValue;
-} SmiRange;
-
-/* SmiModule -- the main structure of a module                               */
-typedef struct SmiModule {
-    SmiIdentifier       name;
-    char                *path;
-    char                *organization;
-    char                *contactinfo;
-    char                *description;
-    char                *reference;
-    SmiLanguage		language;
-    int                 conformance;
-} SmiModule;
-
-/* SmiRevision -- content of a single module's revision clause               */
-typedef struct SmiRevision {
-    time_t              date;
-    char                *description;
-} SmiRevision;
-
-/* SmiImport -- an imported descriptor                                       */
-typedef struct SmiImport {
-    SmiIdentifier       module;
-    SmiIdentifier       name;
-} SmiImport;
-
-/* SmiMacro -- the main structure of a SMIv1/v2 macro or SMIng extension     */
-typedef struct SmiMacro {
-    SmiIdentifier       name;
-    SmiDecl             decl;
-    SmiStatus           status;
-    char                *description;
-    char                *reference;
-    char		*abnf; /* only for SMIng */
-} SmiMacro;
-
-/* SmiIdentity -- the main structure of a SMIng Identity.		     */
-/* NOTE: Not to be confused with SMIv2 MODULE-IDENTITY */
-typedef struct SmiIdentity {
-    SmiIdentifier       name;
-    SmiDecl             decl;
-    SmiStatus           status;
-    char                *description;
-    char                *reference;
-} SmiIdentity;
-
-/* SmiType -- the main structure of a type definition (also base types)      */
-/* also SMIng attributes      */
-typedef struct SmiType {
-    SmiIdentifier       name;
-    SmiBasetype         basetype;
-    SmiDecl             decl;
-    char                *format;
-    SmiValue            value;
-    char                *units;
-    SmiStatus           status;
-    char                *description;
-    char                *reference;
-} SmiType;
-
-/* SmiNode -- the main structure of any clause that defines a node           */
-typedef struct SmiNode {
-    SmiIdentifier       name;
-    unsigned int	oidlen;
-    SmiSubid		*oid;         /* array of length oidlen */
-    SmiDecl             decl;
-    SmiAccess           access;
-    SmiStatus           status;
-    char                *format;
-    SmiValue            value;
-    char                *units;
-    char                *description;
-    char                *reference;
-    SmiIndexkind        indexkind;    /* only valid for rows */
-    int                 implied;      /* only valid for rows */
-    int                 create;       /* only valid for rows */
-    SmiNodekind         nodekind;
-} SmiNode;
-
-/* SmiElement -- an item in a list (row index column, notification object)   */
-typedef struct SmiElement {
-#ifndef __GNUC__
-    char dummy;		/* many compilers are unhappy with empty structures. */
-#endif
-    /* no visible attributes */
-} SmiElement;
-
-/* SmiOption -- an optional group in a compliance statement                  */
-typedef struct SmiOption {
-    char                *description;
-} SmiOption;
-
-/* SmiRefinement -- a refined object in a compliance statement               */
-typedef struct SmiRefinement {
-    SmiAccess           access;
-    char                *description;
-} SmiRefinement;
-
-/* SmiClass -- main structure for SMIng class statement               */
-typedef struct SmiClass {
-    SmiIdentifier       name;
-    SmiDecl             decl;
-    SmiStatus           status;
-    char                *description;
-    char                *reference;
-} SmiClass;
-
-/* SmiClass -- main structure for class attribute               */
-typedef struct SmiAttribute {
-    SmiIdentifier       name;
-    SmiBasetype         basetype;
-    SmiDecl             decl;
-    char                *format;
-    SmiValue            value;
-    char                *units;
-    SmiStatus           status;
-    char                *description;
-    char                *reference;
-    SmiAccess		access;
-} SmiAttribute;
-
-
-/* SmiEvent -- the main structure of a SMIng Event(part of class definition).*/
-typedef struct SmiEvent {
-    SmiIdentifier       name;
-    SmiDecl             decl;
-    SmiStatus           status;
-    char                *description;
-    char                *reference;
-} SmiEvent;
-
-
-
-extern int smiInit(const char *tag);
-
-extern void smiExit(void);
-
-extern void smiSetErrorLevel(int level);
-
-extern void smiSetWidth(int width);
-
-extern int smiGetWidth();
-
-extern int smiGetFlags(void);
-
-extern void smiSetFlags(int userflags);
-
-extern char *smiGetPath(void);
-
-extern int smiSetPath(const char *path);
-
-extern void smiSetSeverity(char *pattern, int severity);
-
-extern int smiReadConfig(const char *filename, const char *tag);
-
-extern char *smiLoadModule(const char *module);
-
-extern int smiIsLoaded(const char *module);
-
-
-typedef void (SmiErrorHandler) (char *path, int line, int severity, char *msg, char *tag);
-
-extern void smiSetErrorHandler(SmiErrorHandler smiErrorHandler);
-
-
-extern SmiModule *smiGetModule(const char *module);
-
-extern SmiModule *smiGetFirstModule(void);
-
-extern SmiModule *smiGetNextModule(SmiModule *smiModulePtr);
-      
-extern SmiNode *smiGetModuleIdentityNode(SmiModule *smiModulePtr);
-
-extern SmiImport *smiGetFirstImport(SmiModule *smiModulePtr);
-
-extern SmiImport *smiGetNextImport(SmiImport *smiImportPtr);
-
-extern int smiIsImported(SmiModule *smiModulePtr,
-			 SmiModule *importedModulePtr, char *importedName);
-
-extern SmiRevision *smiGetFirstRevision(SmiModule *smiModulePtr);
-
-extern SmiRevision *smiGetNextRevision(SmiRevision *smiRevisionPtr);
-
-extern int smiGetRevisionLine(SmiRevision *smiRevisionPtr);
-
-
-
-extern SmiIdentity *smiGetFirstIdentity(SmiModule *smiModulePtr);
-
-extern SmiIdentity *smiGetNextIdentity(SmiIdentity *smiIdentityPtr);
-
-extern SmiIdentity *smiGetParentIdentity(SmiIdentity *smiIdentityPtr);
-
-extern int smiGetIdentityLine(SmiIdentity *smiIdentityPtr);
-
-extern SmiModule *smiGetIdentityModule(SmiIdentity *smiIdentityPtr);
-
-extern SmiIdentity *smiGetIdentity(SmiModule *smiModulePtr,char *identity);
-
-
-
-extern SmiType *smiGetType(SmiModule *smiModulePtr, char *type);
-
-extern SmiType *smiGetFirstType(SmiModule *smiModulePtr);
-
-extern SmiType *smiGetNextType(SmiType *smiTypePtr);
-
-extern SmiType *smiGetParentType(SmiType *smiTypePtr);
-
-extern SmiModule *smiGetTypeModule(SmiType *smiTypePtr);
-
-extern int smiGetTypeLine(SmiType *smiTypePtr);
-
-extern SmiRange *smiGetFirstRange(SmiType *smiTypePtr);
-
-extern SmiRange *smiGetNextRange(SmiRange *smiRangePtr);
-
-extern int smiGetMinMaxRange(SmiType *smiType, SmiValue *min, SmiValue *max);
-
-extern SmiNamedNumber *smiGetFirstNamedNumber(SmiType *smiTypePtr);
-
-extern SmiNamedNumber *smiGetNextNamedNumber(SmiNamedNumber
-					         *smiNamedNumberPtr);
-					         
-					         
-extern SmiClass *smiGetFirstClass(SmiModule *smiModulePtr);
-
-extern SmiClass *smiGetNextClass(SmiClass *smiClassPtr);
-
-extern SmiClass *smiGetParentClass(SmiClass *smiClassPtr);
-
-extern SmiModule *smiGetClassModule(SmiClass *smiClassPtr);
-
-extern SmiClass *smiGetClass(SmiModule *smiModulePtr,char *class);
-
-extern int smiGetClassLine(SmiClass *smiClassPtr);
-
-
-
-extern SmiAttribute *smiGetAttribute(SmiClass *smiClassPtr, char *attribute);
-
-extern SmiAttribute *smiGetFirstAttribute(SmiClass *smiClassPtr);
-
-extern SmiAttribute *smiGetNextAttribute(SmiAttribute *smiAtrributePtr);
-
-extern SmiType *smiGetAttributeParentType(SmiAttribute *smiAtrributePtr);
-
-extern SmiClass *smiGetAttributeParentClass(SmiAttribute *smiAtrributePtr);
-
-extern SmiAttribute *smiGetFirstUniqueAttribute(SmiClass *smiClassPtr);
-
-extern SmiAttribute *smiGetNextUniqueAttribute(SmiAttribute *smiTypePtr);
-
-extern int 		smiIsClassScalar(SmiClass *smiClassPtr);
-
-extern SmiNamedNumber *smiGetAttributeFirstNamedNumber(SmiAttribute *smiAttributePtr);
-
-extern SmiNamedNumber *smiGetAttributeNextNamedNumber(SmiNamedNumber
-					         *smiNamedNumberPtr);
-extern SmiRange *smiGetAttributeFirstRange(SmiAttribute *smiAttributePtr);
-
-extern SmiRange *smiGetAttributeNextRange(SmiRange *smiRangePtr);
-
-extern int smiGetAttributeLine(SmiAttribute *smiAttributePtr);
-
-
-extern SmiEvent *smiGetEvent(SmiClass *smiClassPtr, char *attribute);
-
-extern SmiEvent *smiGetFirstEvent(SmiClass *smiClassPtr);
-
-extern SmiEvent *smiGetNextEvent(SmiEvent *smiEventPtr);
-
-extern int smiGetEventLine(SmiEvent *smiEventPtr);
-
-
-extern SmiMacro *smiGetMacro(SmiModule *smiModulePtr, char *macro);
-
-extern SmiMacro *smiGetFirstMacro(SmiModule *smiModulePtr);
-
-extern SmiMacro *smiGetNextMacro(SmiMacro *smiMacroPtr);
-
-extern SmiModule *smiGetMacroModule(SmiMacro *smiMacroPtr);
-
-extern int smiGetMacroLine(SmiMacro *smiMacroPtr);
-
-
-extern SmiNode *smiGetNode(SmiModule *smiModulePtr, const char *name);
-
-extern SmiNode *smiGetNodeByOID(unsigned int oidlen, SmiSubid oid[]);
-
-extern SmiNode *smiGetFirstNode(SmiModule *smiModulePtr, SmiNodekind nodekind);
-
-extern SmiNode *smiGetNextNode(SmiNode *smiNodePtr, SmiNodekind nodekind);
-
-extern SmiNode *smiGetParentNode(SmiNode *smiNodePtr);
-
-extern SmiNode *smiGetRelatedNode(SmiNode *smiNodePtr);
-
-extern SmiNode *smiGetFirstChildNode(SmiNode *smiNodePtr);
-
-extern SmiNode *smiGetNextChildNode(SmiNode *smiNodePtr);
-
-extern SmiModule *smiGetNodeModule(SmiNode *smiNodePtr);
-
-extern SmiType *smiGetNodeType(SmiNode *smiNodePtr);
-
-extern int smiGetNodeLine(SmiNode *smiNodePtr);
-
-
-
-
-extern SmiElement *smiGetFirstElement(SmiNode *smiNodePtr);
-
-extern SmiElement *smiGetNextElement(SmiElement *smiElementPtr);
-
-extern SmiNode *smiGetElementNode(SmiElement *smiElementPtr);
-
-
-
-extern SmiOption *smiGetFirstOption(SmiNode *smiComplianceNodePtr);
-
-extern SmiOption *smiGetNextOption(SmiOption *smiOptionPtr);
-
-extern SmiNode *smiGetOptionNode(SmiOption *smiOptionPtr);
-
-extern int smiGetOptionLine(SmiOption *smiOptionPtr);
-
-
-extern SmiRefinement *smiGetFirstRefinement(SmiNode *smiComplianceNodePtr);
-
-extern SmiRefinement *smiGetNextRefinement(SmiRefinement *smiRefinementPtr);
-
-extern SmiNode *smiGetRefinementNode(SmiRefinement *smiRefinementPtr);
-
-extern SmiType *smiGetRefinementType(SmiRefinement *smiRefinementPtr);
-
-extern SmiType *smiGetRefinementWriteType(SmiRefinement *smiRefinementPtr);
-
-extern int smiGetRefinementLine(SmiRefinement *smiRefinementPtr);
-
-
-extern SmiElement *smiGetFirstUniquenessElement(SmiNode *smiNodePtr);
-
-#define smiGetNextUniquenessElement(p) smiGetNextElement(p)
-
-extern char *smiRenderOID(unsigned int oidlen, SmiSubid *oid, int flags);
-
-extern char *smiRenderValue(SmiValue *smiValuePtr, SmiType *smiTypePtr,
-			    int flags);
-
-extern char *smiRenderNode(SmiNode *smiNodePtr, int flags);
-
-extern char *smiRenderType(SmiType *smiTypePtr, int flags);
-
-#define SMI_RENDER_NUMERIC   0x01 /* render as numeric values */
-#define SMI_RENDER_NAME      0x02 /* render as names */
-#define SMI_RENDER_QUALIFIED 0x04 /* render names with module prefix */
-#define SMI_RENDER_FORMAT    0x08 /* render by applying the type's format if
-				     type is given and format is present */
-#define SMI_RENDER_PRINTABLE 0x10 /* render string values as a printable
-				     string if all octets are isprint() */
-#define SMI_RENDER_UNKNOWN   0x20 /* render even unknown items as strings
-  				     ("<unknown>") so that we never get NULL */
-#define SMI_RENDER_ALL       0xff /* render as `human friendly' as possible */
-
-#define SMI_UNKNOWN_LABEL "<unknown>"
-
-   
-/*
- * The functions smiGetMaxSize() and smiGetMinSize() compute the
- * max size constraint on a given BITS, OCTET STRING or OBJECT
- * IDENTIFIER type. The functions recurse towards the top of the
- * type derivation tree.
- */
-
-extern unsigned int smiGetMinSize(SmiType *smiType);
-extern unsigned int smiGetMaxSize(SmiType *smiType);
-
-/*
- * Two utility functions to pack and unpack instance identifiers.
- * The smiUnpack() function allocates the array of SmiValues and
- * the smiPack() function allocates the array of SmiSubids.
- */
-
-extern int smiUnpack(SmiNode *row, SmiSubid *oid, unsigned int oidlen,
-		     SmiValue **vals, int *valslen);
-
-extern int smiPack(SmiNode *row, SmiValue *vals, int valslen,
-		   SmiSubid **oid, unsigned int *oidlen);
-
-/*
- * Two printf functions that allocate memory dynamically. The call has
- * to free the allocated memory.
- */
-
-extern int smiAsprintf(char **strp, const char *format, ...);
-
-extern int smiVasprintf(char **strp, const char *format, va_list ap);
-
-
-/*
- * The functions smiMalloc() and friends are used within the library
- * for all memory allocations and deallocations. These functions are
- * simple wrappers around the standard malloc() and friends functions,
- * sometimes with some additional checking. We export these functions
- * because on some systems (e.g. Windows) it is necessary to allocate
- * / deallocate memory with the 'right' version of malloc() and
- * friends.
- */
-
-#ifdef HAVE_DMALLOC_H
-
-extern void *_smiMalloc(char *, int, size_t);
-extern void *_smiRealloc(char *, int, void *ptr, size_t size);
-extern char *_smiStrdup(char *, int, const char *s1);
-extern char *_smiStrndup(char *, int, const char *s1, size_t n);
-extern void _smiFree(char *, int, void *ptr);
-
-#define	smiMalloc(s)	_smiMalloc(__FILE__, __LINE__, s)
-#define	smiRealloc(p,s)	_smiRealloc(__FILE__, __LINE__, p, s)
-#define	smiStrdup(s)	_smiStrdup(__FILE__, __LINE__, s)
-#define	smiStrndup(s,n)	_smiStrndup(__FILE__, __LINE__, s, n)
-#define	smiFree(p)	_smiFree(__FILE__, __LINE__, p)
-
-#else
-extern void *smiMalloc(size_t size);
-extern void *smiRealloc(void *ptr, size_t size);
-extern char *smiStrdup(const char *s1);
-extern char *smiStrndup(const char *s1, size_t n);
-extern void smiFree(void *ptr);
-#endif
-
-#ifdef __cplusplus
+#include "smi.h"
+#include "smidump.h"
+
+
+
+static char *package = NULL;
+
+
+
+static struct {
+    SmiBasetype basetype;
+    char        *smitype;
+    char        *javatype;
+    char        *agentxtype;
+} convertType[] = {
+    { SMI_BASETYPE_OCTETSTRING,      "Opaque",    "byte[]",    "OPAQUE" },
+    { SMI_BASETYPE_UNSIGNED32,       "TimeTicks", "long",      "TIMETICKS" },
+    { SMI_BASETYPE_UNSIGNED32,       "Counter",   "long",      "COUNTER32" },
+    { SMI_BASETYPE_UNSIGNED32,       "Counter32", "long",      "COUNTER32" },
+    { SMI_BASETYPE_OCTETSTRING,      "IpAddress", "byte[]",    "IPADDRESS" },
+    { SMI_BASETYPE_INTEGER32,        NULL,        "int",       "INTEGER" },
+    { SMI_BASETYPE_OCTETSTRING,      NULL,        "byte[]",    "OCTETSTRING" },
+    { SMI_BASETYPE_OBJECTIDENTIFIER, NULL,        "AgentXOID", "OBJECTIDENTIFIER" },
+    { SMI_BASETYPE_UNSIGNED32,       NULL,        "long",      "GAUGE32" },
+    { SMI_BASETYPE_INTEGER64,        NULL,        "long",      "INTEGER" },
+    { SMI_BASETYPE_UNSIGNED64,       NULL,        "long",      "COUNTER64" },
+    { SMI_BASETYPE_ENUM,             NULL,        "int",       "INTEGER" },
+    { SMI_BASETYPE_BITS,             NULL,        "byte[]",    "OCTETSTRING" },
+    { SMI_BASETYPE_UNKNOWN,          NULL,        NULL,        NULL }
+};
+
+
+
+static char* translate1Upper(char *m)
+{
+    static char *sarray[5];
+    static int spos = 0;
+    char *s;
+    int i;
+
+    s = sarray[spos];
+    spos++;
+    if (spos == 5) spos = 0;
+    if (s) xfree(s);
+    s = xstrdup(m);
+    for (i = 0; s[i]; i++) {
+        if (s[i] == '-') s[i] = '_';
+    }
+    if (islower((int) s[0])) {
+        s[0] = toupper(s[0]);
+    }
+    
+    return s;
 }
+
+
+
+static FILE * createFile(char *name, char *suffix)
+{
+    char *fullname;
+    FILE *f;
+
+    fullname = xmalloc(strlen(name) + (suffix ? strlen(suffix) : 0) + 2);
+    strcpy(fullname, name);
+    if (suffix) {
+        strcat(fullname, suffix);
+    }
+    if (!access(fullname, R_OK)) {
+        fprintf(stderr, "smidump: %s already exists\n", fullname);
+        xfree(fullname);
+        return NULL;
+    }
+    f = fopen(fullname, "w");
+    if (!f) {
+        fprintf(stderr, "smidump: cannot open %s for writing: ", fullname);
+        perror(NULL);
+        xfree(fullname);
+        exit(1);
+    }
+    xfree(fullname);
+    return f;
+}
+
+
+
+static char *getJavaType(SmiType *smiType)
+{
+    int i;
+
+    if (smiType) {
+    	for(i=0; convertType[i].basetype != SMI_BASETYPE_UNKNOWN; i++) {
+	    if (smiType->basetype == convertType[i].basetype)
+		return convertType[i].javatype;
+	}
+    }
+
+    return "<UNKNOWN>";
+}
+
+
+
+static char *getAgentXType(SmiType *smiType)
+{
+    int i;
+    SmiType *parentType;
+    SmiModule *smiModule;
+
+    if (smiType) {
+	
+	parentType = smiGetParentType(smiType);
+	if (parentType) {
+	    smiModule = smiGetTypeModule(parentType);
+	    if (smiModule && strlen(smiModule->name)) {
+		smiType = parentType;
+	    }
+	}
+	
+	for(i=0; convertType[i].basetype != SMI_BASETYPE_UNKNOWN; i++) {
+	    if (smiType->basetype == convertType[i].basetype) {
+		if (!convertType[i].smitype) {
+		    return convertType[i].agentxtype;
+		}
+		if ((smiType->name) &&
+		    (!strcmp(convertType[i].smitype, smiType->name))) {
+		    return convertType[i].agentxtype;
+		}
+	    }
+	}
+    }
+
+    return "<UNKNOWN>";
+}
+
+
+
+static int isGroup(SmiNode *smiNode)
+{
+    SmiNode *childNode;
+
+    if (smiNode->nodekind == SMI_NODEKIND_ROW) {
+        return 1;
+    }
+    
+    for(childNode = smiGetFirstChildNode(smiNode);
+        childNode;
+        childNode = smiGetNextChildNode(childNode)) {
+        if (childNode->nodekind == SMI_NODEKIND_SCALAR) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+
+static int isAccessible(SmiNode *groupNode)
+{
+    SmiNode *smiNode;
+    int num = 0;
+    
+    for (smiNode = smiGetFirstChildNode(groupNode);
+         smiNode;
+         smiNode = smiGetNextChildNode(smiNode)) {
+        if ((smiNode->nodekind == SMI_NODEKIND_SCALAR
+             || smiNode->nodekind == SMI_NODEKIND_COLUMN)
+            && (smiNode->access == SMI_ACCESS_READ_ONLY
+                || smiNode->access == SMI_ACCESS_READ_WRITE)) {
+            num++;
+        }
+    }
+
+    return num;
+}
+
+
+
+static unsigned int getMaxSize(SmiType *smiType)
+{
+    SmiRange *smiRange;
+    SmiType  *parentType;
+    unsigned int max = 0, size;
+    
+    switch (smiType->basetype) {
+    case SMI_BASETYPE_OCTETSTRING:
+        size = 65535;
+        break;
+    case SMI_BASETYPE_OBJECTIDENTIFIER:
+        size = 128;
+        break;
+    default:
+        return 0xffffffff;
+    }
+
+    for(smiRange = smiGetFirstRange(smiType);
+        smiRange ; smiRange = smiGetNextRange(smiRange)) {
+        if (smiRange->maxValue.value.unsigned32 > max) {
+            max = smiRange->maxValue.value.unsigned32;
+        }
+    }
+    if (max > 0 && max < size) {
+        size = max;
+    }
+
+    parentType = smiGetParentType(smiType);
+    if (parentType) {
+        unsigned int psize = getMaxSize(parentType);
+        if (psize < size) {
+            size = psize;
+        }
+    }
+
+    return size;
+}
+
+
+
+static void dumpTable(SmiNode *smiNode)
+{
+    FILE *f;
+    SmiNode *parentNode, *columnNode;
+    unsigned int i;
+    char *vb_type;
+
+    parentNode = smiGetParentNode(smiNode);
+
+    f = createFile(translate1Upper(parentNode->name), ".java");
+    if (! f) {
+        return;
+    }
+
+    fprintf(f,
+            "/*\n"
+            " * This Java file has been generated by smidump "
+                SMI_VERSION_STRING "." " Do not edit!\n"
+            " * It is intended to be used within a Java AgentX sub-agent"
+                " environment.\n"
+            " *\n"
+            " * $I" "d$\n"
+            " */\n\n");
+
+    fprintf(f,
+            "/**\n"
+            "    This class represents a Java AgentX (JAX) implementation of\n"
+            "    the table %s defined in %s.\n"
+            "\n"
+            "    @version 1\n"
+            "    @author  smidump " SMI_VERSION_STRING "\n"
+            "    @see     AgentXTable\n"
+            " */\n\n", parentNode->name, smiGetNodeModule(smiNode)->name);
+
+    if (package) {
+	fprintf(f,
+		"package %s;\n\n", package);
+    }
+    
+    fprintf(f,
+            "import java.util.Vector;\n"
+            "\n"
+            "import jax.AgentXOID;\n"
+            "import jax.AgentXVarBind;\n"
+            "import jax.AgentXResponsePDU;\n"
+            "import jax.AgentXSetPhase;\n"
+            "import jax.AgentXTable;\n"
+            "import jax.AgentXEntry;\n"
+            "\n");
+
+    fprintf(f, "public class %s extends AgentXTable\n{\n\n",
+            translate1Upper(parentNode->name));
+
+    fprintf(f,
+            "    // entry OID\n"
+            "    private final static long[] OID = {");
+    for (i = 0; i < smiNode->oidlen; i++) {
+        fprintf(f, "%s%d", i ? ", " : "", smiNode->oid[i]);
+    }
+    fprintf(f, "};\n\n");
+
+    fprintf(f,
+            "    // constructors\n"
+            "    public %s()\n", translate1Upper(parentNode->name));
+    fprintf(f,
+            "    {\n"
+            "        oid = new AgentXOID(OID);\n"
+            "\n"
+            "        // register implemented columns\n");
+    for (columnNode = smiGetFirstChildNode(smiNode);
+         columnNode;
+         columnNode = smiGetNextChildNode(columnNode)) {
+        if (columnNode->access >= SMI_ACCESS_READ_ONLY) {
+            fprintf(f,
+                    "        columns.addElement(new Long(%d));\n",
+                    columnNode->oid[columnNode->oidlen-1]);
+        }
+    }
+    fprintf(f,
+            "    }\n\n");
+    
+    fprintf(f,
+            "    public %s(boolean shared)\n",
+	    translate1Upper(parentNode->name));
+    fprintf(f,
+            "    {\n"
+            "        super(shared);\n"
+	    "\n"
+            "        oid = new AgentXOID(OID);\n"
+            "\n"
+            "        // register implemented columns\n");
+    for (columnNode = smiGetFirstChildNode(smiNode);
+         columnNode;
+         columnNode = smiGetNextChildNode(columnNode)) {
+        if (columnNode->access >= SMI_ACCESS_READ_ONLY) {
+            fprintf(f,
+                    "        columns.addElement(new Long(%d));\n",
+                    columnNode->oid[columnNode->oidlen-1]);
+        }
+    }
+    fprintf(f,
+            "    }\n\n");
+    
+    fprintf(f,
+            "    public AgentXVarBind getVarBind(AgentXEntry entry,"
+                 " long column)\n");
+    fprintf(f,
+            "    {\n"
+            "        AgentXOID oid = new AgentXOID(getOID(), column, entry.getInstance());\n"
+            "\n"
+            "        switch ((int)column) {\n");
+
+    for (columnNode = smiGetFirstChildNode(smiNode);
+         columnNode;
+         columnNode = smiGetNextChildNode(columnNode)) {
+        if (columnNode->access >= SMI_ACCESS_NOTIFY) {
+            fprintf(f,
+                    "        case %d: // %s\n",
+                    columnNode->oid[columnNode->oidlen-1],
+                    columnNode->name);
+            fprintf(f,
+                    "        {\n");
+            fprintf(f,
+                    "            %s value = ((%s)entry).get_%s();\n",
+                    getJavaType(smiGetNodeType(columnNode)),
+                    translate1Upper(smiNode->name),
+                    columnNode->name);
+            fprintf(f,
+                    "            return new AgentXVarBind(oid, "
+                    "AgentXVarBind.%s, value);\n",
+                    getAgentXType(smiGetNodeType(columnNode)));
+            
+            fprintf(f,
+                    "        }\n");
+        }
+    }
+
+    fprintf(f,
+            "        }\n"
+            "\n"
+            "        return null;\n"
+            "    }\n\n");
+
+    fprintf(f,
+            "    public int setEntry(AgentXSetPhase phase,\n"
+            "                        AgentXEntry entry,\n"
+            "                        long column,\n"
+            "                        AgentXVarBind vb)\n");
+    fprintf(f,
+            "    {\n"
+            "\n"
+            "        switch ((int)column) {\n");
+    
+    for (columnNode = smiGetFirstChildNode(smiNode);
+         columnNode;
+         columnNode = smiGetNextChildNode(columnNode)) {
+        if (columnNode->access >= SMI_ACCESS_READ_WRITE) {
+            fprintf(f,
+                    "        case %d: // %s\n",
+                    columnNode->oid[columnNode->oidlen-1],
+                    columnNode->name);
+            fprintf(f,
+                    "        {\n");
+            fprintf(f,
+                    "            if (vb.getType() != AgentXVarBind.%s)\n"
+                    "                return AgentXResponsePDU.WRONG_TYPE;\n",
+                    getAgentXType(smiGetNodeType(columnNode)));      
+            vb_type = getJavaType(smiGetNodeType(columnNode));
+            vb_type = strcmp("byte[]", vb_type) ? vb_type : "bytes";
+            fprintf(f,
+                    "            else\n"
+                    "                return ((%s)entry).set_%s(phase, vb.%sValue());\n",
+                    translate1Upper(smiNode->name),
+                    columnNode->name,
+                    vb_type);
+            
+            fprintf(f,
+                    "        }\n");
+        }
+    }
+
+    fprintf(f,
+            "        }\n"
+            "\n"
+            "        return AgentXResponsePDU.NOT_WRITABLE;\n"
+            "    }\n\n");
+
+    fprintf(f,
+            "}\n\n");
+
+    if (fflush(f) || ferror(f)) {
+	perror("smidump: write error");
+	exit(1);
+    }
+
+    fclose(f);
+}
+
+
+
+static void dumpEntry(SmiNode *smiNode)
+{
+    FILE *f;
+    SmiNode *columnNode, *indexNode;
+    SmiType *smiType;
+    SmiRange *smiRange;
+    SmiElement *element;
+    int cnt;
+    char *p;
+    char init[20];
+
+    f = createFile(translate1Upper(smiNode->name), ".java");
+    if (! f) {
+        return;
+    }
+
+    fprintf(f,
+            "/*\n"
+            " * This Java file has been generated by smidump "
+                SMI_VERSION_STRING "." " Do not edit!\n"
+            " * It is intended to be used within a Java AgentX sub-agent"
+                " environment.\n"
+            " *\n"
+            " * $I" "d$\n"
+            " */\n\n");
+
+    fprintf(f,
+            "/**\n"
+            "    This class represents a Java AgentX (JAX) implementation of\n"
+            "    the table row %s defined in %s.\n"
+            "\n"
+            "    @version 1\n"
+            "    @author  smidump " SMI_VERSION_STRING "\n"
+            "    @see     AgentXTable, AgentXEntry\n"
+            " */\n\n", smiNode->name, smiGetNodeModule(smiNode)->name);
+    
+    if (package) {
+	fprintf(f,
+		"package %s;\n\n", package);
+    }
+    
+    fprintf(f,
+            "import jax.AgentXOID;\n"
+            "import jax.AgentXSetPhase;\n"
+            "import jax.AgentXResponsePDU;\n"
+            "import jax.AgentXEntry;\n"
+            "\n");
+
+    fprintf(f, "public class %s extends AgentXEntry\n{\n\n",
+            translate1Upper(smiNode->name));
+
+    for (columnNode = smiGetFirstChildNode(smiNode);
+         columnNode;
+         columnNode = smiGetNextChildNode(columnNode)) {
+        
+        smiType = smiGetNodeType(columnNode);
+	if (!smiType) continue;
+        p = getJavaType(smiType);
+        if (!strcmp(p, "long")) {
+            strcpy(init, "0");
+        } else if (!strcmp(p, "int")) {
+            strcpy(init, "0");
+        } else if (!strcmp(p, "byte[]")) {
+            smiRange = smiGetFirstRange(smiType);
+            if ((smiRange && (!smiGetNextRange(smiRange)) &&
+                 (!memcmp(&smiRange->minValue, &smiRange->maxValue,
+                          sizeof(SmiValue))))) {
+                sprintf(init, "new byte[%ld]",
+                        smiRange->maxValue.value.integer32);
+            } else {
+                sprintf(init, "new byte[0]");
+            }
+        } else if (!strcmp(p, "AgentXOID")) {
+            strcpy(init, "new AgentXOID()");
+        } else {
+            strcpy(init, "null");
+        }
+        fprintf(f,
+                "    protected %s %s = %s;\n",
+                getJavaType(smiGetNodeType(columnNode)),
+                columnNode->name,
+                init);
+
+        if (columnNode->access == SMI_ACCESS_READ_WRITE) {
+            fprintf(f,
+                    "    protected %s undo_%s = %s;\n",
+                    getJavaType(smiGetNodeType(columnNode)),
+                    columnNode->name,
+                    init);
+        }
+    }
+    for (element = smiGetFirstElement(smiNode), cnt = 0;
+         element;
+         element = smiGetNextElement(element)) {
+        indexNode = smiGetElementNode(element);
+        for (columnNode = smiGetFirstChildNode(smiNode);
+             columnNode;
+             columnNode = smiGetNextChildNode(columnNode)) {
+            if (!strcmp(columnNode->name, indexNode->name))
+                break;
+        }
+        if (!columnNode) {
+            if (!cnt) {
+                fprintf(f, "    // foreign indices\n");
+            }
+            cnt++;
+            fprintf(f, "    protected %s %s;\n",
+                    getJavaType(smiGetNodeType(indexNode)),
+                    indexNode->name);
+        }
+    }
+    fprintf(f, "\n");
+    
+    fprintf(f,
+            "    public %s(", translate1Upper(smiNode->name));
+    for (element = smiGetFirstElement(smiNode), cnt = 0;
+         element;
+         element = smiGetNextElement(element)) {
+        if (cnt) {
+            fprintf(f, ",\n%*s", 4 + 7 + 1 + strlen(smiNode->name), " ");
+        }
+        cnt++;
+        indexNode = smiGetElementNode(element);
+        fprintf(f, "%s %s",
+                getJavaType(smiGetNodeType(indexNode)),
+                indexNode->name);
+    }
+    fprintf(f, ")\n"
+            "    {\n");
+    for (element = smiGetFirstElement(smiNode);
+         element;
+         element = smiGetNextElement(element)) {
+        indexNode = smiGetElementNode(element);
+        fprintf(f, "        this.%s = %s;\n",
+                indexNode->name, indexNode->name);
+    }
+    fprintf(f, "\n");
+    for (element = smiGetFirstElement(smiNode);
+         element;
+         element = smiGetNextElement(element)) {
+        indexNode = smiGetElementNode(element);
+
+        p = getJavaType(smiGetNodeType(indexNode));
+        if (!strcmp(p, "long")) {
+            fprintf(f, "        instance.append(%s);\n",
+                    indexNode->name);
+        } else if (!strcmp(p, "int")) {
+            fprintf(f, "        instance.append(%s);\n",
+                    indexNode->name);
+        } else if (!strcmp(p, "byte[]")) {
+            smiType = smiGetNodeType(indexNode);
+            smiRange = smiGetFirstRange(smiType);
+            if ((smiRange && (!smiGetNextRange(smiRange)) &&
+                 (!memcmp(&smiRange->minValue, &smiRange->maxValue,
+                          sizeof(SmiValue)))) ||
+                (smiNode->implied && (!smiGetNextElement(element)))) {
+                fprintf(f, "        instance.appendImplied(%s);\n",
+                        indexNode->name);
+            } else {
+                fprintf(f, "        instance.append(%s);\n",
+                        indexNode->name);
+            }
+        } else if (!strcmp(p, "AgentXOID")) {
+            if (smiNode->implied && (!smiGetNextElement(element))) {
+                fprintf(f, "        instance.appendImplied(%s);\n",
+                        indexNode->name);
+            } else {
+                fprintf(f, "        instance.append(%s);\n",
+                        indexNode->name);
+            }
+        } else {
+            fprintf(f, "        // [smidump: type of %s not supported]\n",
+                    indexNode->name);
+        }
+    }
+    
+    fprintf(f,
+            "    }\n"
+            "\n");
+
+    for (element = smiGetFirstElement(smiNode);
+         element;
+         element = smiGetNextElement(element)) {
+        indexNode = smiGetElementNode(element);
+        
+        fprintf(f,
+                "    public %s get_%s()\n"
+                "    {\n"
+                "        return %s;\n"
+                "    }\n"
+                "\n",
+                getJavaType(smiGetNodeType(indexNode)),
+                indexNode->name, indexNode->name);
+    }
+
+    for (columnNode = smiGetFirstChildNode(smiNode);
+         columnNode;
+         columnNode = smiGetNextChildNode(columnNode)) {
+        smiType = smiGetNodeType(columnNode);
+        if (columnNode->access >= SMI_ACCESS_NOTIFY) {
+	    for (element = smiGetFirstElement(smiNode);
+		 element;
+		 element = smiGetNextElement(element)) {
+		indexNode = smiGetElementNode(element);
+		if (indexNode == columnNode) break;
+	    }
+	    if (!element) {
+		fprintf(f,
+			"    public %s get_%s()\n"
+			"    {\n"
+			"        return %s;\n"
+			"    }\n"
+			"\n",
+			getJavaType(smiType),
+			columnNode->name, columnNode->name);
+	    }
+        }
+        if (columnNode->access == SMI_ACCESS_READ_WRITE) {
+            fprintf(f,
+                    "    public int set_%s(AgentXSetPhase phase, %s value)\n"
+                    "    {\n",
+                    columnNode->name,
+                    getJavaType(smiGetNodeType(columnNode)));
+            fprintf(f,
+                    "        switch (phase.getPhase()) {\n"
+                    "        case AgentXSetPhase.TEST_SET:\n"
+                    "            break;\n"                     
+                    "        case AgentXSetPhase.COMMIT:\n"
+                    "            undo_%s = %s;\n",
+                    columnNode->name,
+                    columnNode->name);
+            if (!strcmp("byte[]", getJavaType(smiGetNodeType(columnNode)))) {
+                fprintf(f,
+                        "            %s = new byte[value.length];\n"
+                        "            for(int i = 0; i < value.length; i++)\n"
+                        "                %s[i] = value[i];\n",
+                        columnNode->name,
+                        columnNode->name);
+            } else {
+                fprintf(f,
+                        "            %s = value;\n",
+                        columnNode->name);
+            }
+
+            fprintf(f,
+                    "            break;\n"                     
+                    "        case AgentXSetPhase.UNDO:\n"
+                    "            %s = undo_%s;\n"
+                    "            break;\n",
+                    columnNode->name,
+                    columnNode->name);
+            fprintf(f,
+                    "        case AgentXSetPhase.CLEANUP:\n");
+            if (!strcmp("byte[]",getJavaType(smiGetNodeType(columnNode)))) {
+                fprintf(f,
+                        "            undo_%s = null;\n",
+                        columnNode->name);
+            }
+            fprintf(f,
+                    "            break;\n"
+                    "        default:\n"
+                    "            return AgentXResponsePDU.PROCESSING_ERROR;\n"
+                    "        }\n"
+                    "        return AgentXResponsePDU.NO_ERROR;\n"
+                    "    }\n");
+        }
+    }
+    
+    fprintf(f,
+            "}\n\n");
+
+    if (fflush(f) || ferror(f)) {
+	perror("smidump: write error");
+	exit(1);
+    }
+
+    fclose(f);
+}
+
+static void dumpEntryImpl(SmiNode *smiNode)
+{
+    FILE *f;
+    SmiNode *columnNode, *indexNode;
+    SmiType *smiType;
+    SmiElement *element;
+    int cnt;
+
+    f = createFile(translate1Upper(smiNode->name), "Impl.java");
+    if (! f) {
+        return;
+    }
+
+    fprintf(f,
+            "/*\n"
+            " * This Java file has been generated by smidump "
+                SMI_VERSION_STRING ". It\n"
+            " * is intended to be edited by the application programmer and\n"
+            " * to be used within a Java AgentX sub-agent environment.\n"
+            " *\n"
+            " * $I" "d$\n"
+            " */\n\n");
+    fprintf(f,
+            "/**\n"
+            "    This class extends the Java AgentX (JAX) implementation of\n"
+            "    the table row %s defined in %s.\n"
+            " */\n\n", smiNode->name, smiGetNodeModule(smiNode)->name);
+    
+    if (package) {
+	fprintf(f,
+		"package %s;\n\n", package);
+    }
+    
+    fprintf(f,
+            "import jax.AgentXOID;\n"
+            "import jax.AgentXSetPhase;\n"
+            "import jax.AgentXResponsePDU;\n"
+            "import jax.AgentXEntry;\n"
+            "\n");
+
+    fprintf(f, "public class %sImpl extends %s\n{\n\n",
+            translate1Upper(smiNode->name),
+            translate1Upper(smiNode->name));
+
+    fprintf(f,
+            "    // constructor\n"
+            "    public %sImpl(", translate1Upper(smiNode->name));
+    for (element = smiGetFirstElement(smiNode), cnt = 0;
+         element;
+         element = smiGetNextElement(element)) {
+        if (cnt) {
+            fprintf(f, ",\n%*s", 4 + 7 + 1 + strlen(smiNode->name), " ");
+        }
+        cnt++;
+        indexNode = smiGetElementNode(element);
+        fprintf(f, "%s %s",
+                getJavaType(smiGetNodeType(indexNode)),
+                indexNode->name);
+    }
+    fprintf(f, ")\n"
+            "    {\n"
+            "        super(");
+    for (element = smiGetFirstElement(smiNode), cnt = 0;
+         element;
+         element = smiGetNextElement(element)) {
+        if (cnt) {
+            fprintf(f, ",\n%*s", 2 + strlen(smiNode->name), " ");
+        }
+        cnt++;
+        indexNode = smiGetElementNode(element);
+        fprintf(f, "%s", indexNode->name);
+    }
+    fprintf(f,");\n");
+    
+    fprintf(f,
+            "    }\n"
+            "\n");
+
+    for (columnNode = smiGetFirstChildNode(smiNode);
+         columnNode;
+         columnNode = smiGetNextChildNode(columnNode)) {
+        smiType = smiGetNodeType(columnNode);
+	if (!smiType) continue;
+        if (columnNode->access >= SMI_ACCESS_NOTIFY) {
+            fprintf(f,
+                    "    public %s get_%s()\n"
+                    "    {\n"
+                    "        return %s;\n"
+                    "    }\n"
+                    "\n",
+                    getJavaType(smiType),
+                    columnNode->name, columnNode->name);
+        }
+        if (columnNode->access == SMI_ACCESS_READ_WRITE) {
+            fprintf(f,
+                    "    public int set_%s(AgentXSetPhase phase, %s value)\n"
+                    "    {\n",
+                    columnNode->name,
+                    getJavaType(smiGetNodeType(columnNode)));
+            fprintf(f,
+                    "        switch (phase.getPhase()) {\n"
+                    "        case AgentXSetPhase.TEST_SET:\n"
+                    "            break;\n"                     
+                    "        case AgentXSetPhase.COMMIT:\n"
+                    "            undo_%s = %s;\n",
+                    columnNode->name,
+                    columnNode->name);
+            if (!strcmp("byte[]", getJavaType(smiGetNodeType(columnNode)))) {
+                fprintf(f,
+                        "            %s = new byte[value.length];\n"
+                        "            for(int i = 0; i < value.length; i++)\n"
+                        "                %s[i] = value[i];\n",
+                        columnNode->name,
+                        columnNode->name);
+            } else {
+                fprintf(f,
+                        "            %s = value;\n",
+                        columnNode->name);
+            }
+
+            fprintf(f,
+                    "            break;\n"                     
+                    "        case AgentXSetPhase.UNDO:\n"
+                    "            %s = undo_%s;\n"
+                    "            break;\n",
+                    columnNode->name,
+                    columnNode->name);
+            fprintf(f,
+                    "        case AgentXSetPhase.CLEANUP:\n");
+            if (!strcmp("byte[]",getJavaType(smiGetNodeType(columnNode)))) {
+                fprintf(f,
+                        "            undo_%s = null;\n",
+                        columnNode->name);
+            }
+            fprintf(f,
+                    "            break;\n"
+                    "        default:\n"
+                    "            return AgentXResponsePDU.PROCESSING_ERROR;\n"
+                    "        }\n"
+                    "        return AgentXResponsePDU.NO_ERROR;\n"
+                    "    }\n");
+        }
+    }
+    
+    fprintf(f,
+            "}\n\n");
+
+    if (fflush(f) || ferror(f)) {
+	perror("smidump: write error");
+	exit(1);
+    }
+
+    fclose(f);
+}
+
+
+
+static SmiNode *dumpScalars(SmiNode *smiNode)
+{
+    FILE *f;
+    char *vb_type;
+    SmiNode *parentNode, *currNode;
+    SmiType *smiType;
+    SmiRange *smiRange;
+    unsigned int i;
+    char *p;
+    char init[20];
+
+    parentNode = smiGetParentNode(smiNode);
+
+    f = createFile(translate1Upper(parentNode->name), ".java");
+    if (! f) {
+        return NULL;
+    }
+
+    fprintf(f,
+            "/*\n"
+            " * This Java file has been generated by smidump "
+                SMI_VERSION_STRING "." " Do not edit!\n"
+            " * It is intended to be used within a Java AgentX sub-agent"
+            " environment.\n"
+            " *\n"
+            " * $I" "d$\n"
+            " */\n\n");
+    fprintf(f,
+            "/**\n"
+            "    This class represents a Java AgentX (JAX) implementation of\n"
+            "    the scalar group %s defined in %s.\n"
+            "\n"
+            "    @version 1\n"
+            "    @author  smidump " SMI_VERSION_STRING "\n"
+            "    @see     AgentXGroup, AgentXScalars\n"
+            " */\n\n", parentNode->name, smiGetNodeModule(smiNode)->name);
+
+    if (package) {
+	fprintf(f,
+		"package %s;\n\n", package);
+    }
+    
+    fprintf(f,
+            "import java.util.Vector;\n"
+            "import java.util.Enumeration;\n"
+            "import jax.AgentXOID;\n"
+            "import jax.AgentXVarBind;\n"
+            "import jax.AgentXSetPhase;\n"
+            "import jax.AgentXResponsePDU;\n"
+            "import jax.AgentXScalars;\n"
+            "\n");
+
+    fprintf(f, "public class %s extends AgentXScalars\n{\n\n",
+            translate1Upper(parentNode->name));
+
+    fprintf(f,
+            "    private final static long[] %sOID = {",
+            translate1Upper(parentNode->name));
+    for (i = 0; i < parentNode->oidlen; i++) {
+        fprintf(f, "%s%d", i ? ", " : "", parentNode->oid[i]);
+    }
+    fprintf(f, "};\n\n");
+
+    /* -------       variable definitions */
+
+    for (currNode = smiNode;
+         currNode && (currNode->nodekind == SMI_NODEKIND_SCALAR) ;
+         currNode = smiGetNextNode(currNode,SMI_NODEKIND_ANY)) {
+        fprintf(f,
+                "    protected AgentXOID %sOID;\n"
+                "    protected final static long[] %sName = {",
+                translate1Upper(currNode->name),
+                translate1Upper(currNode->name)
+                );
+        for (i = 0; i < currNode->oidlen; i++) {
+            fprintf(f, "%s%d", i ? ", " : "", currNode->oid[i]);
+        }
+        fprintf(f, ", 0};\n");
+
+        smiType = smiGetNodeType(currNode);
+        p = getJavaType(smiType);
+        if (!strcmp(p, "long")) {
+            strcpy(init, "0");
+        } else if (!strcmp(p, "int")) {
+            strcpy(init, "0");
+        } else if (!strcmp(p, "byte[]")) {
+            smiRange = smiGetFirstRange(smiType);
+            if ((smiRange && (!smiGetNextRange(smiRange)) &&
+                 (!memcmp(&smiRange->minValue, &smiRange->maxValue,
+                          sizeof(SmiValue))))) {
+                sprintf(init, "new byte[%ld]",
+                        smiRange->maxValue.value.integer32);
+            } else {
+                sprintf(init, "new byte[0]");
+            }
+        } else if (!strcmp(p, "AgentXOID")) {
+            strcpy(init, "new AgentXOID()");
+        } else {
+            strcpy(init, "null");
+        }
+        fprintf(f,
+                "    protected %s %s = %s;\n",
+                getJavaType(smiGetNodeType(currNode)),
+                currNode->name,
+                init);
+        
+        if (currNode->access == SMI_ACCESS_READ_WRITE) {
+            fprintf(f,
+                    "    protected %s undo_%s = %s;\n",
+                    getJavaType(smiGetNodeType(currNode)),
+                    currNode->name,
+                    init);
+        }
+    }
+    /* -------       constructor */
+    fprintf(f,
+            "    public %s()\n    {\n"
+            "        oid = new AgentXOID(%sOID);\n"
+            "        data = new Vector();\n",
+            translate1Upper(parentNode->name),
+            translate1Upper(parentNode->name));
+
+    for (currNode = smiNode;
+         currNode && (currNode->nodekind == SMI_NODEKIND_SCALAR) ;
+         currNode = smiGetNextNode(currNode,SMI_NODEKIND_ANY)) {
+        fprintf(f,
+                "        %sOID = new AgentXOID(%sName);\n"
+                "        data.addElement(%sOID);\n",
+                translate1Upper(currNode->name),
+                translate1Upper(currNode->name),
+                translate1Upper(currNode->name));
+    }
+    fprintf(f,"    }\n\n");
+    /* -------         get & set methods */ 
+    for (currNode = smiNode;
+         currNode && (currNode->nodekind == SMI_NODEKIND_SCALAR) ;
+         currNode = smiGetNextNode(currNode,SMI_NODEKIND_ANY)) {
+        smiType = smiGetNodeType(currNode);
+        if (currNode->access >= SMI_ACCESS_NOTIFY) {
+            fprintf(f,
+                    "    public %s get_%s()\n"
+                    "    {\n"
+                    "        return %s;\n"
+                    "    }\n"
+                    "\n",
+                    getJavaType(smiType),
+                    currNode->name, currNode->name);
+        }
+        if (currNode->access == SMI_ACCESS_READ_WRITE) {
+            fprintf(f,
+                    "    public int set_%s(AgentXSetPhase phase, %s value)\n"
+                    "    {\n",
+                    currNode->name,
+                    getJavaType(smiGetNodeType(currNode)));
+            fprintf(f,
+                    "        switch (phase.getPhase()) {\n"
+                    "        case AgentXSetPhase.TEST_SET:\n"
+                    "            break;\n"
+                    "        case AgentXSetPhase.COMMIT:\n"
+                    "            undo_%s = %s;\n",
+                    currNode->name,
+                    currNode->name);
+            if (!strcmp("byte[]", getJavaType(smiGetNodeType(currNode)))) {
+                fprintf(f,
+                        "            %s = new byte[value.length];\n"
+                        "            for(int i = 0; i < value.length; i++)\n"
+                        "                %s[i] = value[i];\n",
+                        currNode->name,
+                        currNode->name);
+            } else {
+                fprintf(f,
+                        "            %s = value;\n",
+                        currNode->name);
+            }
+
+            fprintf(f,
+                    "            break;\n"                      
+                    "        case AgentXSetPhase.UNDO:\n"
+                    "            %s = undo_%s;\n"
+                    "            break;\n",
+                    currNode->name,
+                    currNode->name);
+            fprintf(f,
+                    "        case AgentXSetPhase.CLEANUP:\n");
+            if (!strcmp("byte[]",getJavaType(smiGetNodeType(currNode)))) {
+                fprintf(f,
+                        "            undo_%s = null;\n",
+                        currNode->name);
+            }
+            fprintf(f,
+                    "            break;\n"
+                    "        default:\n"
+                    "            return AgentXResponsePDU.PROCESSING_ERROR;\n"
+                    "        }\n"
+                    "        return AgentXResponsePDU.NO_ERROR;\n"
+                    "    }\n");
+        }
+    }
+    /* ------    handle get get-next and set requests */
+    fprintf(f,
+            "    public AgentXVarBind getScalar(AgentXOID pos,"
+            " AgentXOID oid)\n"
+            "    {\n"
+            "        if ((pos == null) || (pos.compareTo(oid) != 0))\n"
+            "            return new AgentXVarBind(oid,"
+            " AgentXVarBind.NOSUCHOBJECT);\n"
+            "        else {\n"
+            );
+    for (currNode = smiNode;
+         currNode && (currNode->nodekind == SMI_NODEKIND_SCALAR) ;
+         currNode = smiGetNextNode(currNode,SMI_NODEKIND_ANY)) {    
+        fprintf(f,
+                "            if (pos == %sOID)\n"
+                "                return new AgentXVarBind(oid,"
+                " AgentXVarBind.%s, \n"
+                "                                         get_%s());\n",
+                translate1Upper(currNode->name),
+                getAgentXType(smiGetNodeType(currNode)),
+                currNode->name
+                );
+    }
+    fprintf(f,
+            "        }\n"
+            "        return new AgentXVarBind(oid,"
+            " AgentXVarBind.NOSUCHOBJECT);\n    }\n\n");
+        
+    fprintf(f,
+            "    public int setScalar(AgentXSetPhase phase,"
+            " AgentXOID pos,\n"
+            "                         AgentXVarBind inVb)\n    {\n"
+            "        if ((pos == null) || (pos.compareTo(inVb.getOID()) != 0))\n"
+            "            return AgentXResponsePDU.INCONSISTENT_NAME;\n"
+            "        else {\n"
+            );
+
+    for (currNode = smiNode;
+         currNode && (currNode->nodekind == SMI_NODEKIND_SCALAR) ;
+         currNode = smiGetNextNode(currNode,SMI_NODEKIND_ANY)) {
+        vb_type = getJavaType(smiGetNodeType(currNode));
+        vb_type = strcmp("byte[]", vb_type) ? vb_type : "bytes";
+        if (currNode->access == SMI_ACCESS_READ_WRITE)
+            fprintf(f,
+                    "            if (pos == %sOID)\n"
+                    "                return "
+                    "set_%s(phase, inVb.%sValue());\n",
+                    translate1Upper(currNode->name),
+                    currNode->name,
+                    vb_type
+                    );
+    }
+    fprintf(f,
+            "        }\n"
+            "        return AgentXResponsePDU.NOT_WRITABLE;\n"
+            "    }\n\n");
+    fprintf(f,
+            "    public AgentXVarBind getNextScalar(AgentXOID pos,"
+            " AgentXOID oid)\n    {\n"
+            "        if ((pos == null) || (pos.compareTo(oid) <= 0))\n"
+            "            return new AgentXVarBind(oid,"
+            " AgentXVarBind.ENDOFMIBVIEW);\n"
+            "        else {\n"
+            );
+    for (currNode = smiNode;
+         currNode && (currNode->nodekind == SMI_NODEKIND_SCALAR) ;
+         currNode = smiGetNextNode(currNode,SMI_NODEKIND_ANY)) {    
+        fprintf(f,
+                "            if (pos == %sOID)\n"
+                "                return new AgentXVarBind(pos,"
+                " AgentXVarBind.%s, \n"
+                "                                         get_%s());\n",
+                translate1Upper(currNode->name),
+                getAgentXType(smiGetNodeType(currNode)),
+                currNode->name
+                );
+    }
+    fprintf(f,
+            "        }\n"
+            "        return new AgentXVarBind(pos,"
+            " AgentXVarBind.ENDOFMIBVIEW);\n    }\n\n");
+    fprintf(f,
+            "}\n\n");
+
+    if (fflush(f) || ferror(f)) {
+	perror("smidump: write error");
+	exit(1);
+    }
+
+    fclose(f);
+    /* skip all already processed nodes */
+    for(;
+        smiNode && (smiNode->nodekind == SMI_NODEKIND_SCALAR);
+        smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ANY)) {
+    }
+    return smiNode;
+}
+
+static void dumpNotifications(SmiNode *smiNode)
+{
+    FILE *f;
+    int cnt;
+    unsigned int i;
+    SmiElement *element;
+    SmiNode *elementNode;
+
+    SmiType *snt;
+    snt = smiGetNodeType(smiNode);
+
+    f = createFile(translate1Upper(smiNode->name), ".java");
+    if (! f) {
+        return;
+    }
+
+    fprintf(f,
+            "/*\n"
+            " * This Java file has been generated by smidump "
+                SMI_VERSION_STRING "." " Do not edit!\n"
+            " * It is intended to be used within a Java AgentX sub-agent"
+            " environment.\n"
+            " *\n"
+            " * $I" "d$\n"
+            " */\n\n");
+
+    if (package) {
+	fprintf(f,
+		"package %s;\n\n", package);
+    }
+    
+    fprintf(f,
+            "import jax.AgentXOID;\n"
+            "import jax.AgentXVarBind;\n"
+            "import jax.AgentXNotification;\n"
+            "import java.util.Vector;\n"
+            "\n");
+
+    fprintf(f, "public class %s extends AgentXNotification\n{\n\n",
+            translate1Upper(smiNode->name));
+
+    fprintf(f,
+            "    private final static long[] %s_OID = {",
+            smiNode->name);
+    for (i = 0; i < smiNode->oidlen; i++) {
+        fprintf(f, "%s%d", i ? ", " : "", smiNode->oid[i]);
+    }
+    fprintf(f, "};\n"); 
+    fprintf(f,
+            "    private static AgentXVarBind snmpTrapOID_VarBind =\n"
+            "        new AgentXVarBind(snmpTrapOID_OID,\n"
+            "                          AgentXVarBind.OBJECTIDENTIFIER,\n"
+            "                          new AgentXOID(%s_OID));\n\n",
+            smiNode->name);
+
+    for (element = smiGetFirstElement(smiNode), cnt = 1;
+         element;
+         element = smiGetNextElement(element), cnt++) {
+        elementNode = smiGetElementNode(element);
+        fprintf(f, "    private final static long[] OID%d = {", cnt);
+        for (i = 0; i < elementNode->oidlen; i++) {
+            fprintf(f, "%s%d", i ? ", " : "", elementNode->oid[i]);
+        }
+        fprintf(f, 
+                "};\n"
+                "    private final AgentXOID %s_OID = "
+                "new AgentXOID(OID%d",
+                elementNode->name, cnt);
+        fprintf(f,");\n");
+#if 0
+        if (elementNode->nodekind != SMI_NODEKIND_COLUMN || 
+            (smiGetNodeModule(elementNode) != smiGetNodeModule(smiNode))) {
+            fprintf(f,
+                    "    private static AgentXVarBind varBind_%s = new AgentXVarBind(\n"
+                    "            %sOID, AgentXVarBind.%s\n);\n",
+                    elementNode->name,
+                    elementNode->name,
+                    getAgentXType(smiGetNodeType(elementNode)));        
+        }
 #endif
+    }    
+    fprintf(f, 
+            "\n\n    public %s(",
+            translate1Upper(smiNode->name));
+    for (element = smiGetFirstElement(smiNode), cnt = 0;
+         element;
+         element = smiGetNextElement(element)) {
+        elementNode = smiGetElementNode(element); 
+        if (smiGetNodeModule(elementNode) == smiGetNodeModule(smiNode)) {
+            if (cnt) fprintf(f,", ");
+            cnt++;
+            fprintf(f, "%s %s_%d",
+                    translate1Upper(smiGetParentNode(elementNode)->name),
+                    smiGetParentNode(elementNode)->name, cnt);
+        }
+    }
+    fprintf(f, ") {\n"
+            "        AgentXOID oid;\n"
+            "        AgentXVarBind varBind;\n"
+            "\n"
+	    "        // add the snmpTrapOID object\n"
+            "        varBindList.addElement(snmpTrapOID_VarBind);\n");
+    for (element = smiGetFirstElement(smiNode), cnt = 1;
+         element;
+         element = smiGetNextElement(element), cnt++) {
+        elementNode = smiGetElementNode(element);
+
+	if (smiGetNodeModule(elementNode) == smiGetNodeModule(smiNode)) {
+
+	    fprintf(f,
+		    "\n        // add the %s %s object of %s_%d\n",
+		    elementNode->name,
+		    elementNode->nodekind == SMI_NODEKIND_COLUMN ?
+		    "columnar" : "scalar",
+		    smiGetParentNode(elementNode)->name, cnt);
+
+	    if (elementNode->nodekind == SMI_NODEKIND_COLUMN) {
+		fprintf(f,
+			"        oid = %s_OID;\n"
+			"        oid.appendImplied(%s_%d.getInstance());\n",
+			elementNode->name,
+			smiGetParentNode(elementNode)->name, cnt);
+		fprintf(f,
+			"        varBind = new AgentXVarBind(oid,\n"
+			"                                    AgentXVarBind.%s,\n"
+			"                                    %s_%d.get_%s());\n",
+			getAgentXType(smiGetNodeType(elementNode)),
+			smiGetParentNode(elementNode)->name, cnt,
+			elementNode->name);
+		fprintf(f,
+			"        varBindList.addElement(varBind);\n");
+	    } else {
+		fprintf(f,
+			"        oid = %s_OID;\n",
+			elementNode->name);
+		fprintf(f,
+			"        oid.append(0);\n");
+		fprintf(f,
+			"        varBind = new AgentXVarBind(oid,\n"
+			"                                    AgentXVarBind.%s,\n"
+			"                                    %s_%d.get_%s());\n",
+			getAgentXType(smiGetNodeType(elementNode)),
+			smiGetParentNode(elementNode)->name, cnt,
+			elementNode->name);
+		fprintf(f,
+			"        varBindList.addElement(varBind);\n");
+	    }
+
+        } else {
+	    fprintf(f,
+		    "        // the notification's object %s "
+		    "is not contained in this module.\n",
+		    elementNode->name);
+	}
+    }    
+
+    fprintf(f,
+            "    }\n\n");
+
+    fprintf(f,
+            "    public Vector getVarBindList() {\n"
+            "        return varBindList;\n    }\n\n");
+
+    fprintf(f,
+            "}\n\n");
+
+    if (fflush(f) || ferror(f)) {
+	perror("smidump: write error");
+	exit(1);
+    }
+
+    fclose(f);
+}
+
+static void dumpScalarImpl(SmiNode *smiNode)
+{
+    FILE *f;
+    SmiNode *parentNode, *currNode;
+    SmiType *smiType;
+
+    parentNode = smiGetParentNode(smiNode);
+
+    f = createFile(translate1Upper(parentNode->name), "Impl.java");
+    if (! f) {
+        return;
+    }
+
+    fprintf(f,
+            "/*\n"
+            " * This Java file has been generated by smidump "
+                SMI_VERSION_STRING ". It\n"
+            " * is intended to be edited by the application programmer and\n"
+            " * to be used within a Java AgentX sub-agent environment.\n"
+            " *\n"
+            " * $I" "d$\n"
+            " */\n\n");
+    fprintf(f,
+            "/**\n"
+            "    This class extends the Java AgentX (JAX) implementation of\n"
+            "    the scalar group %s defined in %s.\n"
+            " */\n\n", parentNode->name, smiGetNodeModule(smiNode)->name);
+
+    if (package) {
+	fprintf(f,
+		"package %s;\n\n", package);
+    }
+    
+    fprintf(f,
+            "import java.util.Vector;\n"
+            "import java.util.Enumeration;\n"
+            "import jax.AgentXOID;\n"
+            "import jax.AgentXSetPhase;\n"
+            "import jax.AgentXResponsePDU;\n"
+            "\n");
+
+    fprintf(f, "public class %sImpl extends %s\n{\n\n",
+            translate1Upper(parentNode->name),
+            translate1Upper(parentNode->name));
+
+    for (currNode = smiNode;
+         currNode && (currNode->nodekind == SMI_NODEKIND_SCALAR) ;
+         currNode = smiGetNextNode(currNode,SMI_NODEKIND_ANY)) {
+        smiType = smiGetNodeType(currNode);
+        if (currNode->access >= SMI_ACCESS_NOTIFY) {
+            fprintf(f,
+                    "    public %s get_%s()\n"
+                    "    {\n"
+                    "        return %s;\n"
+                    "    }\n"
+                    "\n",
+                    getJavaType(smiType),
+                    currNode->name, currNode->name);
+        }
+        if (currNode->access == SMI_ACCESS_READ_WRITE) {
+            fprintf(f,
+                    "    public int set_%s(AgentXSetPhase phase, %s value)\n"
+                    "    {\n",
+                    currNode->name,
+                    getJavaType(smiGetNodeType(currNode)));
+            fprintf(f,
+                    "        switch (phase.getPhase()) {\n"
+                    "        case AgentXSetPhase.TEST_SET:\n"
+                    "            break;\n"
+                    "        case AgentXSetPhase.COMMIT:\n"
+                    "            undo_%s = %s;\n",
+                    currNode->name,
+                    currNode->name);
+            if (!strcmp("byte[]", getJavaType(smiGetNodeType(currNode)))) {
+                fprintf(f,
+                        "            %s = new byte[value.length];\n"
+                        "            for(int i = 0; i < value.length; i++)\n"
+                        "                %s[i] = value[i];\n",
+                        currNode->name,
+                        currNode->name);
+            } else {
+                fprintf(f,
+                        "            %s = value;\n",
+                        currNode->name);
+            }
+            fprintf(f,
+                    "            break;\n"                      
+                    "        case AgentXSetPhase.UNDO:\n"
+                    "            %s = undo_%s;\n"
+                    "            break;\n",
+                    currNode->name,
+                    currNode->name);
+            fprintf(f,
+                    "        case AgentXSetPhase.CLEANUP:\n");
+            if (!strcmp("byte[]",getJavaType(smiGetNodeType(currNode)))) {
+                fprintf(f,
+                        "            undo_%s = null;\n",
+                        currNode->name);
+            } else {
+                fprintf(f,
+                        "            undo_%s = -1; // TODO: better check!\n",
+                        currNode->name);
+            }
+            fprintf(f,
+                    "            break;\n"
+                    "        default:\n"
+                    "            return AgentXResponsePDU.PROCESSING_ERROR;\n"
+                    "        }\n"
+                    "        return AgentXResponsePDU.NO_ERROR;\n"
+                    "    }\n"
+                    "\n");
+        }
+    }
+    fprintf(f,
+            "}\n\n");
+
+    if (fflush(f) || ferror(f)) {
+	perror("smidump: write error");
+	exit(1);
+    }
+
+    fclose(f);
+}
 
 
-#endif /* _SMI_H */
+static void dumpJax(int modc, SmiModule **modv, int flags, char *output)
+{
+    SmiNode     *smiNode;
+    int		i;
+
+    for (i = 0; i < modc; i++) {
+
+	for(smiNode = smiGetFirstNode(modv[i], SMI_NODEKIND_ROW);
+	    smiNode;
+	    smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_ROW)) {
+	    if (isGroup(smiNode) && isAccessible(smiNode)) {
+		dumpTable(smiNode);
+		dumpEntry(smiNode);
+		dumpEntryImpl(smiNode);
+	    }
+	}
+    
+	for(smiNode = smiGetFirstNode(modv[i], SMI_NODEKIND_SCALAR);
+	    smiNode;
+	    smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_SCALAR)) {
+	    dumpScalarImpl(smiNode);
+	    smiNode = dumpScalars(smiNode); 
+	}
+	
+	for(smiNode = smiGetFirstNode(modv[i], SMI_NODEKIND_NOTIFICATION);
+	    smiNode;
+	    smiNode = smiGetNextNode(smiNode, SMI_NODEKIND_NOTIFICATION)) {
+	    dumpNotifications(smiNode);
+	}
+    }
+}
+
+
+
+void initJax()
+{
+    static SmidumpDriverOption opt[] = {
+	{ "package", OPT_STRING, &package, 0,
+	  "make classes part of a given package"},
+        { 0, OPT_END, 0, 0 }
+    };
+
+    static SmidumpDriver driver = {
+	"jax",
+	dumpJax,
+	SMI_FLAG_NODESCR,
+	SMIDUMP_DRIVER_CANT_UNITE | SMIDUMP_DRIVER_CANT_OUTPUT,
+	"Java AgentX sub-agent classes in separate files",
+	opt,
+	NULL
+    };
+
+    smidumpRegisterDriver(&driver);
+}
