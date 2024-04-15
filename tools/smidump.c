@@ -35,6 +35,7 @@ static void usage(void);
 static void version(void);
 static void config(char *filename);
 static void level(int lev);
+static void width(int width);
 static void quiet(void);
 static void preload(char *module);
 static void unified(void);
@@ -60,14 +61,14 @@ static optStruct genericOpt[] = {
     { 'c', "config",         OPT_STRING, config,        OPT_CALLFUNC },
     { 'l', "level",          OPT_INT,    level,         OPT_CALLFUNC },
     { 'p', "preload",        OPT_STRING, preload,       OPT_CALLFUNC },
-    { 'l', "level",          OPT_INT,    level,         OPT_CALLFUNC },
     { 'q', "quiet",          OPT_FLAG,   quiet,         OPT_CALLFUNC },
     { 'm', "error-names",    OPT_FLAG,   &mFlag,        0 },
     { 's', "severity",       OPT_FLAG,   &sFlag,        0 },
     { 'u', "unified",        OPT_FLAG,   unified,       OPT_CALLFUNC },
     { 'f', "format",         OPT_STRING, format,        OPT_CALLFUNC },
-    { 'o', "output",         OPT_STRING, &output,       0            },
-    { 'k', "keep-going",     OPT_FLAG,	 &kFlag,	0 },
+    { 'o', "output",         OPT_STRING, &output,       0 },
+    { 'k', "keep-going",     OPT_FLAG,	 &kFlag,	    0 },
+    { 'w', "width",          OPT_INT,	 width,	        OPT_CALLFUNC },
     { 0, 0, OPT_END, 0, 0 }  /* no more options */
 };
 
@@ -180,7 +181,7 @@ static void usage()
 /*
    %n in printf is a security vulnerability. Ref:
    http://en.wikipedia.org/wiki/Format_string_vulnerabilities
-   MS decided it was important enough to disble it by default. Ref:
+   MS decided it was important enough to disable it by default. Ref:
    "ms-help://MS.VSCC.v80/MS.MSDN.v80/MS.VisualStudio.v80.en/dv_vccrt/html/77a854ae-5b48-4865-89f4-f2dc5cf80f52.htm
    Calling _set_printf_count_output() stops an invalid parameter crash.
 */
@@ -201,7 +202,8 @@ static void usage()
 	    "  -f, --format=format  use <format> when dumping (default %s)\n"
 	    "  -o, --output=name    use <name> when creating names for output files\n"
 	    "  -u, --unified        print a single unified output of all modules\n"
-	    "  -k, --keep-going     continue after serious parse errors\n\n",
+	    "  -k, --keep-going     continue after serious parse errors\n"
+	    "  -w, --width          set the maximum line width\n\n",
 	    defaultDriver ? defaultDriver->name : "none");
 
     fprintf(stderr, "Supported formats are:\n");
@@ -256,6 +258,7 @@ static void help() { usage(); exit(0); }
 static void version() { printf("smidump " SMI_VERSION_STRING "\n"); exit(0); }
 static void config(char *filename) { smiReadConfig(filename, "smidump"); }
 static void level(int lev) { smiSetErrorLevel(lev); }
+static void width(int width) { smiSetWidth(width); }
 static void quiet() { flags |= SMIDUMP_FLAG_SILENT; }
 static void preload(char *module) { smiLoadModule(module); }
 static void unified() { flags |= SMIDUMP_FLAG_UNITE; }
@@ -375,18 +378,20 @@ int main(int argc, char *argv[])
 	smiSetErrorHandler(errorHandler);
     }
 
+
     smiflags = smiGetFlags();
     smiflags |= SMI_FLAG_ERRORS;
     smiflags |= driver->smiflags;
+
     smiSetFlags(smiflags);
 
-    if (flags & SMIDUMP_FLAG_UNITE && driver->ignflags & SMIDUMP_DRIVER_CANT_UNITE) {
+    if ((flags & SMIDUMP_FLAG_UNITE) && (driver->ignflags & SMIDUMP_DRIVER_CANT_UNITE)) {
 	fprintf(stderr, "smidump: %s format does not support united output:"
 		" ignoring -u\n", driver->name);
 	flags = (flags & ~SMIDUMP_FLAG_UNITE);
     }
 
-    if (output && driver->ignflags & SMIDUMP_DRIVER_CANT_OUTPUT) {
+    if (output && (driver->ignflags & SMIDUMP_DRIVER_CANT_OUTPUT)) {
 	fprintf(stderr, "smidump: %s format does not support output option:"
 		" ignoring -o %s\n", driver->name, output);
 	output = NULL;
@@ -397,6 +402,7 @@ int main(int argc, char *argv[])
     
     for (i = 1; i < argc; i++) {
 	modulename = smiLoadModule(argv[i]);
+    //return (0);
 	smiModule = modulename ? smiGetModule(modulename) : NULL;
 	if (smiModule) {
 	    if ((smiModule->conformance) && (smiModule->conformance < 3)) {
@@ -414,6 +420,8 @@ int main(int argc, char *argv[])
 		    argv[i]);
 	}
     }
+	
+	// return(0);
 
     if (! (flags & SMIDUMP_FLAG_ERROR) || kFlag) {
 	(driver->func)(modc, modv, flags, output);
