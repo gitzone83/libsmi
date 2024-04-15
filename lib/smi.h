@@ -35,8 +35,8 @@ extern const char *smi_library_version;
 
 #define SMI_VERSION_MAJOR 0
 #define SMI_VERSION_MINOR 4
-#define SMI_VERSION_PATCHLEVEL 8
-#define SMI_VERSION_STRING "0.4.8"
+#define SMI_VERSION_PATCHLEVEL 9
+#define SMI_VERSION_STRING "0.4.9"
 extern const char *smi_version_string;
 
 
@@ -369,6 +369,10 @@ extern int smiInit(const char *tag);
 extern void smiExit(void);
 
 extern void smiSetErrorLevel(int level);
+
+extern void smiSetWidth(int width);
+
+extern int smiGetWidth();
 
 extern int smiGetFlags(void);
 
