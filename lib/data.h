@@ -339,6 +339,7 @@ typedef struct Handle {
     char     	    *cache;
     char     	    *cacheProg;
     int      	    errorLevel;
+    int				width;
     SmiErrorHandler *errorHandler;
     Parser          *parserPtr;
 } Handle;
